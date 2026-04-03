@@ -140,6 +140,7 @@ export default function CoachBuilderPage() {
   const [documents, setDocuments] = useState<BuilderDocument[]>([]);
   const [activeDocument, setActiveDocument] = useState<BuilderDocument>(getDefaultDocument("training_plan"));
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [leftPanel, setLeftPanel] = useState<"templates" | "blocks" | "drafts" | null>("templates");
   const [zoom, setZoom] = useState(88);
 
   useEffect(() => {
@@ -302,408 +303,208 @@ export default function CoachBuilderPage() {
   return (
     <CoachShell profile={profile}>
       {loading ? (
-        <div className="flex min-h-[620px] items-center justify-center">
+        <div style={{ display: "flex", minHeight: "620px", alignItems: "center", justifyContent: "center" }}>
           <MorphingSquare message="Loading builder studio..." />
         </div>
       ) : (
-        <div className="portal-page flex min-h-[760px] flex-col gap-4">
-          {error ? <div className="rounded-[18px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div> : null}
-          {success ? <div className="rounded-[18px] border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 0 }}>
+          {error ? <div style={{ marginBottom: "14px", borderRadius: "18px", border: "1px solid rgba(239,68,68,0.28)", background: "rgba(127,29,29,0.24)", padding: "14px 18px", color: "rgb(254 205 211)", fontSize: "14px" }}>{error}</div> : null}
+          {success ? <div style={{ marginBottom: "14px", borderRadius: "18px", border: "1px solid rgba(52,211,153,0.24)", background: "rgba(6,78,59,0.22)", padding: "14px 18px", color: "rgb(167 243 208)", fontSize: "14px" }}>{success}</div> : null}
 
-          <section className="flex min-h-[780px] min-w-0 overflow-hidden rounded-[28px] border border-white/[0.06] bg-[rgba(10,10,16,0.78)] shadow-[var(--shadow-panel)] backdrop-blur-xl">
-            <aside className="hidden w-[64px] shrink-0 border-r border-white/[0.06] bg-[rgba(12,12,18,0.78)] xl:flex xl:flex-col xl:items-center xl:gap-3 xl:px-2 xl:py-4">
-              {[LayoutTemplate, Sparkles, Layers3].map((Icon, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  className={`flex h-10 w-10 items-center justify-center rounded-[14px] border transition ${
-                    index === 0
-                      ? "border-[rgba(0,163,255,0.26)] bg-[rgba(0,163,255,0.08)] text-white shadow-[var(--shadow-glow)]"
-                      : "border-white/[0.08] bg-white/[0.03] text-white/55 hover:border-white/[0.14] hover:bg-white/[0.08]"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                </button>
-              ))}
-            </aside>
-
-            <aside className="w-[286px] shrink-0 border-r border-white/[0.06] bg-[rgba(12,12,20,0.82)]">
-              <div className="border-b border-white/[0.06] px-6 py-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--text-ghost)]">Designer</p>
-                    <h1 className="mt-1 font-display text-[2rem] font-bold tracking-[-0.05em] text-white">Builder Studio</h1>
-                  </div>
-                  <button type="button" className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-white/[0.08] bg-white/[0.04] text-white transition hover:border-white/[0.14] hover:bg-white/[0.08]">
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="mt-4 rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm leading-6 text-[var(--text-secondary)]">
-                  Design everything inside HEIMDALLFIT.
-                </div>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", background: "#0A0A0F" }}>
+            <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "52px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(10,10,16,0.95)", padding: "0 16px", gap: "12px", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
+                <input value={activeDocument.title} onChange={(e) => updateDocument((cur) => ({ ...cur, title: e.target.value }))} style={{ background: "transparent", border: "none", outline: "none", fontSize: "14px", fontWeight: "600", fontFamily: "'Syne', sans-serif", color: "rgba(255,255,255,0.90)", maxWidth: "240px", minWidth: "80px" }} />
+                <span style={{ padding: "2px 10px", borderRadius: "20px", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", background: "rgba(0,163,255,0.10)", border: "1px solid rgba(0,163,255,0.20)", color: "#00A3FF", fontFamily: "'DM Mono', monospace", whiteSpace: "nowrap" }}>
+                  {activeDocument.kind.replace(/_/g, " ")}
+                </span>
               </div>
 
-              <div className="max-h-[calc(100vh-290px)] overflow-y-auto px-4 py-5">
-                <div className="rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4">
-                  <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
-                    <LayoutTemplate className="h-3.5 w-3.5" />
-                    Templates
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    {templates.map((template) => {
-                      const Icon = template.icon;
-                      const active = activeDocument.kind === template.kind;
-                      return (
-                        <button
-                          key={template.kind}
-                          type="button"
-                          onClick={() => switchTemplate(template.kind)}
-                          className={`relative w-full overflow-hidden rounded-[18px] border bg-gradient-to-br p-4 text-left transition hover:-translate-y-px ${
-                            active ? `border-[rgba(0,163,255,0.28)] ${template.accent} shadow-[var(--shadow-glow)]` : "border-white/[0.07] from-[rgba(255,255,255,0.03)] to-[rgba(255,255,255,0.015)] hover:border-white/[0.14]"
-                          }`}
-                        >
-                          <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${template.accent}`} />
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-white/[0.08] bg-white/[0.04] text-white">
-                              <Icon className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <p className="text-[13px] font-semibold text-white">{template.label}</p>
-                              <p className="mt-1 text-[11px] leading-5 text-white/55">{template.description}</p>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-4 rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4">
-                  <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Blocks
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {blockPresets.map((block) => {
-                      const Icon = block.icon;
-                      return (
-                        <button
-                          key={block.label}
-                          type="button"
-                          onClick={() => addSection(block.sectionTitle, block.item)}
-                          className="rounded-[16px] border border-white/[0.07] bg-[rgba(255,255,255,0.025)] p-3 text-left transition hover:-translate-y-px hover:border-[rgba(0,163,255,0.22)] hover:bg-[rgba(0,163,255,0.08)]"
-                        >
-                          <Icon className="h-4 w-4 text-white/72" />
-                          <p className="mt-2 text-[12px] font-medium text-white">{block.label}</p>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-4 rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4">
-                  <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
-                    <span>Pages & Drafts</span>
-                    <Layers3 className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    <button type="button" className="w-full rounded-[18px] border border-[rgba(0,163,255,0.26)] bg-[rgba(0,163,255,0.10)] p-3 text-left shadow-[var(--shadow-glow)]">
-                      <p className="text-[13px] font-semibold text-white">Page 1</p>
-                      <p className="mt-1 text-[11px] text-white/55">{activeDocument.title}</p>
-                    </button>
-                    {documents.map((document) => (
-                      <button
-                        key={document.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveDocument(document);
-                          setSelectedSectionId(document.content.sections[0]?.id || null);
-                        }}
-                        className={`w-full rounded-[16px] border px-3 py-3 text-left transition ${
-                          activeDocument.id === document.id ? "border-white/18 bg-white/[0.06]" : "border-white/[0.07] bg-[rgba(255,255,255,0.02)] hover:border-white/[0.12]"
-                        }`}
-                      >
-                        <p className="truncate text-[13px] font-medium text-white">{document.title}</p>
-                        <div className="mt-1 flex items-center justify-between text-[10px] text-white/40">
-                          <span className="uppercase tracking-[0.18em]">{kindLabel(document.kind)}</span>
-                          <span>{formatUpdatedAt(document.updatedAt)}</span>
-                        </div>
-                      </button>
-                    ))}
-                    {!documents.length ? (
-                      <div className="rounded-[16px] border border-dashed border-white/[0.09] bg-[rgba(255,255,255,0.02)] px-3 py-4 text-sm text-white/42">
-                        Start from a template and your saved drafts will appear here.
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <button type="button" onClick={() => setZoom((z) => Math.max(50, z - 10))} style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ZoomOut style={{ width: 13, height: 13 }} /></button>
+                <span style={{ width: "46px", textAlign: "center", fontSize: "12px", fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.65)" }}>{zoom}%</span>
+                <button type="button" onClick={() => setZoom((z) => Math.min(150, z + 10))} style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ZoomIn style={{ width: 13, height: 13 }} /></button>
               </div>
-            </aside>
 
-            <div className="flex min-w-0 flex-1 flex-col">
-              <header className="flex h-[76px] shrink-0 items-center justify-between border-b border-white/[0.06] bg-[rgba(12,12,18,0.82)] px-6">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white/78">{activeDocument.title}</div>
-                  <div className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
-                    {kindLabel(activeDocument.kind)}
-                  </div>
-                </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <button type="button" onClick={saveDocument} disabled={saving} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.80)", fontSize: "12px", fontWeight: "500", cursor: "pointer", opacity: saving ? 0.6 : 1 }}><Save style={{ width: 13, height: 13 }} />{saving ? "Saving..." : "Save"}</button>
+                <button type="button" onClick={sendDocument} disabled={sending} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 16px", borderRadius: "10px", background: "linear-gradient(135deg, #00A3FF, #0070CC)", border: "none", color: "#fff", fontSize: "12px", fontWeight: "600", cursor: "pointer", boxShadow: "0 3px 14px rgba(0,163,255,0.40)", opacity: sending ? 0.6 : 1 }}><Send style={{ width: 13, height: 13 }} />{sending ? "Sending..." : "Send to Client"}</button>
+              </div>
+            </header>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setZoom((current) => Math.max(70, current - 5))}
-                    className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/[0.08] bg-white/[0.04] text-white/68 transition hover:border-white/[0.14] hover:bg-white/[0.08]"
-                  >
-                    <ZoomOut className="h-4 w-4" />
+            <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+              <div style={{ width: "60px", flexShrink: 0, background: "rgba(10,10,16,0.90)", borderRight: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "12px", gap: "6px" }}>
+                {[{ key: "templates", Icon: LayoutTemplate, label: "Templates" }, { key: "blocks", Icon: Sparkles, label: "Blocks" }, { key: "drafts", Icon: Layers3, label: "Drafts" }].map(({ key, Icon, label }) => (
+                  <button key={key} type="button" title={label} onClick={() => setLeftPanel((prev) => (prev === key ? null : (key as "templates" | "blocks" | "drafts")))} style={{ width: "40px", height: "40px", borderRadius: "12px", background: leftPanel === key ? "rgba(0,163,255,0.12)" : "rgba(255,255,255,0.04)", border: `1px solid ${leftPanel === key ? "rgba(0,163,255,0.30)" : "rgba(255,255,255,0.07)"}`, color: leftPanel === key ? "#00A3FF" : "rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                    <Icon style={{ width: 16, height: 16 }} />
                   </button>
-                  <div className="rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-white/72">{zoom}%</div>
-                  <button
-                    type="button"
-                    onClick={() => setZoom((current) => Math.min(110, current + 5))}
-                    className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/[0.08] bg-white/[0.04] text-white/68 transition hover:border-white/[0.14] hover:bg-white/[0.08]"
-                  >
-                    <ZoomIn className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={saveDocument}
-                    disabled={saving}
-                    className="inline-flex items-center gap-2 rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white transition hover:border-white/[0.14] hover:bg-white/[0.08] disabled:opacity-60"
-                  >
-                    <Save className="h-4 w-4" />
-                    {saving ? "Saving..." : "Save"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={sendDocument}
-                    disabled={sending}
-                    className="inline-flex items-center gap-2 rounded-[14px] bg-[linear-gradient(135deg,var(--accent),rgba(0,120,220,1))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(0,163,255,0.28)] transition hover:-translate-y-px hover:shadow-[0_14px_34px_rgba(0,163,255,0.36)] disabled:opacity-60"
-                  >
-                    <Send className="h-4 w-4" />
-                    {sending ? "Sending..." : "Send"}
-                  </button>
-                </div>
-              </header>
+                ))}
+                <div style={{ width: "28px", height: "1px", background: "rgba(255,255,255,0.06)", margin: "4px 0" }} />
+                <button type="button" title="Add Section" onClick={() => addSection()} style={{ width: "40px", height: "40px", borderRadius: "12px", background: "rgba(67,208,127,0.10)", border: "1px solid rgba(67,208,127,0.22)", color: "#43D07F", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Plus style={{ width: 16, height: 16 }} /></button>
+              </div>
+              {leftPanel ? (
+                <div style={{ width: "240px", flexShrink: 0, background: "rgba(11,11,18,0.97)", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", overflowY: "auto", padding: "16px 12px" }}>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>{leftPanel === "templates" ? "Templates" : leftPanel === "blocks" ? "Add Block" : "Saved Drafts"}</p>
 
-              <div className="grid min-h-0 flex-1 xl:grid-cols-[minmax(0,1fr)_292px]">
-                <div className="min-h-0 bg-[radial-gradient(circle_at_top,rgba(0,163,255,0.10),transparent_28%),#dfe4ee] p-6">
-                  <div className="flex h-full min-h-0 flex-col rounded-[30px] border border-[#d8dbe5] bg-[#eef2f8] shadow-[0_32px_100px_rgba(15,23,42,0.16)]">
-                    <div className="flex items-center justify-between border-b border-[#dde1ea] px-6 py-4">
-                      <div className="flex items-center gap-3 text-sm text-[#596176]">
-                        <span>Page 1</span>
-                        <span className="rounded-full bg-white px-2.5 py-1 text-[11px] text-[#677086] shadow-sm">A4 landscape</span>
-                      </div>
-                      <div className="rounded-full border border-[#d6dae5] bg-white px-3 py-1.5 text-[11px] uppercase tracking-[0.22em] text-[#75809b]">
-                        live canvas
-                      </div>
+                  {leftPanel === "templates" ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {templates.map((template) => {
+                        const Icon = template.icon;
+                        const isActive = activeDocument.kind === template.kind;
+                        return (
+                          <button key={template.kind} type="button" onClick={() => switchTemplate(template.kind)} style={{ textAlign: "left", borderRadius: "14px", background: isActive ? "rgba(0,163,255,0.10)" : "rgba(255,255,255,0.03)", border: `1px solid ${isActive ? "rgba(0,163,255,0.25)" : "rgba(255,255,255,0.07)"}`, padding: "12px", cursor: "pointer", position: "relative" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+                              <div style={{ width: "30px", height: "30px", borderRadius: "9px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon style={{ width: 14, height: 14, color: isActive ? "#00A3FF" : "rgba(255,255,255,0.7)" }} /></div>
+                              <span style={{ fontSize: "13px", fontWeight: "600", color: "rgba(255,255,255,0.88)" }}>{template.label}</span>
+                            </div>
+                            <p style={{ fontSize: "11px", lineHeight: "1.5", color: "rgba(255,255,255,0.45)", margin: 0 }}>{template.description}</p>
+                          </button>
+                        );
+                      })}
                     </div>
+                  ) : null}
 
-                    <div className="flex min-h-0 flex-1 items-start justify-center overflow-auto px-6 py-8">
-                      <div
-                        className="w-[1440px] max-w-full rounded-[28px] bg-white p-10 shadow-[0_25px_80px_rgba(15,23,42,0.14)]"
-                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
-                      >
-                        <div className="border-b border-[#e9eaf0] pb-5">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="text-[11px] uppercase tracking-[0.32em] text-[#8f98ae]">{kindLabel(activeDocument.kind)}</p>
-                              <h2 className="mt-3 text-[2.2rem] font-semibold tracking-[-0.05em] text-[#0f172a]">{activeDocument.title}</h2>
-                            </div>
-                            <div className="rounded-full bg-[#f3f5fb] px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-[#6b7388]">
-                              {assignedClient?.name || "Unassigned"}
-                            </div>
-                          </div>
-                          <textarea
-                            value={activeDocument.content.coverNote}
-                            onChange={(event) =>
-                              updateDocument((current) => ({
-                                ...current,
-                                content: { ...current.content, coverNote: event.target.value }
-                              }))
-                            }
-                            className="mt-4 min-h-[88px] w-full resize-none rounded-[18px] border border-[#e3e5ec] bg-[#fbfcff] px-4 py-3 text-[15px] leading-7 text-[#334155] outline-none"
-                          />
-                        </div>
-
-                        <div className="mt-8 grid gap-5 xl:grid-cols-2">
-                          {activeDocument.content.sections.map((section) => (
-                            <button
-                              key={section.id}
-                              type="button"
-                              onClick={() => setSelectedSectionId(section.id)}
-                              className={`rounded-[24px] border p-6 text-left transition ${
-                                selectedSection?.id === section.id
-                                  ? "border-[#6f67ff] bg-[#f7f5ff] shadow-[0_10px_30px_rgba(111,103,255,0.12)]"
-                                  : "border-[#e4e7ef] bg-[#fcfcfe] hover:border-[#cfd5e3]"
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-4">
-                                <input
-                                  value={section.title}
-                                  onChange={(event) => updateSection(section.id, { title: event.target.value })}
-                                  className="w-full bg-transparent text-[1.15rem] font-semibold text-[#0f172a] outline-none"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    removeSection(section.id);
-                                  }}
-                                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2f4f8] text-[#7c8597]"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                              <div className="mt-4 space-y-2">
-                                {section.items.map((item, index) => (
-                                  <div key={`${section.id}-${index}`} className="flex items-start gap-3 rounded-[14px] bg-[#f5f7fb] px-3 py-3">
-                                    <span className="mt-1.5 h-2 w-2 rounded-full bg-[#6f67ff]" />
-                                    <input
-                                      value={item}
-                                      onChange={(event) => updateItem(section.id, index, event.target.value)}
-                                      className="w-full bg-transparent text-[14px] leading-6 text-[#334155] outline-none"
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  addItem(section.id);
-                                }}
-                                className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#dde2ec] bg-white px-3 py-2 text-xs font-medium text-[#4b5565]"
-                              >
-                                <Plus className="h-3.5 w-3.5" />
-                                Add line item
-                              </button>
+                  {leftPanel === "blocks" ? (
+                    <>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                        {blockPresets.map((block) => {
+                          const Icon = block.icon;
+                          return (
+                            <button key={block.label} type="button" onClick={() => addSection(block.sectionTitle, block.item)} style={{ borderRadius: "12px", padding: "12px 10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "8px" }}>
+                              <Icon style={{ width: 15, height: 15, color: "rgba(255,255,255,0.60)" }} />
+                              <span style={{ fontSize: "11px", fontWeight: "500", color: "rgba(255,255,255,0.80)" }}>{block.label}</span>
                             </button>
+                          );
+                        })}
+                      </div>
+                      <button type="button" onClick={() => addSection()} style={{ marginTop: "12px", width: "100%", padding: "10px", borderRadius: "12px", background: "rgba(67,208,127,0.08)", border: "1px solid rgba(67,208,127,0.20)", color: "#43D07F", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><Plus style={{ width: 13, height: 13 }} />New blank section</button>
+                    </>
+                  ) : null}
+
+                  {leftPanel === "drafts" ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      {documents.length === 0 ? <div style={{ padding: "16px", borderRadius: "12px", border: "1px dashed rgba(255,255,255,0.10)", fontSize: "12px", color: "rgba(255,255,255,0.35)", textAlign: "center" }}>No saved drafts yet</div> : null}
+                      {documents.map((doc) => (
+                        <button key={doc.id} type="button" onClick={() => { setActiveDocument(doc); setSelectedSectionId(doc.content.sections[0]?.id || null); }} style={{ textAlign: "left", borderRadius: "12px", padding: "10px 12px", background: activeDocument.id === doc.id ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)", border: `1px solid ${activeDocument.id === doc.id ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, cursor: "pointer" }}>
+                          <p style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,0.85)", margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title}</p>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "rgba(255,255,255,0.38)", fontFamily: "'DM Mono', monospace" }}><span>{kindLabel(doc.kind)}</span><span>{formatUpdatedAt(doc.updatedAt)}</span></div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div style={{ flex: 1, minWidth: 0, background: "#ECEEF4", overflow: "auto", display: "flex", flexDirection: "column", alignItems: "center", padding: "32px 40px", gap: "24px" }}>
+                <div style={{ width: "100%", maxWidth: "980px", minWidth: "620px", background: "#fff", borderRadius: "16px", boxShadow: "0 8px 40px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06)", overflow: "hidden", transform: `scale(${zoom / 100})`, transformOrigin: "top center", marginBottom: zoom < 100 ? `${(zoom - 100) * 6}px` : "0" }}>
+                  <div style={{ background: "linear-gradient(135deg, #0A0A0F 0%, #141419 100%)", padding: "28px 32px 24px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "200px", height: "200px", borderRadius: "50%", background: activeDocument.kind === "onboarding_form" ? "radial-gradient(circle, rgba(0,163,255,0.15) 0%, transparent 70%)" : activeDocument.kind === "diet_plan" ? "radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)" : "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)", pointerEvents: "none" }} />
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "20px", position: "relative" }}>
+                      <div>
+                        <p style={{ fontSize: "9px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>{kindLabel(activeDocument.kind)} · HEIMDALLFIT</p>
+                        <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.04em", color: "#fff", margin: 0, fontFamily: "'Syne', sans-serif" }}>{activeDocument.title}</h1>
+                      </div>
+                      <div style={{ padding: "6px 14px", borderRadius: "20px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", fontSize: "11px", color: "rgba(255,255,255,0.65)", whiteSpace: "nowrap", fontFamily: "'DM Mono', monospace" }}>{assignedClient?.name || "Unassigned"}</div>
+                    </div>
+                    <textarea value={activeDocument.content.coverNote} onChange={(e) => updateDocument((cur) => ({ ...cur, content: { ...cur.content, coverNote: e.target.value } }))} placeholder="Add a cover note..." style={{ marginTop: "16px", width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: "12px", padding: "12px 16px", fontSize: "14px", lineHeight: "1.7", color: "rgba(255,255,255,0.75)", resize: "none", outline: "none", minHeight: "72px", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ padding: "28px 32px 32px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px", background: "#f7f8fb", minHeight: "320px" }}>
+                    {activeDocument.content.sections.map((section, sIdx) => (
+                      <div key={section.id} onClick={() => setSelectedSectionId(section.id)} style={{ borderRadius: "16px", background: "#fff", border: `2px solid ${selectedSection?.id === section.id ? "#6F67FF" : "#E4E7EF"}`, boxShadow: selectedSection?.id === section.id ? "0 8px 24px rgba(111,103,255,0.14)" : "0 2px 8px rgba(15,23,42,0.06)", cursor: "pointer", overflow: "hidden", display: "flex", flexDirection: "column", animation: `fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) ${sIdx * 0.05}s both` }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px 10px", borderBottom: "1px solid #F0F2F7", background: selectedSection?.id === section.id ? "#FAFAFE" : "#FAFCFF" }}>
+                          <input value={section.title} onChange={(e) => updateSection(section.id, { title: e.target.value })} onClick={(e) => e.stopPropagation()} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", fontWeight: "700", color: "#0F172A", fontFamily: "'Syne', sans-serif", flex: 1, minWidth: 0 }} />
+                          <button type="button" onClick={(e) => { e.stopPropagation(); removeSection(section.id); }} style={{ width: "26px", height: "26px", borderRadius: "8px", background: "transparent", border: "none", color: "#B0B8CC", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Trash2 style={{ width: 13, height: 13 }} /></button>
+                        </div>
+                        <div style={{ padding: "10px 14px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                          {section.items.map((item, idx) => (
+                            <div key={`${section.id}-${idx}`} style={{ display: "flex", alignItems: "flex-start", gap: "8px", borderRadius: "9px", background: "#F5F7FB", padding: "7px 10px" }} onClick={(e) => e.stopPropagation()}>
+                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: selectedSection?.id === section.id ? "#6F67FF" : "#C5CADC", marginTop: "7px", flexShrink: 0 }} />
+                              <input value={item} onChange={(e) => updateItem(section.id, idx, e.target.value)} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", lineHeight: "1.6", color: "#334155", fontFamily: "'DM Sans', sans-serif", flex: 1, minWidth: 0 }} />
+                            </div>
                           ))}
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-[#dde1ea] px-5 py-3">
-                      <div className="flex items-center gap-3 overflow-x-auto">
-                        <button className="flex min-w-[148px] items-center gap-3 rounded-[20px] border border-[#cfd5e3] bg-white px-3 py-3 text-left shadow-sm">
-                          <div className="h-12 w-10 rounded-[10px] border border-[#d7dce8] bg-[#f7f8fb]" />
-                          <div>
-                            <p className="text-sm font-medium text-[#0f172a]">Page 1</p>
-                            <p className="text-xs text-[#728099]">{activeDocument.title}</p>
-                          </div>
-                        </button>
-                        <button className="inline-flex items-center gap-2 rounded-[20px] border border-dashed border-[#c7cedd] bg-white px-4 py-4 text-sm font-medium text-[#334155]">
-                          <Plus className="h-4 w-4" />
-                          Add page
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <aside className="border-l border-white/[0.06] bg-[rgba(12,12,20,0.82)] p-5">
-                  <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.03] p-4">
-                    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
-                      <Sparkles className="h-3.5 w-3.5" />
-                      Inspector
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">Edit the selected block and prepare the asset for delivery.</p>
-                  </div>
-
-                  <div className="mt-4 rounded-[20px] border border-white/[0.07] bg-white/[0.03] p-4">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">Document Settings</p>
-                    <label className="mt-4 block">
-                      <span className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-white/34">Description</span>
-                      <textarea
-                        value={activeDocument.description}
-                        onChange={(event) => updateDocument((current) => ({ ...current, description: event.target.value }))}
-                        className="min-h-[92px] w-full rounded-[16px] border border-white/[0.08] bg-[#101117] px-4 py-3 text-sm text-white outline-none"
-                      />
-                    </label>
-
-                    <label className="mt-4 block">
-                      <span className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-white/34">Assigned Client</span>
-                      <select
-                        value={activeDocument.clientId || ""}
-                        onChange={(event) =>
-                          updateDocument((current) => ({
-                            ...current,
-                            clientId: event.target.value || null,
-                            clientName: clients.find((client) => client.id === event.target.value)?.name || null
-                          }))
-                        }
-                        className="h-11 w-full rounded-[16px] border border-white/[0.08] bg-[#101117] px-4 text-sm text-white outline-none"
-                      >
-                        <option value="">No client selected</option>
-                        {clients.map((client) => (
-                          <option key={client.id} value={client.id}>
-                            {client.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="mt-4 rounded-[20px] border border-white/[0.07] bg-white/[0.03] p-4">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">Selected Block</p>
-                    {selectedSection ? (
-                      <div className="mt-4 space-y-4">
-                        <label className="block">
-                          <span className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-white/34">Block Title</span>
-                          <input
-                            value={selectedSection.title}
-                            onChange={(event) => updateSection(selectedSection.id, { title: event.target.value })}
-                            className="h-11 w-full rounded-[16px] border border-white/[0.08] bg-[#101117] px-4 text-sm text-white outline-none"
-                          />
-                        </label>
-                        <div className="rounded-[16px] bg-[#101117] px-4 py-3">
-                          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/34">Items</p>
-                          <p className="mt-2 text-sm text-white/72">{selectedSection.items.length} content line{selectedSection.items.length === 1 ? "" : "s"}</p>
+                        <div style={{ padding: "8px 14px 12px" }}>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); addItem(section.id); }} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "transparent", border: "1px solid #DDE2EC", fontSize: "11px", color: "#4B5565", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}><Plus style={{ width: 11, height: 11 }} />Add line</button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => addItem(selectedSection.id)}
-                          className="inline-flex items-center gap-2 rounded-full border border-[#2b2c35] bg-[#101117] px-4 py-2.5 text-sm text-white"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Item
-                        </button>
                       </div>
-                    ) : (
-                      <div className="mt-4 rounded-[16px] border border-dashed border-[#2a2b34] bg-[#101117] px-4 py-5 text-sm text-white/42">
-                        Select a block on the canvas to edit it here.
-                      </div>
-                    )}
-                  </div>
+                    ))}
 
-                  <div className="mt-4 rounded-[20px] border border-[#262730] bg-[#181922] p-4">
-                    <p className="text-[10px] uppercase tracking-[0.28em] text-white/36">Dispatch</p>
-                    <div className="mt-4 space-y-3 text-sm text-white/68">
-                      <div className="rounded-[16px] bg-[#101117] px-4 py-3">
-                        <p className="text-[10px] uppercase tracking-[0.22em] text-white/34">Assigned Client</p>
-                        <p className="mt-2 font-medium text-white">{assignedClient?.name || "No client selected yet"}</p>
-                      </div>
-                      <div className="rounded-[16px] bg-[#101117] px-4 py-3">
-                        <p className="text-[10px] uppercase tracking-[0.22em] text-white/34">Current Status</p>
-                        <p className="mt-2 font-medium capitalize text-white">{activeDocument.status}</p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={sendDocument}
-                      disabled={sending}
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-[16px] bg-white px-4 py-3 text-sm font-semibold text-black disabled:opacity-60"
-                    >
-                      <Send className="h-4 w-4" />
-                      {sending ? "Sending..." : "Send Current Asset"}
+                    <button type="button" onClick={() => addSection()} style={{ borderRadius: "16px", background: "transparent", border: "2px dashed #CBD2E0", minHeight: "140px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer", color: "#8A94AA", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                      <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#EDF0F7", display: "flex", alignItems: "center", justifyContent: "center" }}><Plus style={{ width: 16, height: 16, color: "#8A94AA" }} /></div>
+                      Add Section
                     </button>
                   </div>
-                </aside>
+                </div>
+              </div>
+
+              <div style={{ width: "264px", flexShrink: 0, background: "rgba(10,10,16,0.95)", borderLeft: "1px solid rgba(255,255,255,0.06)", overflowY: "auto", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <section>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>Document</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <label style={{ display: "block" }}>
+                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Assign Client</span>
+                      <select value={activeDocument.clientId || ""} onChange={(e) => updateDocument((cur) => ({ ...cur, clientId: e.target.value || null, clientName: clients.find((c) => c.id === e.target.value)?.name || null }))} style={{ width: "100%", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.80)", fontSize: "12px", paddingLeft: "10px", outline: "none" }}>
+                        <option value="">No client selected</option>
+                        {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </label>
+                    <label style={{ display: "block" }}>
+                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Description</span>
+                      <textarea value={activeDocument.description} onChange={(e) => updateDocument((cur) => ({ ...cur, description: e.target.value }))} style={{ width: "100%", borderRadius: "10px", padding: "8px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.72)", fontSize: "12px", resize: "none", outline: "none", minHeight: "64px", boxSizing: "border-box" }} />
+                    </label>
+                  </div>
+                </section>
+
+                <div style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
+
+                <section>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>Selected Block</p>
+                  {selectedSection ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <label style={{ display: "block" }}>
+                        <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Block Title</span>
+                        <input value={selectedSection.title} onChange={(e) => updateSection(selectedSection.id, { title: e.target.value })} style={{ width: "100%", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.88)", fontSize: "12px", paddingLeft: "10px", outline: "none", boxSizing: "border-box" }} />
+                      </label>
+                      <div style={{ padding: "10px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>Lines</span>
+                        <span style={{ fontSize: "13px", fontWeight: "600", color: "rgba(255,255,255,0.85)", fontFamily: "'DM Mono', monospace" }}>{selectedSection.items.length}</span>
+                      </div>
+                      <button type="button" onClick={() => addItem(selectedSection.id)} style={{ width: "100%", padding: "9px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.72)", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><Plus style={{ width: 12, height: 12 }} />Add Item</button>
+                      <button type="button" onClick={() => removeSection(selectedSection.id)} style={{ width: "100%", padding: "9px", borderRadius: "10px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", color: "rgba(239,68,68,0.85)", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><Trash2 style={{ width: 12, height: 12 }} />Remove Block</button>
+                    </div>
+                  ) : (
+                    <div style={{ padding: "20px 12px", borderRadius: "12px", border: "1px dashed rgba(255,255,255,0.10)", fontSize: "11px", color: "rgba(255,255,255,0.30)", textAlign: "center", lineHeight: "1.6" }}>Click any block on the canvas to inspect and edit it here.</div>
+                  )}
+                </section>
+
+                <div style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
+
+                <section>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>Dispatch</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {[{ label: "Assigned To", value: assignedClient?.name || "No client yet" }, { label: "Status", value: activeDocument.status }].map((row) => (
+                      <div key={row.label} style={{ padding: "10px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.14em", fontFamily: "'DM Mono', monospace" }}>{row.label}</span>
+                        <span style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,0.80)", textTransform: "capitalize" }}>{row.value}</span>
+                      </div>
+                    ))}
+                    <button type="button" onClick={sendDocument} disabled={sending} style={{ width: "100%", padding: "11px", borderRadius: "12px", background: "linear-gradient(135deg, #00A3FF, #0070CC)", border: "none", color: "#fff", fontSize: "13px", fontWeight: "600", display: "flex", alignItems: "center", justifyContent: "center", gap: "7px", cursor: "pointer", boxShadow: "0 4px 18px rgba(0,163,255,0.38)", opacity: sending ? 0.6 : 1, marginTop: "4px" }}><Send style={{ width: 13, height: 13 }} />{sending ? "Sending..." : "Send to Client"}</button>
+                  </div>
+                </section>
               </div>
             </div>
-          </section>
+
+            <div style={{ height: "68px", flexShrink: 0, background: "rgba(10,10,16,0.95)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", padding: "0 16px", gap: "10px", overflowX: "auto" }}>
+              <button type="button" style={{ display: "flex", alignItems: "center", gap: "10px", padding: "6px 12px 6px 8px", borderRadius: "12px", background: "rgba(111,103,255,0.12)", border: "1px solid rgba(111,103,255,0.30)", cursor: "pointer", flexShrink: 0 }}>
+                <div style={{ width: "32px", height: "24px", borderRadius: "5px", background: "linear-gradient(135deg, #0A0A0F, #1A1A2A)", border: "1px solid rgba(255,255,255,0.12)" }} />
+                <div style={{ textAlign: "left" }}>
+                  <p style={{ fontSize: "11px", fontWeight: "600", color: "rgba(255,255,255,0.85)", margin: 0, lineHeight: 1.2 }}>Page 1</p>
+                  <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.40)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "120px" }}>{activeDocument.title}</p>
+                </div>
+              </button>
+              <button type="button" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "7px 14px", borderRadius: "12px", background: "transparent", border: "1px dashed rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontSize: "12px", cursor: "pointer", flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}><Plus style={{ width: 13, height: 13 }} />Add page</button>
+            </div>
+          </div>
         </div>
       )}
     </CoachShell>

@@ -229,8 +229,8 @@ export function CoachShell({
               })}
             </header>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-              <main className="portal-page flex min-h-full flex-col">{children}</main>
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflowY: "auto", padding: "20px" }}>
+              <main style={{ display: "flex", flexDirection: "column", flex: 1 }}>{children}</main>
             </div>
           </div>
         </div>
