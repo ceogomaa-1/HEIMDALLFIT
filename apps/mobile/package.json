@@ -1,0 +1,33 @@
+{
+  "name": "mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "build": "expo export --platform all",
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@heimdallfit/config": "workspace:*",
+    "@heimdallfit/types": "workspace:*",
+    "@supabase/supabase-js": "^2.49.4",
+    "expo": "^53.0.7",
+    "expo-image-picker": "^16.1.4",
+    "expo-linking": "^7.1.5",
+    "expo-notifications": "^0.31.2",
+    "expo-router": "^5.0.6",
+    "expo-status-bar": "^2.2.3",
+    "nativewind": "^4.1.23",
+    "react": "^19.0.0",
+    "react-native": "^0.79.2",
+    "react-native-safe-area-context": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.12",
+    "typescript": "^5.8.3"
+  }
+}

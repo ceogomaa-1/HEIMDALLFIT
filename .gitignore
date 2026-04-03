@@ -1,0 +1,14 @@
+node_modules
+.next
+.expo
+.turbo
+dist
+build
+.DS_Store
+coverage
+.env
+.env.local
+pnpm-lock.yaml
+apps/web/.next
+apps/mobile/.expo
+supabase/.temp

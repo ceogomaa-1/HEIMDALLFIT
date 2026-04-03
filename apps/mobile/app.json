@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "HEIMDALLFIT",
+    "slug": "heimdallfit",
+    "scheme": "heimdallfit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "plugins": ["expo-router", "expo-notifications"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.heimdallfit.app"
+    },
+    "android": {
+      "package": "com.heimdallfit.app"
+    }
+  }
+}
