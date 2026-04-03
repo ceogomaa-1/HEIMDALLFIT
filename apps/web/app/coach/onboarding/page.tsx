@@ -171,17 +171,17 @@ export default function CoachOnboardingPage() {
 
   return (
     <CoachShell profile={shellProfile}>
-      <div className="flex min-h-full flex-col gap-4 pb-4">
-        <section className="flex flex-col gap-3 border-b border-[#232329] pb-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="portal-page flex min-h-full flex-col gap-5 pb-4">
+        <section className="flex flex-col gap-3 border-b border-white/[0.06] pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[13px] text-white/45">Coach onboarding</p>
-            <h1 className="mt-1 text-[1.8rem] font-semibold tracking-[-0.05em] text-white">Onboard a new Client</h1>
-            <p className="mt-2 max-w-[680px] text-[13px] text-white/45">
+            <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-[var(--accent)]">Coach onboarding</p>
+            <h1 className="mt-2 font-display text-[2.3rem] font-bold tracking-[-0.05em] text-white">Onboard a new Client</h1>
+            <p className="mt-3 max-w-[680px] text-[14px] leading-7 text-[var(--text-secondary)]">
               Send a professional HEIMDALLFIT invite with your real room code so the client lands directly inside your ecosystem.
             </p>
           </div>
           {profile?.roomId ? (
-            <div className="rounded-[18px] border border-[#2b2b34] bg-[#17171d] px-4 py-3 text-sm text-white/68">
+            <div className="rounded-[18px] border border-[rgba(0,163,255,0.18)] bg-[rgba(0,163,255,0.08)] px-4 py-3 text-sm text-[var(--text-secondary)]">
               Room Code: <span className="font-semibold text-white">{profile.roomId}</span>
             </div>
           ) : null}
@@ -193,14 +193,14 @@ export default function CoachOnboardingPage() {
           </div>
         ) : (
           <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-            <GlassPanel className="border-[#24242b] bg-[#1a1a20] p-5">
-              <div className="flex items-center gap-3 border-b border-[#24242b] pb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#202028] text-white/75">
+            <GlassPanel className="p-6">
+              <div className="flex items-center gap-3 border-b border-white/[0.06] pb-5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[16px] border border-white/[0.08] bg-white/[0.04] text-white/75">
                   <UserRoundPlus className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-[1.25rem] font-semibold tracking-[-0.04em] text-white">Invite Flow</h2>
-                  <p className="text-[13px] text-white/45">Enter the client basics and send their access immediately.</p>
+                  <h2 className="font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Invite Flow</h2>
+                  <p className="text-[13px] text-[var(--text-secondary)]">Enter the client basics and send their access immediately.</p>
                 </div>
               </div>
 
@@ -211,7 +211,7 @@ export default function CoachOnboardingPage() {
                     value={clientName}
                     onChange={(event) => setClientName(event.target.value)}
                     placeholder="Client full name"
-                    className="w-full rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3 text-white outline-none transition focus:border-white/20"
+                    className="w-full rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-white outline-none transition"
                   />
                 </label>
 
@@ -222,7 +222,7 @@ export default function CoachOnboardingPage() {
                     value={clientEmail}
                     onChange={(event) => setClientEmail(event.target.value)}
                     placeholder="client@email.com"
-                    className="w-full rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3 text-white outline-none transition focus:border-white/20"
+                    className="w-full rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-white outline-none transition"
                   />
                 </label>
 
@@ -232,7 +232,7 @@ export default function CoachOnboardingPage() {
                     value={emailSubject}
                     onChange={(event) => setEmailSubject(event.target.value)}
                     placeholder="Welcome to HEIMDALLFIT!"
-                    className="w-full rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3 text-white outline-none transition focus:border-white/20"
+                    className="w-full rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-white outline-none transition"
                   />
                 </label>
 
@@ -243,12 +243,12 @@ export default function CoachOnboardingPage() {
                     onChange={(event) => setCoachMessage(event.target.value)}
                     rows={5}
                     placeholder="Add a personal note for this client."
-                    className="w-full resize-none rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3 text-white outline-none transition focus:border-white/20"
+                    className="w-full resize-none rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-white outline-none transition"
                   />
                 </label>
 
-                <div className="rounded-[22px] border border-[#2b2b34] bg-[#17171d] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-white/32">Email Preview</p>
+                <div className="rounded-[22px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(0,163,255,0.06),rgba(255,255,255,0.03))] p-5">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">Email Preview</p>
                   <p className="mt-3 text-sm font-semibold text-white">{emailSubject || "Welcome to HEIMDALLFIT!"}</p>
                   <div className="mt-4 space-y-3 text-sm leading-7 text-white/65">
                     <p>
@@ -261,8 +261,8 @@ export default function CoachOnboardingPage() {
                       DO NOT SHARE THIS ROOM CODE WITH OTHER PEOPLE WITHOUT YOUR COACH APPROVAL FIRST.
                     </p>
                     {coachMessage.trim() ? (
-                      <div className="rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-[0.22em] text-white/32">Message From Your Coach</p>
+                      <div className="rounded-[18px] border border-white/[0.08] bg-black/20 px-4 py-3">
+                        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--text-ghost)]">Message From Your Coach</p>
                         <p className="mt-2 whitespace-pre-line text-white/78">{coachMessage}</p>
                       </div>
                     ) : null}
@@ -286,14 +286,14 @@ export default function CoachOnboardingPage() {
             </GlassPanel>
 
             <div className="grid gap-4">
-              <GlassPanel className="border-[#24242b] bg-[#1a1a20] p-5">
+              <GlassPanel className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#202028] text-white/72">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-white/[0.08] bg-white/[0.04] text-white/72">
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white">What happens next</h2>
-                    <p className="text-[13px] text-white/45">The client receives the invite, signs up, and gets connected to your room.</p>
+                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.04em] text-white">What happens next</h2>
+                    <p className="text-[13px] text-[var(--text-secondary)]">The client receives the invite, signs up, and gets connected to your room.</p>
                   </div>
                 </div>
 
@@ -304,34 +304,34 @@ export default function CoachOnboardingPage() {
                     "Their account attaches to your room after auth.",
                     "Messaging and onboarding form plug into that relationship next."
                   ].map((item) => (
-                    <div key={item} className="rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3 text-sm text-white/65">
+                    <div key={item} className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-3 text-sm text-[var(--text-secondary)]">
                       {item}
                     </div>
                   ))}
                 </div>
               </GlassPanel>
 
-              <GlassPanel className="border-[#24242b] bg-[#1a1a20] p-5">
+              <GlassPanel className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#202028] text-white/72">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-white/[0.08] bg-white/[0.04] text-white/72">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white">Recent Invites</h2>
-                    <p className="text-[13px] text-white/45">Track which clients have already been invited into your room.</p>
+                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.04em] text-white">Recent Invites</h2>
+                    <p className="text-[13px] text-[var(--text-secondary)]">Track which clients have already been invited into your room.</p>
                   </div>
                 </div>
 
                 <div className="mt-4 space-y-3">
                   {invites.length ? (
                     invites.map((invite) => (
-                      <div key={invite.id} className="rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3">
+                      <div key={invite.id} className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-3 transition hover:border-white/[0.12] hover:bg-white/[0.05]">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-white">{invite.clientName}</p>
                             <p className="mt-1 text-xs text-white/42">{invite.clientEmail}</p>
                           </div>
-                          <span className="rounded-full bg-[#1a3b2d] px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[#5de498]">
+                          <span className="rounded-full border border-[rgba(67,208,127,0.25)] bg-[rgba(67,208,127,0.12)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-[#5de498]">
                             {invite.status}
                           </span>
                         </div>
@@ -342,21 +342,21 @@ export default function CoachOnboardingPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-6 text-sm text-white/48">
+                    <div className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-6 text-sm text-white/48">
                       No invites sent yet. Your next invite becomes the first client entry in this list.
                     </div>
                   )}
                 </div>
               </GlassPanel>
 
-              <GlassPanel className="border-[#24242b] bg-[#1a1a20] p-5">
+              <GlassPanel className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#202028] text-white/72">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-white/[0.08] bg-white/[0.04] text-white/72">
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white">Client Entry Promise</h2>
-                    <p className="text-[13px] text-white/45">No switching apps. No WhatsApp dependency. Everything starts here.</p>
+                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.04em] text-white">Client Entry Promise</h2>
+                    <p className="text-[13px] text-[var(--text-secondary)]">No switching apps. No WhatsApp dependency. Everything starts here.</p>
                   </div>
                 </div>
               </GlassPanel>

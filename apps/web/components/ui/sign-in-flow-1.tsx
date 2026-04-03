@@ -256,11 +256,11 @@ function MiniNavbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="fixed left-1/2 top-6 z-20 w-[calc(100%-2rem)] max-w-[880px] -translate-x-1/2 rounded-full border border-white/10 bg-[#120a0ab0] px-5 py-3 backdrop-blur-md">
+    <header className="fixed left-1/2 top-6 z-20 w-[calc(100%-2rem)] max-w-[920px] -translate-x-1/2 rounded-full border border-white/[0.08] bg-[rgba(12,12,20,0.76)] px-5 py-3 backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
       <div className="flex items-center justify-between gap-6">
         <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-full border border-white/15 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.18),rgba(120,10,10,0.08))]" />
-          <span className="text-sm font-semibold tracking-[0.35em] text-white/85">HEIMDALLFIT</span>
+          <div className="h-7 w-7 rounded-full border border-white/10 bg-[radial-gradient(circle_at_center,rgba(0,163,255,0.25),rgba(255,255,255,0.03))]" />
+          <span className="font-display text-sm font-bold tracking-[0.35em] text-white/90">HEIMDALLFIT</span>
         </div>
 
         <nav className="hidden items-center gap-6 sm:flex">
@@ -622,14 +622,14 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
   };
 
   return (
-    <div className={cn("relative flex min-h-screen w-full flex-col overflow-hidden bg-black", className)}>
+    <div className={cn("relative flex min-h-screen w-full flex-col overflow-hidden bg-[var(--bg-void)]", className)}>
       <div className="absolute inset-0 z-0">
         {initialCanvasVisible ? (
           <div className="absolute inset-0">
             <CanvasRevealEffect
               animationSpeed={3}
-              containerClassName="bg-black"
-              colors={[[255, 255, 255], [115, 18, 18]]}
+              containerClassName="bg-[var(--bg-void)]"
+              colors={[[255, 255, 255], [0, 163, 255]]}
               dotSize={6}
               reverse={false}
             />
@@ -640,16 +640,17 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
           <div className="absolute inset-0">
             <CanvasRevealEffect
               animationSpeed={4}
-              containerClassName="bg-black"
-              colors={[[255, 255, 255], [115, 18, 18]]}
+              containerClassName="bg-[var(--bg-void)]"
+              colors={[[255, 255, 255], [0, 163, 255]]}
               dotSize={6}
               reverse={true}
             />
           </div>
         ) : null}
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(65,9,9,0.28),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.78),rgba(0,0,0,0.92))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(0,163,255,0.14),transparent_36%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_100%,rgba(67,208,127,0.08),transparent_30%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.56),rgba(0,0,0,0.88))]" />
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">
@@ -659,23 +660,23 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
           <div className="w-full max-w-[1080px] lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
             <div className="hidden lg:flex lg:flex-col lg:justify-center">
               <div className="max-w-[540px]">
-                <p className="text-xs uppercase tracking-[0.45em] text-white/40">
+                <p className="font-mono text-xs uppercase tracking-[0.45em] text-[var(--accent)]">
                   {portalType === "client" ? "Client Authentication" : "Coach Authentication"}
                 </p>
-                <h1 className="mt-5 text-6xl font-semibold leading-[0.95] tracking-[-0.06em] text-white">
+                <h1 className="mt-5 font-display text-6xl font-bold leading-[0.95] tracking-[-0.06em] text-white">
                   Access
                   <br />
                   Your Portal.
                 </h1>
-                <p className="mt-6 max-w-[420px] text-lg text-white/55">
+                <p className="mt-6 max-w-[420px] text-lg leading-8 text-[var(--text-secondary)]">
                   {portalType === "client"
                     ? "Sign in or create your client account before entering your coach room."
                     : "Sign in or create your coach account before entering the Command Center."}
                 </p>
                 <div className="mt-10 grid grid-cols-2 gap-4">
                   {(portalType === "client" ? ["Coach Invite", "Messages", "Programs", "Room Access"] : ["Clients", "Programs", "Store", "Analytics"]).map((item) => (
-                    <div key={item} className="rounded-[24px] border border-white/10 bg-white/[0.03] px-5 py-4 backdrop-blur-md">
-                      <p className="text-sm uppercase tracking-[0.28em] text-white/35">{item}</p>
+                    <div key={item} className="rounded-[24px] border border-white/[0.08] bg-[rgba(255,255,255,0.03)] px-5 py-4 backdrop-blur-md shadow-[var(--shadow-card)]">
+                      <p className="font-mono text-sm uppercase tracking-[0.28em] text-[var(--text-ghost)]">{item}</p>
                     </div>
                   ))}
                 </div>
@@ -690,15 +691,16 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="w-full rounded-[36px] border border-white/10 bg-[#120d0dbc] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl md:p-8"
+                  className="relative w-full overflow-hidden rounded-[28px] border border-white/[0.09] bg-[rgba(12,12,20,0.90)] p-6 shadow-[0_40px_100px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-[28px] md:p-9"
                 >
-                  <div className="flex items-center justify-between rounded-full border border-white/10 bg-black/25 p-1 text-sm">
+                  <div className="pointer-events-none absolute left-[15%] right-[15%] top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(0,163,255,0.5),transparent)]" />
+                  <div className="flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] p-1 text-sm">
                     <button
                       type="button"
                       onClick={() => setMode("login")}
                       className={cn(
                         "w-1/2 rounded-full px-4 py-2.5 transition",
-                        mode === "login" ? "bg-white text-black" : "text-white/55 hover:text-white"
+                        mode === "login" ? "bg-[linear-gradient(135deg,var(--accent),rgba(0,120,220,1))] text-white shadow-[0_8px_24px_rgba(0,163,255,0.28)]" : "text-white/55 hover:text-white"
                       )}
                     >
                       Login
@@ -708,7 +710,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                       onClick={() => setMode("signup")}
                       className={cn(
                         "w-1/2 rounded-full px-4 py-2.5 transition",
-                        mode === "signup" ? "bg-white text-black" : "text-white/55 hover:text-white"
+                        mode === "signup" ? "bg-[linear-gradient(135deg,var(--accent),rgba(0,120,220,1))] text-white shadow-[0_8px_24px_rgba(0,163,255,0.28)]" : "text-white/55 hover:text-white"
                       )}
                     >
                       Sign Up
@@ -716,7 +718,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                   </div>
 
                   <div className="mt-8 space-y-2 text-center">
-                    <h2 className="text-[2.2rem] font-semibold leading-none tracking-[-0.05em] text-white">
+                    <h2 className="font-display text-[2.4rem] font-bold leading-none tracking-[-0.05em] text-white">
                       {mode === "login"
                         ? portalType === "client"
                           ? "Welcome to your room."
@@ -725,7 +727,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                           ? "Create your client access."
                           : "Create your coach access."}
                     </h2>
-                    <p className="text-sm text-white/55">
+                    <p className="text-sm leading-6 text-[var(--text-secondary)]">
                       {mode === "login"
                         ? portalType === "client"
                           ? "Log in to unlock your dashboard, room, and coach communication."
@@ -741,7 +743,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                       type="button"
                       onClick={handleGoogleSignIn}
                       disabled={loading}
-                      className="flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-3.5 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="flex w-full items-center justify-center gap-3 rounded-[14px] border border-white/[0.09] bg-white/[0.04] px-5 py-3.5 text-sm font-medium text-white transition hover:-translate-y-px hover:border-white/[0.14] hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Chrome className="h-4 w-4" />
                       <span>
@@ -751,25 +753,25 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
 
                     <div className="flex items-center gap-4">
                       <div className="h-px flex-1 bg-white/10" />
-                      <span className="text-xs uppercase tracking-[0.28em] text-white/30">or</span>
+                      <span className="font-mono text-xs uppercase tracking-[0.28em] text-white/30">or</span>
                       <div className="h-px flex-1 bg-white/10" />
                     </div>
                   </div>
 
                   {portalType === "client" && invitePreview ? (
-                    <div className="mt-6 rounded-[26px] border border-white/10 bg-white/[0.04] p-4 text-left">
-                      <p className="text-[11px] uppercase tracking-[0.28em] text-white/34">Coach Invite</p>
+                    <div className="mt-6 rounded-[26px] border border-white/10 bg-[linear-gradient(135deg,rgba(0,163,255,0.08),rgba(255,255,255,0.03))] p-4 text-left">
+                      <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">Coach Invite</p>
                       <div className="mt-3">
                         <p className="text-lg font-semibold text-white">{invitePreview.coachName}</p>
                         <p className="mt-1 text-sm text-white/52">{invitePreview.coachSpecialty || "Your coach is waiting for you."}</p>
                       </div>
                       <div className="mt-4 grid grid-cols-2 gap-3">
                         <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-3">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">Room Code</p>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-ghost)]">Room Code</p>
                           <p className="mt-1 text-sm font-semibold text-white">{invitePreview.roomCode}</p>
                         </div>
                         <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-3">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">Room Name</p>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-ghost)]">Room Name</p>
                           <p className="mt-1 text-sm font-semibold text-white">{invitePreview.roomName}</p>
                         </div>
                       </div>
@@ -781,27 +783,27 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                       <button
                         type="button"
                         onClick={() => setShowRoomIdEntry((current) => !current)}
-                        className="text-xs font-medium text-white/58 transition hover:text-white"
+                        className="text-xs font-medium text-[var(--text-secondary)] transition hover:text-white"
                       >
                         Got your coach room ID already?
                       </button>
 
                       {showRoomIdEntry ? (
                         <div className="mt-3 rounded-[24px] border border-white/10 bg-white/[0.04] p-4">
-                          <label className="block text-[11px] uppercase tracking-[0.24em] text-white/34">Coach Room ID</label>
+                          <label className="block text-[11px] uppercase tracking-[0.24em] text-[var(--text-ghost)]">Coach Room ID</label>
                           <input
                             value={roomId}
                             onChange={(event) => setRoomId(event.target.value.toUpperCase())}
                             placeholder="MK7WAU2Y"
-                            className="mt-3 w-full rounded-full border border-white/10 bg-black/20 px-5 py-3 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
+                            className="mt-3 w-full rounded-[14px] border border-white/[0.09] bg-white/[0.04] px-5 py-3 font-mono tracking-[0.28em] text-white outline-none transition placeholder:text-white/28"
                           />
                           {roomLookupLoading ? <p className="mt-3 text-xs text-white/45">Checking room...</p> : null}
                           {roomLookupError ? <p className="mt-3 text-xs text-red-300">{roomLookupError}</p> : null}
                           {roomLookup ? (
-                            <div className="mt-3 rounded-[18px] border border-white/10 bg-black/20 p-4">
+                            <div className="mt-3 rounded-[18px] border border-[rgba(0,163,255,0.18)] bg-[rgba(0,163,255,0.08)] p-4">
                               <p className="text-sm font-semibold text-white">{roomLookup.brandName}</p>
                               <p className="mt-1 text-xs text-white/45">{roomLookup.roomName}</p>
-                              <p className="mt-2 text-xs uppercase tracking-[0.22em] text-white/34">Room ready to join</p>
+                              <p className="mt-2 text-xs uppercase tracking-[0.22em] text-[var(--accent)]">Room ready to join</p>
                             </div>
                           ) : null}
                         </div>
@@ -815,7 +817,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                         value={fullName}
                         onChange={(event) => setFullName(event.target.value)}
                         placeholder={portalType === "client" ? "Client full name" : "Coach full name"}
-                        className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
+                        className="w-full rounded-[14px] border border-white/[0.09] bg-white/[0.04] px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
                         required
                       />
                     ) : null}
@@ -825,7 +827,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                         placeholder={portalType === "client" ? "client@email.com" : "coach@email.com"}
-                      className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
+                      className="w-full rounded-[14px] border border-white/[0.09] bg-white/[0.04] px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
                       required
                     />
 
@@ -834,7 +836,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder="Password"
-                      className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
+                      className="w-full rounded-[14px] border border-white/[0.09] bg-white/[0.04] px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
                       required
                     />
 
@@ -844,7 +846,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                         value={confirmPassword}
                         onChange={(event) => setConfirmPassword(event.target.value)}
                         placeholder="Confirm password"
-                        className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
+                        className="w-full rounded-[14px] border border-white/[0.09] bg-white/[0.04] px-5 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-white/25"
                         required
                       />
                     ) : null}
@@ -860,7 +862,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full rounded-full bg-white px-5 py-3.5 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="mt-2 w-full rounded-[14px] bg-[linear-gradient(135deg,var(--accent)_0%,rgba(0,120,220,1)_100%)] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_4px_24px_rgba(0,163,255,0.40)] transition hover:-translate-y-px hover:shadow-[0_8px_32px_rgba(0,163,255,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading
                         ? "Processing..."

@@ -306,18 +306,20 @@ export default function CoachBuilderPage() {
           <MorphingSquare message="Loading builder studio..." />
         </div>
       ) : (
-        <div className="flex min-h-[760px] flex-col gap-4">
+        <div className="portal-page flex min-h-[760px] flex-col gap-4">
           {error ? <div className="rounded-[18px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div> : null}
           {success ? <div className="rounded-[18px] border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
 
-          <section className="flex min-h-[780px] min-w-0 overflow-hidden rounded-[24px] border border-[#25262e] bg-[#0f1016]">
-            <aside className="hidden w-[78px] shrink-0 border-r border-[#23242b] bg-[#111219] xl:flex xl:flex-col xl:items-center xl:gap-3 xl:px-3 xl:py-4">
+          <section className="flex min-h-[780px] min-w-0 overflow-hidden rounded-[28px] border border-white/[0.06] bg-[rgba(10,10,16,0.78)] shadow-[var(--shadow-panel)] backdrop-blur-xl">
+            <aside className="hidden w-[64px] shrink-0 border-r border-white/[0.06] bg-[rgba(12,12,18,0.78)] xl:flex xl:flex-col xl:items-center xl:gap-3 xl:px-2 xl:py-4">
               {[LayoutTemplate, Sparkles, Layers3].map((Icon, index) => (
                 <button
                   key={index}
                   type="button"
-                  className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${
-                    index === 0 ? "border-[#7a6bff] bg-[#1d1c2b] text-white" : "border-[#272832] bg-[#16171f] text-white/55"
+                  className={`flex h-10 w-10 items-center justify-center rounded-[14px] border transition ${
+                    index === 0
+                      ? "border-[rgba(0,163,255,0.26)] bg-[rgba(0,163,255,0.08)] text-white shadow-[var(--shadow-glow)]"
+                      : "border-white/[0.08] bg-white/[0.03] text-white/55 hover:border-white/[0.14] hover:bg-white/[0.08]"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -325,25 +327,25 @@ export default function CoachBuilderPage() {
               ))}
             </aside>
 
-            <aside className="w-[252px] shrink-0 border-r border-[#23242b] bg-[#14151c]">
-              <div className="border-b border-[#23242b] px-5 py-4">
+            <aside className="w-[286px] shrink-0 border-r border-white/[0.06] bg-[rgba(12,12,20,0.82)]">
+              <div className="border-b border-white/[0.06] px-6 py-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.28em] text-white/35">Designer</p>
-                    <h1 className="mt-1 text-xl font-semibold text-white">Builder Studio</h1>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--text-ghost)]">Designer</p>
+                    <h1 className="mt-1 font-display text-[2rem] font-bold tracking-[-0.05em] text-white">Builder Studio</h1>
                   </div>
-                  <button type="button" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#282932] bg-[#1a1b23] text-white">
+                  <button type="button" className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-white/[0.08] bg-white/[0.04] text-white transition hover:border-white/[0.14] hover:bg-white/[0.08]">
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="mt-4 rounded-[18px] border border-[#272832] bg-[#101117] px-3 py-2.5 text-sm text-white/55">
+                <div className="mt-4 rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm leading-6 text-[var(--text-secondary)]">
                   Design everything inside HEIMDALLFIT.
                 </div>
               </div>
 
-              <div className="max-h-[calc(100vh-290px)] overflow-y-auto px-3 py-4">
-                <div className="rounded-[22px] border border-[#25262e] bg-[#171820] p-3">
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-white/35">
+              <div className="max-h-[calc(100vh-290px)] overflow-y-auto px-4 py-5">
+                <div className="rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4">
+                  <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
                     <LayoutTemplate className="h-3.5 w-3.5" />
                     Templates
                   </div>
@@ -356,12 +358,13 @@ export default function CoachBuilderPage() {
                           key={template.kind}
                           type="button"
                           onClick={() => switchTemplate(template.kind)}
-                          className={`w-full rounded-[18px] border bg-gradient-to-br p-3 text-left transition ${
-                            active ? `border-[#7a6bff] ${template.accent}` : "border-[#2a2b34] from-[#15161d] to-[#13141a] hover:border-white/20"
+                          className={`relative w-full overflow-hidden rounded-[18px] border bg-gradient-to-br p-4 text-left transition hover:-translate-y-px ${
+                            active ? `border-[rgba(0,163,255,0.28)] ${template.accent} shadow-[var(--shadow-glow)]` : "border-white/[0.07] from-[rgba(255,255,255,0.03)] to-[rgba(255,255,255,0.015)] hover:border-white/[0.14]"
                           }`}
                         >
+                          <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${template.accent}`} />
                           <div className="flex items-start gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/25 text-white">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-white/[0.08] bg-white/[0.04] text-white">
                               <Icon className="h-4 w-4" />
                             </div>
                             <div>
@@ -375,8 +378,8 @@ export default function CoachBuilderPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-[22px] border border-[#25262e] bg-[#171820] p-3">
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-white/35">
+                <div className="mt-4 rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4">
+                  <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
                     <Sparkles className="h-3.5 w-3.5" />
                     Blocks
                   </div>
@@ -388,7 +391,7 @@ export default function CoachBuilderPage() {
                           key={block.label}
                           type="button"
                           onClick={() => addSection(block.sectionTitle, block.item)}
-                          className="rounded-[16px] border border-[#2a2b34] bg-[#13141a] p-3 text-left transition hover:border-white/20"
+                          className="rounded-[16px] border border-white/[0.07] bg-[rgba(255,255,255,0.025)] p-3 text-left transition hover:-translate-y-px hover:border-[rgba(0,163,255,0.22)] hover:bg-[rgba(0,163,255,0.08)]"
                         >
                           <Icon className="h-4 w-4 text-white/72" />
                           <p className="mt-2 text-[12px] font-medium text-white">{block.label}</p>
@@ -398,13 +401,13 @@ export default function CoachBuilderPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-[22px] border border-[#25262e] bg-[#171820] p-3">
-                  <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.28em] text-white/35">
+                <div className="mt-4 rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4">
+                  <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
                     <span>Pages & Drafts</span>
                     <Layers3 className="h-3.5 w-3.5" />
                   </div>
                   <div className="mt-3 space-y-2">
-                    <button type="button" className="w-full rounded-[18px] border border-[#7a6bff] bg-[#211f33] p-3 text-left">
+                    <button type="button" className="w-full rounded-[18px] border border-[rgba(0,163,255,0.26)] bg-[rgba(0,163,255,0.10)] p-3 text-left shadow-[var(--shadow-glow)]">
                       <p className="text-[13px] font-semibold text-white">Page 1</p>
                       <p className="mt-1 text-[11px] text-white/55">{activeDocument.title}</p>
                     </button>
@@ -417,7 +420,7 @@ export default function CoachBuilderPage() {
                           setSelectedSectionId(document.content.sections[0]?.id || null);
                         }}
                         className={`w-full rounded-[16px] border px-3 py-3 text-left transition ${
-                          activeDocument.id === document.id ? "border-white/25 bg-[#1e2028]" : "border-[#25262e] bg-[#13141a] hover:border-white/15"
+                          activeDocument.id === document.id ? "border-white/18 bg-white/[0.06]" : "border-white/[0.07] bg-[rgba(255,255,255,0.02)] hover:border-white/[0.12]"
                         }`}
                       >
                         <p className="truncate text-[13px] font-medium text-white">{document.title}</p>
@@ -428,7 +431,7 @@ export default function CoachBuilderPage() {
                       </button>
                     ))}
                     {!documents.length ? (
-                      <div className="rounded-[16px] border border-dashed border-[#2b2c36] bg-[#13141a] px-3 py-4 text-sm text-white/42">
+                      <div className="rounded-[16px] border border-dashed border-white/[0.09] bg-[rgba(255,255,255,0.02)] px-3 py-4 text-sm text-white/42">
                         Start from a template and your saved drafts will appear here.
                       </div>
                     ) : null}
@@ -438,10 +441,10 @@ export default function CoachBuilderPage() {
             </aside>
 
             <div className="flex min-w-0 flex-1 flex-col">
-              <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-[#23242b] bg-[#111219] px-5">
+              <header className="flex h-[76px] shrink-0 items-center justify-between border-b border-white/[0.06] bg-[rgba(12,12,18,0.82)] px-6">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-2xl border border-[#282932] bg-[#171821] px-3 py-2 text-sm text-white/70">{activeDocument.title}</div>
-                  <div className="rounded-full border border-[#282932] bg-[#171821] px-3 py-2 text-[10px] uppercase tracking-[0.28em] text-white/40">
+                  <div className="rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white/78">{activeDocument.title}</div>
+                  <div className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
                     {kindLabel(activeDocument.kind)}
                   </div>
                 </div>
@@ -450,15 +453,15 @@ export default function CoachBuilderPage() {
                   <button
                     type="button"
                     onClick={() => setZoom((current) => Math.max(70, current - 5))}
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#282932] bg-[#171821] text-white/68"
+                    className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/[0.08] bg-white/[0.04] text-white/68 transition hover:border-white/[0.14] hover:bg-white/[0.08]"
                   >
                     <ZoomOut className="h-4 w-4" />
                   </button>
-                  <div className="rounded-2xl border border-[#282932] bg-[#171821] px-3 py-2 text-sm text-white/72">{zoom}%</div>
+                  <div className="rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-white/72">{zoom}%</div>
                   <button
                     type="button"
                     onClick={() => setZoom((current) => Math.min(110, current + 5))}
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#282932] bg-[#171821] text-white/68"
+                    className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/[0.08] bg-white/[0.04] text-white/68 transition hover:border-white/[0.14] hover:bg-white/[0.08]"
                   >
                     <ZoomIn className="h-4 w-4" />
                   </button>
@@ -466,7 +469,7 @@ export default function CoachBuilderPage() {
                     type="button"
                     onClick={saveDocument}
                     disabled={saving}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-[#282932] bg-[#171821] px-4 py-2.5 text-sm text-white disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white transition hover:border-white/[0.14] hover:bg-white/[0.08] disabled:opacity-60"
                   >
                     <Save className="h-4 w-4" />
                     {saving ? "Saving..." : "Save"}
@@ -475,7 +478,7 @@ export default function CoachBuilderPage() {
                     type="button"
                     onClick={sendDocument}
                     disabled={sending}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-black disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-[14px] bg-[linear-gradient(135deg,var(--accent),rgba(0,120,220,1))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(0,163,255,0.28)] transition hover:-translate-y-px hover:shadow-[0_14px_34px_rgba(0,163,255,0.36)] disabled:opacity-60"
                   >
                     <Send className="h-4 w-4" />
                     {sending ? "Sending..." : "Send"}
@@ -483,10 +486,10 @@ export default function CoachBuilderPage() {
                 </div>
               </header>
 
-              <div className="grid min-h-0 flex-1 xl:grid-cols-[minmax(0,1fr)_264px]">
-                <div className="min-h-0 bg-[#eceef4] p-6">
-                  <div className="flex h-full min-h-0 flex-col rounded-[28px] border border-[#d8dbe5] bg-[#f7f8fb]">
-                    <div className="flex items-center justify-between border-b border-[#dde1ea] px-5 py-3">
+              <div className="grid min-h-0 flex-1 xl:grid-cols-[minmax(0,1fr)_292px]">
+                <div className="min-h-0 bg-[radial-gradient(circle_at_top,rgba(0,163,255,0.10),transparent_28%),#dfe4ee] p-6">
+                  <div className="flex h-full min-h-0 flex-col rounded-[30px] border border-[#d8dbe5] bg-[#eef2f8] shadow-[0_32px_100px_rgba(15,23,42,0.16)]">
+                    <div className="flex items-center justify-between border-b border-[#dde1ea] px-6 py-4">
                       <div className="flex items-center gap-3 text-sm text-[#596176]">
                         <span>Page 1</span>
                         <span className="rounded-full bg-white px-2.5 py-1 text-[11px] text-[#677086] shadow-sm">A4 landscape</span>
@@ -496,9 +499,9 @@ export default function CoachBuilderPage() {
                       </div>
                     </div>
 
-                    <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-6">
+                    <div className="flex min-h-0 flex-1 items-start justify-center overflow-auto px-6 py-8">
                       <div
-                        className="w-[1080px] max-w-full rounded-[28px] bg-white p-8 shadow-[0_25px_80px_rgba(15,23,42,0.14)]"
+                        className="w-[1440px] max-w-full rounded-[28px] bg-white p-10 shadow-[0_25px_80px_rgba(15,23,42,0.14)]"
                         style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
                       >
                         <div className="border-b border-[#e9eaf0] pb-5">
@@ -523,13 +526,13 @@ export default function CoachBuilderPage() {
                           />
                         </div>
 
-                        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                        <div className="mt-8 grid gap-5 xl:grid-cols-2">
                           {activeDocument.content.sections.map((section) => (
                             <button
                               key={section.id}
                               type="button"
                               onClick={() => setSelectedSectionId(section.id)}
-                              className={`rounded-[24px] border p-5 text-left transition ${
+                              className={`rounded-[24px] border p-6 text-left transition ${
                                 selectedSection?.id === section.id
                                   ? "border-[#6f67ff] bg-[#f7f5ff] shadow-[0_10px_30px_rgba(111,103,255,0.12)]"
                                   : "border-[#e4e7ef] bg-[#fcfcfe] hover:border-[#cfd5e3]"
@@ -599,23 +602,23 @@ export default function CoachBuilderPage() {
                   </div>
                 </div>
 
-                <aside className="border-l border-[#23242b] bg-[#15161d] p-4">
-                  <div className="rounded-[20px] border border-[#262730] bg-[#181922] p-4">
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-white/36">
+                <aside className="border-l border-white/[0.06] bg-[rgba(12,12,20,0.82)] p-5">
+                  <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.03] p-4">
+                    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">
                       <Sparkles className="h-3.5 w-3.5" />
                       Inspector
                     </div>
-                    <p className="mt-3 text-sm text-white/56">Edit the selected block and prepare the asset for delivery.</p>
+                    <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">Edit the selected block and prepare the asset for delivery.</p>
                   </div>
 
-                  <div className="mt-4 rounded-[20px] border border-[#262730] bg-[#181922] p-4">
-                    <p className="text-[10px] uppercase tracking-[0.28em] text-white/36">Document Settings</p>
+                  <div className="mt-4 rounded-[20px] border border-white/[0.07] bg-white/[0.03] p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">Document Settings</p>
                     <label className="mt-4 block">
                       <span className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-white/34">Description</span>
                       <textarea
                         value={activeDocument.description}
                         onChange={(event) => updateDocument((current) => ({ ...current, description: event.target.value }))}
-                        className="min-h-[92px] w-full rounded-[16px] border border-[#2b2c35] bg-[#101117] px-4 py-3 text-sm text-white outline-none"
+                        className="min-h-[92px] w-full rounded-[16px] border border-white/[0.08] bg-[#101117] px-4 py-3 text-sm text-white outline-none"
                       />
                     </label>
 
@@ -630,7 +633,7 @@ export default function CoachBuilderPage() {
                             clientName: clients.find((client) => client.id === event.target.value)?.name || null
                           }))
                         }
-                        className="h-11 w-full rounded-[16px] border border-[#2b2c35] bg-[#101117] px-4 text-sm text-white outline-none"
+                        className="h-11 w-full rounded-[16px] border border-white/[0.08] bg-[#101117] px-4 text-sm text-white outline-none"
                       >
                         <option value="">No client selected</option>
                         {clients.map((client) => (
@@ -642,8 +645,8 @@ export default function CoachBuilderPage() {
                     </label>
                   </div>
 
-                  <div className="mt-4 rounded-[20px] border border-[#262730] bg-[#181922] p-4">
-                    <p className="text-[10px] uppercase tracking-[0.28em] text-white/36">Selected Block</p>
+                  <div className="mt-4 rounded-[20px] border border-white/[0.07] bg-white/[0.03] p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text-ghost)]">Selected Block</p>
                     {selectedSection ? (
                       <div className="mt-4 space-y-4">
                         <label className="block">
@@ -651,11 +654,11 @@ export default function CoachBuilderPage() {
                           <input
                             value={selectedSection.title}
                             onChange={(event) => updateSection(selectedSection.id, { title: event.target.value })}
-                            className="h-11 w-full rounded-[16px] border border-[#2b2c35] bg-[#101117] px-4 text-sm text-white outline-none"
+                            className="h-11 w-full rounded-[16px] border border-white/[0.08] bg-[#101117] px-4 text-sm text-white outline-none"
                           />
                         </label>
                         <div className="rounded-[16px] bg-[#101117] px-4 py-3">
-                          <p className="text-[10px] uppercase tracking-[0.22em] text-white/34">Items</p>
+                          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/34">Items</p>
                           <p className="mt-2 text-sm text-white/72">{selectedSection.items.length} content line{selectedSection.items.length === 1 ? "" : "s"}</p>
                         </div>
                         <button
