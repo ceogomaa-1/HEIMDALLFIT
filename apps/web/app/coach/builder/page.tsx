@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ClipboardList,
   FileBadge2,
   FileHeart,
+  GripVertical,
+  ImagePlus,
   Layers3,
   LayoutTemplate,
   Plus,
@@ -21,7 +23,17 @@ import { MorphingSquare } from "../../../components/ui/morphing-square";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../../lib/supabase";
 
 type BuilderKind = "onboarding_form" | "diet_plan" | "training_plan";
-type BuilderSection = { id: string; title: string; items: string[] };
+type BuilderSection = {
+  id: string;
+  title: string;
+  items: string[];
+  type?: "text" | "image";
+  imageUrl?: string | null;
+  imagePath?: string | null;
+  imageCaption?: string;
+  span?: 1 | 2;
+  height?: "sm" | "md" | "lg";
+};
 type BuilderContent = { coverNote: string; sections: BuilderSection[] };
 type BuilderDocument = {
   id: string;
@@ -69,7 +81,8 @@ const blockPresets = [
   { label: "Heading", icon: Type, sectionTitle: "New Heading Block", item: "Write a title here" },
   { label: "Checklist", icon: ClipboardList, sectionTitle: "Checklist", item: "Add checklist point" },
   { label: "Workout", icon: FileBadge2, sectionTitle: "Workout Block", item: "Exercise x sets x reps" },
-  { label: "Meal Block", icon: FileHeart, sectionTitle: "Meal Block", item: "Meal / macros / timing" }
+  { label: "Meal Block", icon: FileHeart, sectionTitle: "Meal Block", item: "Meal / macros / timing" },
+  { label: "Image", icon: ImagePlus, sectionTitle: "Image Block", item: "" }
 ] as const;
 
 function createId(prefix: string) {
@@ -142,6 +155,9 @@ export default function CoachBuilderPage() {
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [leftPanel, setLeftPanel] = useState<"templates" | "blocks" | "drafts" | null>("templates");
   const [zoom, setZoom] = useState(88);
+  const [uploadingSectionId, setUploadingSectionId] = useState<string | null>(null);
+  const [draggingSectionId, setDraggingSectionId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -207,6 +223,22 @@ export default function CoachBuilderPage() {
     setSelectedSectionId(newSection.id);
   }
 
+  function addImageSection() {
+    const newSection: BuilderSection = {
+      id: createId("section"),
+      title: "Image Block",
+      items: [],
+      type: "image",
+      imageUrl: null,
+      imagePath: null,
+      imageCaption: "Add a caption or coaching note for this visual.",
+      span: 2,
+      height: "md"
+    };
+    updateDocument((current) => ({ ...current, content: { ...current.content, sections: [...current.content.sections, newSection] } }));
+    setSelectedSectionId(newSection.id);
+  }
+
   function updateSection(sectionId: string, next: Partial<BuilderSection>) {
     updateDocument((current) => ({
       ...current,
@@ -237,6 +269,56 @@ export default function CoachBuilderPage() {
     const remaining = activeDocument.content.sections.filter((section) => section.id !== sectionId);
     updateDocument((current) => ({ ...current, content: { ...current.content, sections: remaining } }));
     setSelectedSectionId(remaining[0]?.id || null);
+  }
+
+  function moveSection(sourceId: string, targetId: string) {
+    if (!sourceId || !targetId || sourceId === targetId) return;
+    updateDocument((current) => {
+      const sections = [...current.content.sections];
+      const sourceIndex = sections.findIndex((section) => section.id === sourceId);
+      const targetIndex = sections.findIndex((section) => section.id === targetId);
+      if (sourceIndex === -1 || targetIndex === -1) return current;
+      const [moved] = sections.splice(sourceIndex, 1);
+      sections.splice(targetIndex, 0, moved);
+      return { ...current, content: { ...current.content, sections } };
+    });
+  }
+
+  async function uploadImageToSection(sectionId: string, file: File) {
+    if (!supabase) return;
+    setUploadingSectionId(sectionId);
+    setError(null);
+    setSuccess(null);
+    try {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Coach session missing. Please log in again.");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/coach/builder/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData
+      });
+
+      const payload = (await response.json()) as { error?: string; path?: string; url?: string };
+      if (!response.ok || !payload.url) throw new Error(payload.error || "Unable to upload image.");
+
+      updateSection(sectionId, {
+        type: "image",
+        imageUrl: payload.url,
+        imagePath: payload.path || null,
+        span: 2
+      });
+      setSuccess("Image added to the canvas.");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Unable to upload image.");
+    } finally {
+      setUploadingSectionId(null);
+    }
   }
 
   async function saveDocument() {
@@ -299,6 +381,7 @@ export default function CoachBuilderPage() {
   const assignedClient = clients.find((client) => client.id === activeDocument.clientId) || null;
   const selectedSection =
     activeDocument.content.sections.find((section) => section.id === selectedSectionId) || activeDocument.content.sections[0] || null;
+  const isSelectedImageBlock = selectedSection?.type === "image";
 
   return (
     <CoachShell profile={profile}>
@@ -312,6 +395,19 @@ export default function CoachBuilderPage() {
           {success ? <div style={{ marginBottom: "14px", borderRadius: "18px", border: "1px solid rgba(52,211,153,0.24)", background: "rgba(6,78,59,0.22)", padding: "14px 18px", color: "rgb(167 243 208)", fontSize: "14px" }}>{success}</div> : null}
 
           <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", background: "#0A0A0F" }}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (file && selectedSectionId) {
+                  await uploadImageToSection(selectedSectionId, file);
+                }
+                event.target.value = "";
+              }}
+            />
             <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "52px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(10,10,16,0.95)", padding: "0 16px", gap: "12px", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
                 <input value={activeDocument.title} onChange={(e) => updateDocument((cur) => ({ ...cur, title: e.target.value }))} style={{ background: "transparent", border: "none", outline: "none", fontSize: "14px", fontWeight: "600", fontFamily: "'Syne', sans-serif", color: "rgba(255,255,255,0.90)", maxWidth: "240px", minWidth: "80px" }} />
@@ -370,7 +466,7 @@ export default function CoachBuilderPage() {
                         {blockPresets.map((block) => {
                           const Icon = block.icon;
                           return (
-                            <button key={block.label} type="button" onClick={() => addSection(block.sectionTitle, block.item)} style={{ borderRadius: "12px", padding: "12px 10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <button key={block.label} type="button" onClick={() => (block.label === "Image" ? addImageSection() : addSection(block.sectionTitle, block.item))} style={{ borderRadius: "12px", padding: "12px 10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: "8px" }}>
                               <Icon style={{ width: 15, height: 15, color: "rgba(255,255,255,0.60)" }} />
                               <span style={{ fontSize: "11px", fontWeight: "500", color: "rgba(255,255,255,0.80)" }}>{block.label}</span>
                             </button>
@@ -410,22 +506,83 @@ export default function CoachBuilderPage() {
                   </div>
                   <div style={{ padding: "28px 32px 32px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px", background: "#f7f8fb", minHeight: "320px" }}>
                     {activeDocument.content.sections.map((section, sIdx) => (
-                      <div key={section.id} onClick={() => setSelectedSectionId(section.id)} style={{ borderRadius: "16px", background: "#fff", border: `2px solid ${selectedSection?.id === section.id ? "#6F67FF" : "#E4E7EF"}`, boxShadow: selectedSection?.id === section.id ? "0 8px 24px rgba(111,103,255,0.14)" : "0 2px 8px rgba(15,23,42,0.06)", cursor: "pointer", overflow: "hidden", display: "flex", flexDirection: "column", animation: `fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) ${sIdx * 0.05}s both` }}>
+                      <div
+                        key={section.id}
+                        draggable
+                        onDragStart={() => setDraggingSectionId(section.id)}
+                        onDragEnd={() => setDraggingSectionId(null)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          if (draggingSectionId) moveSection(draggingSectionId, section.id);
+                          setDraggingSectionId(null);
+                        }}
+                        onClick={() => setSelectedSectionId(section.id)}
+                        style={{
+                          gridColumn: section.span === 2 ? "span 2" : "span 1",
+                          minHeight: section.type === "image" ? (section.height === "sm" ? "220px" : section.height === "lg" ? "420px" : "320px") : "unset",
+                          borderRadius: "16px",
+                          background: "#fff",
+                          border: `2px solid ${selectedSection?.id === section.id ? "#6F67FF" : draggingSectionId === section.id ? "#94A3FF" : "#E4E7EF"}`,
+                          boxShadow: selectedSection?.id === section.id ? "0 8px 24px rgba(111,103,255,0.14)" : "0 2px 8px rgba(15,23,42,0.06)",
+                          cursor: "grab",
+                          overflow: "hidden",
+                          display: "flex",
+                          flexDirection: "column",
+                          animation: `fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) ${sIdx * 0.05}s both`
+                        }}
+                      >
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px 10px", borderBottom: "1px solid #F0F2F7", background: selectedSection?.id === section.id ? "#FAFAFE" : "#FAFCFF" }}>
-                          <input value={section.title} onChange={(e) => updateSection(section.id, { title: e.target.value })} onClick={(e) => e.stopPropagation()} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", fontWeight: "700", color: "#0F172A", fontFamily: "'Syne', sans-serif", flex: 1, minWidth: 0 }} />
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }}>
+                            <GripVertical style={{ width: 14, height: 14, color: "#A0A8BA", flexShrink: 0 }} />
+                            <input value={section.title} onChange={(e) => updateSection(section.id, { title: e.target.value })} onClick={(e) => e.stopPropagation()} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", fontWeight: "700", color: "#0F172A", fontFamily: "'Syne', sans-serif", flex: 1, minWidth: 0 }} />
+                          </div>
                           <button type="button" onClick={(e) => { e.stopPropagation(); removeSection(section.id); }} style={{ width: "26px", height: "26px", borderRadius: "8px", background: "transparent", border: "none", color: "#B0B8CC", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Trash2 style={{ width: 13, height: 13 }} /></button>
                         </div>
-                        <div style={{ padding: "10px 14px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
-                          {section.items.map((item, idx) => (
-                            <div key={`${section.id}-${idx}`} style={{ display: "flex", alignItems: "flex-start", gap: "8px", borderRadius: "9px", background: "#F5F7FB", padding: "7px 10px" }} onClick={(e) => e.stopPropagation()}>
-                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: selectedSection?.id === section.id ? "#6F67FF" : "#C5CADC", marginTop: "7px", flexShrink: 0 }} />
-                              <input value={item} onChange={(e) => updateItem(section.id, idx, e.target.value)} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", lineHeight: "1.6", color: "#334155", fontFamily: "'DM Sans', sans-serif", flex: 1, minWidth: 0 }} />
+
+                        {section.type === "image" ? (
+                          <div style={{ padding: "14px", display: "flex", flex: 1, flexDirection: "column", gap: "10px" }}>
+                            <div style={{ position: "relative", flex: 1, minHeight: section.height === "sm" ? "130px" : section.height === "lg" ? "310px" : "210px", borderRadius: "14px", border: "1px dashed #D8DEEA", background: section.imageUrl ? `url(${section.imageUrl}) center/cover no-repeat` : "linear-gradient(135deg, #eef2ff, #f8fafc)" }}>
+                              {!section.imageUrl ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedSectionId(section.id);
+                                    fileInputRef.current?.click();
+                                  }}
+                                  style={{ position: "absolute", inset: 0, border: "none", background: "transparent", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", color: "#64748B", cursor: "pointer" }}
+                                >
+                                  <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "#FFFFFFCC", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(15,23,42,0.08)" }}>
+                                    <ImagePlus style={{ width: 18, height: 18 }} />
+                                  </div>
+                                  <span style={{ fontSize: "12px", fontWeight: "600" }}>{uploadingSectionId === section.id ? "Uploading..." : "Add photo"}</span>
+                                </button>
+                              ) : null}
                             </div>
-                          ))}
-                        </div>
-                        <div style={{ padding: "8px 14px 12px" }}>
-                          <button type="button" onClick={(e) => { e.stopPropagation(); addItem(section.id); }} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "transparent", border: "1px solid #DDE2EC", fontSize: "11px", color: "#4B5565", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}><Plus style={{ width: 11, height: 11 }} />Add line</button>
-                        </div>
+                            <input
+                              value={section.imageCaption || ""}
+                              onChange={(e) => updateSection(section.id, { imageCaption: e.target.value })}
+                              onClick={(e) => e.stopPropagation()}
+                              placeholder="Image caption / coaching note"
+                              style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", outline: "none", borderRadius: "10px", padding: "10px 12px", fontSize: "12px", color: "#334155" }}
+                            />
+                          </div>
+                        ) : (
+                          <>
+                            <div style={{ padding: "10px 14px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                              {section.items.map((item, idx) => (
+                                <div key={`${section.id}-${idx}`} style={{ display: "flex", alignItems: "flex-start", gap: "8px", borderRadius: "9px", background: "#F5F7FB", padding: "7px 10px" }} onClick={(e) => e.stopPropagation()}>
+                                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: selectedSection?.id === section.id ? "#6F67FF" : "#C5CADC", marginTop: "7px", flexShrink: 0 }} />
+                                  <input value={item} onChange={(e) => updateItem(section.id, idx, e.target.value)} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", lineHeight: "1.6", color: "#334155", fontFamily: "'DM Sans', sans-serif", flex: 1, minWidth: 0 }} />
+                                </div>
+                              ))}
+                            </div>
+                            <div style={{ padding: "8px 14px 12px" }}>
+                              <button type="button" onClick={(e) => { e.stopPropagation(); addItem(section.id); }} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "transparent", border: "1px solid #DDE2EC", fontSize: "11px", color: "#4B5565", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}><Plus style={{ width: 11, height: 11 }} />Add line</button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     ))}
 
@@ -466,10 +623,28 @@ export default function CoachBuilderPage() {
                         <input value={selectedSection.title} onChange={(e) => updateSection(selectedSection.id, { title: e.target.value })} style={{ width: "100%", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.88)", fontSize: "12px", paddingLeft: "10px", outline: "none", boxSizing: "border-box" }} />
                       </label>
                       <div style={{ padding: "10px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>Lines</span>
-                        <span style={{ fontSize: "13px", fontWeight: "600", color: "rgba(255,255,255,0.85)", fontFamily: "'DM Mono', monospace" }}>{selectedSection.items.length}</span>
+                        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>{isSelectedImageBlock ? "Block Type" : "Lines"}</span>
+                        <span style={{ fontSize: "13px", fontWeight: "600", color: "rgba(255,255,255,0.85)", fontFamily: "'DM Mono', monospace" }}>{isSelectedImageBlock ? "IMAGE" : selectedSection.items.length}</span>
                       </div>
-                      <button type="button" onClick={() => addItem(selectedSection.id)} style={{ width: "100%", padding: "9px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.72)", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><Plus style={{ width: 12, height: 12 }} />Add Item</button>
+                      {isSelectedImageBlock ? (
+                        <>
+                          <button type="button" onClick={() => fileInputRef.current?.click()} style={{ width: "100%", padding: "9px", borderRadius: "10px", background: "rgba(0,163,255,0.09)", border: "1px solid rgba(0,163,255,0.18)", color: "#8DD3FF", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><ImagePlus style={{ width: 12, height: 12 }} />{uploadingSectionId === selectedSection.id ? "Uploading..." : "Replace Image"}</button>
+                          <label style={{ display: "block" }}>
+                            <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Caption</span>
+                            <textarea value={selectedSection.imageCaption || ""} onChange={(e) => updateSection(selectedSection.id, { imageCaption: e.target.value })} style={{ width: "100%", minHeight: "78px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.88)", fontSize: "12px", padding: "10px", outline: "none", boxSizing: "border-box", resize: "none" }} />
+                          </label>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                            <button type="button" onClick={() => updateSection(selectedSection.id, { span: selectedSection.span === 2 ? 1 : 2 })} style={{ padding: "9px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.72)", fontSize: "12px", cursor: "pointer" }}>{selectedSection.span === 2 ? "Single Width" : "Double Width"}</button>
+                            <select value={selectedSection.height || "md"} onChange={(e) => updateSection(selectedSection.id, { height: e.target.value as "sm" | "md" | "lg" })} style={{ height: "38px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.72)", fontSize: "12px", paddingLeft: "10px", outline: "none" }}>
+                              <option value="sm">Short</option>
+                              <option value="md">Medium</option>
+                              <option value="lg">Tall</option>
+                            </select>
+                          </div>
+                        </>
+                      ) : (
+                        <button type="button" onClick={() => addItem(selectedSection.id)} style={{ width: "100%", padding: "9px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.72)", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><Plus style={{ width: 12, height: 12 }} />Add Item</button>
+                      )}
                       <button type="button" onClick={() => removeSection(selectedSection.id)} style={{ width: "100%", padding: "9px", borderRadius: "10px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", color: "rgba(239,68,68,0.85)", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><Trash2 style={{ width: 12, height: 12 }} />Remove Block</button>
                     </div>
                   ) : (

@@ -64,7 +64,7 @@ export function ClientShell({
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(0,163,255,0.07),transparent_40%),radial-gradient(ellipse_at_bottom_left,rgba(67,208,127,0.05),transparent_30%),linear-gradient(180deg,#08080d_0%,#090a10_35%,#08080d_100%)]" />
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1760px] px-6 py-8">
-        <aside className="hidden w-[260px] shrink-0 animate-slide-left lg:block">
+        <aside className="hidden w-[260px] shrink-0 self-start animate-slide-left lg:block">
           <div
             style={{
               background: "rgba(10,10,18,0.85)",
@@ -73,7 +73,7 @@ export function ClientShell({
               borderRadius: "28px",
               boxShadow: "0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
               padding: "20px",
-              height: "100%",
+              height: "auto",
               display: "flex",
               flexDirection: "column",
               position: "relative",
@@ -225,8 +225,8 @@ export function ClientShell({
               })}
             </header>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-              <main className="portal-page flex min-h-full flex-col">{children}</main>
+            <div className="min-h-0 flex flex-1 flex-col overflow-hidden px-6 py-6">
+              <main className="portal-page flex min-h-0 flex-1 flex-col">{children}</main>
             </div>
           </div>
         </div>

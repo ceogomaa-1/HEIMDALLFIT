@@ -9,6 +9,12 @@ export type BuilderSection = {
   id: string;
   title: string;
   items: string[];
+  type?: "text" | "image";
+  imageUrl?: string | null;
+  imagePath?: string | null;
+  imageCaption?: string;
+  span?: 1 | 2;
+  height?: "sm" | "md" | "lg";
 };
 
 export type BuilderContent = {
@@ -54,6 +60,17 @@ export function getDefaultBuilderContent(kind: BuilderKind): BuilderContent {
           id: randomId("section"),
           title: "Lifestyle",
           items: ["How many days per week can you train?", "How many meals do you usually eat per day?", "How much water do you drink daily?"]
+        },
+        {
+          id: randomId("section"),
+          title: "Reference Photo",
+          items: [],
+          type: "image",
+          imageUrl: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
+          imagePath: null,
+          imageCaption: "Use image blocks for posture references, progress photos, or branded visuals.",
+          span: 2,
+          height: "md"
         }
       ]
     };
@@ -72,6 +89,17 @@ export function getDefaultBuilderContent(kind: BuilderKind): BuilderContent {
           id: randomId("section"),
           title: "Evening",
           items: ["Meal 4: Lean protein + potatoes + greens", "Post-dinner walk: 10-15 mins", "No sugary snacks after 9 PM"]
+        },
+        {
+          id: randomId("section"),
+          title: "Meal Inspiration",
+          items: [],
+          type: "image",
+          imageUrl: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80",
+          imagePath: null,
+          imageCaption: "Show plated meal references, grocery examples, or portion visuals.",
+          span: 2,
+          height: "md"
         }
       ]
     };
@@ -85,13 +113,24 @@ export function getDefaultBuilderContent(kind: BuilderKind): BuilderContent {
         title: "Day 1 - Push",
         items: ["Bench Press - 4 x 8", "Incline Dumbbell Press - 3 x 10", "Cable Lateral Raise - 3 x 15"]
       },
-      {
-        id: randomId("section"),
-        title: "Conditioning",
-        items: ["Bike sprint: 10 rounds x 20s on / 40s off", "Cooldown walk: 8 mins", "Breathing reset: 3 mins"]
-      }
-    ]
-  };
+        {
+          id: randomId("section"),
+          title: "Conditioning",
+          items: ["Bike sprint: 10 rounds x 20s on / 40s off", "Cooldown walk: 8 mins", "Breathing reset: 3 mins"]
+        },
+        {
+          id: randomId("section"),
+          title: "Movement Reference",
+          items: [],
+          type: "image",
+          imageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80",
+          imagePath: null,
+          imageCaption: "Drop exercise demos, hero images, or coach branding directly into the program.",
+          span: 2,
+          height: "md"
+        }
+      ]
+    };
 }
 
 function normalizeContent(kind: BuilderKind, content: unknown): BuilderContent {
@@ -108,7 +147,13 @@ function normalizeContent(kind: BuilderKind, content: unknown): BuilderContent {
       ? parsed.sections.map((section) => ({
           id: typeof section?.id === "string" ? section.id : randomId("section"),
           title: typeof section?.title === "string" ? section.title : "Untitled Section",
-          items: Array.isArray(section?.items) ? section.items.map((item) => String(item)) : []
+          items: Array.isArray(section?.items) ? section.items.map((item) => String(item)) : [],
+          type: section?.type === "image" ? "image" : "text",
+          imageUrl: typeof section?.imageUrl === "string" ? section.imageUrl : null,
+          imagePath: typeof section?.imagePath === "string" ? section.imagePath : null,
+          imageCaption: typeof section?.imageCaption === "string" ? section.imageCaption : "",
+          span: section?.span === 2 ? 2 : 1,
+          height: section?.height === "sm" || section?.height === "lg" ? section.height : "md"
         }))
       : fallback.sections
   };

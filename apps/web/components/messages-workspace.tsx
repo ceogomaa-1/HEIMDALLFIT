@@ -367,7 +367,10 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
   }
 
   return (
-    <div className="grid min-h-[680px] grid-cols-[306px_minmax(0,1fr)] overflow-hidden rounded-[28px] border border-white/[0.06] bg-[rgba(10,10,16,0.80)] shadow-[var(--shadow-panel)] backdrop-blur-xl">
+    <div
+      className="grid grid-cols-[360px_minmax(0,1fr)] overflow-hidden rounded-[24px] border border-[#23242b] bg-[#14151b]"
+      style={{ flex: 1, minHeight: 0 }}
+    >
       <aside className="flex min-h-0 flex-col border-r border-white/[0.06] bg-[rgba(13,13,20,0.92)]">
         <div className="border-b border-white/[0.06] px-4 py-4">
           <div className="flex items-center gap-2">
@@ -476,20 +479,19 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
           <div className="flex h-full items-center justify-center"><MorphingSquare message="Loading thread..." /></div>
         ) : threadPayload ? (
           <>
-            <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] px-6 pb-5 pt-6">
-              <div className="mx-auto flex flex-col items-center text-center">
-                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[rgba(0,163,255,0.18)] bg-[#232530] text-xl font-semibold text-white shadow-[0_0_36px_rgba(0,163,255,0.14)]">
-                  {selectedThread?.counterpartAvatar ? (
-                    <img src={selectedThread.counterpartAvatar} alt={threadPayload.thread.counterpartName} className="h-full w-full object-cover" />
-                  ) : (
-                    initials(threadPayload.thread.counterpartName)
-                  )}
-                </div>
-                <p className="mt-3 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white">{threadPayload.thread.counterpartName}</p>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">{selectedThread?.counterpartHandle}</p>
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--text-ghost)]">{typingLabel || threadPayload.thread.lastSeenLabel}</p>
+            <div className="flex h-14 shrink-0 items-center gap-3 border-b border-white/6 px-5 py-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-[#232530] text-sm font-semibold text-white">
+                {selectedThread?.counterpartAvatar ? (
+                  <img src={selectedThread.counterpartAvatar} alt={threadPayload.thread.counterpartName} className="h-full w-full object-cover" />
+                ) : (
+                  initials(threadPayload.thread.counterpartName)
+                )}
               </div>
-              <button type="button" className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/[0.16] hover:bg-white/[0.09]">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14px] font-semibold leading-tight text-white">{threadPayload.thread.counterpartName}</p>
+                <p className="truncate text-[11px] leading-tight text-white/42">{typingLabel || threadPayload.thread.lastSeenLabel}</p>
+              </div>
+              <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/[0.16] hover:bg-white/[0.09]">
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
@@ -547,7 +549,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
               ))}
             </div>
 
-            <div className="border-t border-white/6 px-5 py-4">
+            <div className="shrink-0 border-t border-white/6 px-5 py-4">
               {error ? <div className="mb-3 rounded-[16px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">{error}</div> : null}
               <div className="mb-3 flex flex-wrap gap-2">
                 {attachments.map((file) => (

@@ -68,7 +68,7 @@ export function CoachShell({
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(0,163,255,0.08),transparent_40%),radial-gradient(ellipse_at_bottom_right,rgba(67,208,127,0.05),transparent_28%),linear-gradient(180deg,#09090d_0%,#090a10_35%,#08080d_100%)]" />
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1760px] px-6 py-8">
-        <aside className="hidden w-[260px] shrink-0 animate-slide-left lg:block">
+        <aside className="hidden w-[260px] shrink-0 self-start animate-slide-left lg:block">
           <div
             style={{
               background: "rgba(10,10,18,0.85)",
@@ -77,7 +77,7 @@ export function CoachShell({
               borderRadius: "28px",
               boxShadow: "0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
               padding: "20px",
-              height: "100%",
+              height: "auto",
               display: "flex",
               flexDirection: "column",
               position: "relative",
@@ -229,8 +229,8 @@ export function CoachShell({
               })}
             </header>
 
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflowY: "auto", padding: "20px" }}>
-              <main style={{ display: "flex", flexDirection: "column", flex: 1 }}>{children}</main>
+            <div className="min-h-0 flex flex-1 flex-col overflow-hidden px-5 py-5">
+              <main className="flex min-h-0 flex-1 flex-col">{children}</main>
             </div>
           </div>
         </div>

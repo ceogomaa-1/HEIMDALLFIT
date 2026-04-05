@@ -67,18 +67,20 @@ export default function ClientMessagesPage() {
   return (
     <ClientShell profile={profile}>
       {checking ? (
-        <div className="flex min-h-[520px] items-center justify-center">
+        <div className="flex h-full min-h-[520px] flex-1 items-center justify-center">
           <MorphingSquare message="Loading messages..." />
         </div>
       ) : error ? (
         <div className="rounded-[24px] border border-[#2b2b34] bg-[#18181f] px-5 py-4 text-sm text-red-300">{error}</div>
       ) : supabase ? (
-        <MessagesWorkspace
-          portal="client"
-          supabase={supabase}
-          emptyTitle="No coach thread yet."
-          emptyCopy="Once you join a coach room, your private HEIMDALLFIT thread will appear here automatically."
-        />
+        <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+          <MessagesWorkspace
+            portal="client"
+            supabase={supabase}
+            emptyTitle="No coach thread yet."
+            emptyCopy="Once you join a coach room, your private HEIMDALLFIT thread will appear here automatically."
+          />
+        </div>
       ) : null}
     </ClientShell>
   );

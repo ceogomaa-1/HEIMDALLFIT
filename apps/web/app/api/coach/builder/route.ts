@@ -50,7 +50,17 @@ export async function POST(request: Request) {
       clientId?: string | null;
       content?: {
         coverNote?: string;
-        sections?: Array<{ id?: string; title?: string; items?: string[] }>;
+        sections?: Array<{
+          id?: string;
+          title?: string;
+          items?: string[];
+          type?: "text" | "image";
+          imageUrl?: string | null;
+          imagePath?: string | null;
+          imageCaption?: string;
+          span?: 1 | 2;
+          height?: "sm" | "md" | "lg";
+        }>;
       };
     };
 
@@ -67,7 +77,13 @@ export async function POST(request: Request) {
         sections: payload.content?.sections?.map((section) => ({
           id: section.id || "",
           title: section.title || "",
-          items: Array.isArray(section.items) ? section.items : []
+          items: Array.isArray(section.items) ? section.items : [],
+          type: section.type === "image" ? "image" : "text",
+          imageUrl: typeof section.imageUrl === "string" ? section.imageUrl : null,
+          imagePath: typeof section.imagePath === "string" ? section.imagePath : null,
+          imageCaption: typeof section.imageCaption === "string" ? section.imageCaption : "",
+          span: section.span === 2 ? 2 : 1,
+          height: section.height === "sm" || section.height === "lg" ? section.height : "md"
         })) || []
       }
     });

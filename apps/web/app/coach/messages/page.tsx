@@ -67,18 +67,20 @@ export default function CoachMessagesPage() {
   return (
     <CoachShell profile={profile}>
       {checking ? (
-        <div className="flex min-h-[520px] items-center justify-center">
+        <div className="flex h-full min-h-[520px] flex-1 items-center justify-center">
           <MorphingSquare message="Loading messages..." />
         </div>
       ) : error ? (
         <div className="rounded-[24px] border border-[#2b2b34] bg-[#18181f] px-5 py-4 text-sm text-red-300">{error}</div>
       ) : supabase ? (
-        <MessagesWorkspace
-          portal="coach"
-          supabase={supabase}
-          emptyTitle="No client threads yet."
-          emptyCopy="As soon as a client joins your room, their private HEIMDALLFIT thread will appear here."
-        />
+        <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+          <MessagesWorkspace
+            portal="coach"
+            supabase={supabase}
+            emptyTitle="No client threads yet."
+            emptyCopy="As soon as a client joins your room, their private HEIMDALLFIT thread will appear here."
+          />
+        </div>
       ) : null}
     </CoachShell>
   );
