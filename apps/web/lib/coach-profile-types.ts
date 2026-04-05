@@ -1,3 +1,18 @@
+export type CoachProfileGalleryItem = {
+  id: string;
+  path: string;
+  url: string | null;
+  caption: string;
+};
+
+export type CoachProfileAchievement = {
+  id: string;
+  title: string;
+  issuer: string;
+  year: string;
+  category: string;
+};
+
 export type CoachProfileResponse = {
   id: string;
   fullName: string;
@@ -12,6 +27,8 @@ export type CoachProfileResponse = {
   roomId: string;
   roomName: string;
   brandTagline: string;
+  gallery: CoachProfileGalleryItem[];
+  achievements: CoachProfileAchievement[];
 };
 
 export type UpdateCoachProfilePayload = {
@@ -23,4 +40,10 @@ export type UpdateCoachProfilePayload = {
   bio: string;
   roomName: string;
   brandTagline: string;
+  gallery: Array<{
+    id: string;
+    path: string;
+    caption: string;
+  }>;
+  achievements: CoachProfileAchievement[];
 };

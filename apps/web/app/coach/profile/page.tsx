@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Copy, ExternalLink, ImagePlus, LoaderCircle, Save, UserCircle2 } from "lucide-react";
+import { Award, Camera, Copy, ExternalLink, ImagePlus, LoaderCircle, Plus, Save, Trash2, Trophy, UserCircle2 } from "lucide-react";
 import { CoachShell } from "../../../components/coach-shell";
 import { GlassPanel } from "../../../components/glass";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../../lib/supabase";
-import type { CoachProfileResponse } from "../../../lib/coach-profile-types";
+import type { CoachProfileAchievement, CoachProfileGalleryItem, CoachProfileResponse } from "../../../lib/coach-profile-types";
 
 type ProfileForm = {
   fullName: string;
@@ -16,6 +16,8 @@ type ProfileForm = {
   bio: string;
   roomName: string;
   brandTagline: string;
+  gallery: CoachProfileGalleryItem[];
+  achievements: CoachProfileAchievement[];
 };
 
 function toFormState(profile: CoachProfileResponse): ProfileForm {
@@ -27,8 +29,14 @@ function toFormState(profile: CoachProfileResponse): ProfileForm {
     specialty: profile.specialty,
     bio: profile.bio,
     roomName: profile.roomName,
-    brandTagline: profile.brandTagline
+    brandTagline: profile.brandTagline,
+    gallery: profile.gallery,
+    achievements: profile.achievements
   };
+}
+
+function createId(prefix: string) {
+  return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 export default function CoachProfilePage() {
@@ -37,11 +45,12 @@ export default function CoachProfilePage() {
   const [form, setForm] = useState<ProfileForm | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState<"avatar" | "banner" | null>(null);
+  const [uploading, setUploading] = useState<"avatar" | "banner" | "gallery" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const bannerInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -102,6 +111,64 @@ export default function CoachProfilePage() {
 
   const updateField = (field: keyof ProfileForm, value: string) => {
     setForm((current) => (current ? { ...current, [field]: value } : current));
+  };
+
+  const updateGalleryItem = (id: string, patch: Partial<CoachProfileGalleryItem>) => {
+    setForm((current) =>
+      current
+        ? {
+            ...current,
+            gallery: current.gallery.map((item) => (item.id === id ? { ...item, ...patch } : item))
+          }
+        : current
+    );
+  };
+
+  const removeGalleryItem = (id: string) => {
+    setForm((current) =>
+      current
+        ? {
+            ...current,
+            gallery: current.gallery.filter((item) => item.id !== id)
+          }
+        : current
+    );
+  };
+
+  const addAchievement = () => {
+    setForm((current) =>
+      current
+        ? {
+            ...current,
+            achievements: [
+              ...current.achievements,
+              { id: createId("achievement"), title: "", issuer: "", year: "", category: "Certification" }
+            ]
+          }
+        : current
+    );
+  };
+
+  const updateAchievement = (id: string, patch: Partial<CoachProfileAchievement>) => {
+    setForm((current) =>
+      current
+        ? {
+            ...current,
+            achievements: current.achievements.map((item) => (item.id === id ? { ...item, ...patch } : item))
+          }
+        : current
+    );
+  };
+
+  const removeAchievement = (id: string) => {
+    setForm((current) =>
+      current
+        ? {
+            ...current,
+            achievements: current.achievements.filter((item) => item.id !== id)
+          }
+        : current
+    );
   };
 
   const handleImageUpload = async (kind: "avatar" | "banner", file: File | null) => {
@@ -183,7 +250,9 @@ export default function CoachProfilePage() {
         body: JSON.stringify({
           ...form,
           avatarPath: form.avatarPath || null,
-          bannerPath: form.bannerPath || null
+          bannerPath: form.bannerPath || null,
+          gallery: form.gallery.map((item) => ({ id: item.id, path: item.path, caption: item.caption })),
+          achievements: form.achievements
         })
       });
       const payload = await response.json();
@@ -207,9 +276,59 @@ export default function CoachProfilePage() {
   const fieldClass =
     "w-full rounded-[12px] border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[13px] text-white outline-none transition-all duration-200 placeholder:text-[var(--text-ghost)]";
 
+  const handleGalleryUpload = async (file: File | null) => {
+    if (!file || !supabase) return;
+    setError(null);
+    setMessage(null);
+    setUploading("gallery");
+
+    try {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) throw new Error("Coach session missing. Please log in again.");
+
+      const formData = new FormData();
+      formData.append("kind", "gallery");
+      formData.append("file", file);
+
+      const response = await fetch("/api/coach/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Unable to upload gallery image.");
+
+      setForm((current) =>
+        current
+          ? {
+              ...current,
+              gallery: [
+                {
+                  id: createId("gallery"),
+                  path: payload.path,
+                  url: payload.url,
+                  caption: ""
+                },
+                ...current.gallery
+              ].slice(0, 9)
+            }
+          : current
+      );
+      setMessage("Marketplace photo added.");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Unable to upload gallery image.");
+    } finally {
+      setUploading(null);
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+    }
+  };
+
   return (
     <CoachShell profile={shellProfile}>
-      <div className="flex min-h-full flex-col gap-5">
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-4 pr-1">
         <section className="flex flex-col gap-4 border-b border-white/[0.06] pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">Coach workspace</p>
@@ -285,6 +404,7 @@ export default function CoachProfilePage() {
                 </div>
 
                 <div className="px-6 pb-6" style={{ position: "relative" }}>
+                  <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(event) => handleGalleryUpload(event.target.files?.[0] || null)} />
                   <div
                     style={{
                       width: "80px",
@@ -345,6 +465,123 @@ export default function CoachProfilePage() {
                       <span>Bio</span>
                       <textarea value={form.bio} onChange={(event) => updateField("bio", event.target.value)} rows={6} className={`${fieldClass} min-h-[150px] resize-none`} />
                     </label>
+                  </div>
+
+                  <div className="mt-8 rounded-[22px] border border-white/[0.07] bg-white/[0.02] p-5">
+                    <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--text-ghost)]">Marketplace Gallery</p>
+                        <h3 className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white">Profile highlights</h3>
+                        <p className="mt-1 text-sm text-[var(--text-secondary)]">Add photos that preview your coaching style inside the coach marketplace.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => galleryInputRef.current?.click()}
+                        disabled={uploading === "gallery"}
+                        className="rounded-[14px] border border-[var(--border-accent)] bg-[var(--accent-dim)] px-4 py-2.5 text-sm font-medium text-[var(--accent-bright)] transition hover:bg-[rgba(37,99,235,0.18)] disabled:opacity-60"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <ImagePlus className="h-4 w-4" />
+                          {uploading === "gallery" ? "Uploading..." : "Add marketplace photo"}
+                        </span>
+                      </button>
+                    </div>
+
+                    {form.gallery.length ? (
+                      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        {form.gallery.map((item) => (
+                          <div key={item.id} className="overflow-hidden rounded-[18px] border border-white/[0.07] bg-[rgba(12,12,20,0.88)]">
+                            <div className="relative h-40 bg-[linear-gradient(135deg,rgba(37,99,235,0.18),rgba(16,185,129,0.08))]">
+                              {item.url ? <img src={item.url} alt={item.caption || "Marketplace preview"} className="h-full w-full object-cover" /> : null}
+                              <button
+                                type="button"
+                                onClick={() => removeGalleryItem(item.id)}
+                                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white transition hover:bg-black/70"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="p-4">
+                              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-ghost)]">Caption</p>
+                              <input
+                                value={item.caption}
+                                onChange={(event) => updateGalleryItem(item.id, { caption: event.target.value })}
+                                placeholder="Boxing session, podium moment, gym floor..."
+                                className={`${fieldClass} mt-2`}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="mt-5 rounded-[18px] border border-dashed border-white/[0.10] bg-white/[0.02] px-5 py-10 text-center text-sm text-[var(--text-secondary)]">
+                        No marketplace photos yet. Add a few clean visuals so clients instantly understand your style.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-8 rounded-[22px] border border-white/[0.07] bg-white/[0.02] p-5">
+                    <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--text-ghost)]">Authority Stack</p>
+                        <h3 className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white">Certifications, awards, medals, titles, trophies</h3>
+                        <p className="mt-1 text-sm text-[var(--text-secondary)]">Show clients the receipts behind your coaching reputation.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addAchievement}
+                        className="rounded-[14px] border border-white/[0.10] bg-white/[0.05] px-4 py-2.5 text-sm font-medium text-white transition hover:border-white/[0.16] hover:bg-white/[0.09]"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          Add achievement
+                        </span>
+                      </button>
+                    </div>
+
+                    <div className="mt-5 space-y-4">
+                      {form.achievements.length ? (
+                        form.achievements.map((item) => (
+                          <div key={item.id} className="rounded-[18px] border border-white/[0.07] bg-[rgba(12,12,20,0.88)] p-4">
+                            <div className="mb-4 flex items-center justify-between">
+                              <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(245,158,11,0.18)] bg-[rgba(245,158,11,0.10)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--amber)]">
+                                <Trophy className="h-3.5 w-3.5" />
+                                credibility item
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeAchievement(item.id)}
+                                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/70 transition hover:bg-white/[0.08] hover:text-white"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                              <label className="space-y-2 text-sm text-[var(--text-secondary)]">
+                                <span>Title</span>
+                                <input value={item.title} onChange={(event) => updateAchievement(item.id, { title: event.target.value })} placeholder="IBJJF Gold Medalist" className={fieldClass} />
+                              </label>
+                              <label className="space-y-2 text-sm text-[var(--text-secondary)]">
+                                <span>Category</span>
+                                <input value={item.category} onChange={(event) => updateAchievement(item.id, { category: event.target.value })} placeholder="Medal / Certification / Award" className={fieldClass} />
+                              </label>
+                              <label className="space-y-2 text-sm text-[var(--text-secondary)]">
+                                <span>Issuer</span>
+                                <input value={item.issuer} onChange={(event) => updateAchievement(item.id, { issuer: event.target.value })} placeholder="Organization / Event" className={fieldClass} />
+                              </label>
+                              <label className="space-y-2 text-sm text-[var(--text-secondary)]">
+                                <span>Year</span>
+                                <input value={item.year} onChange={(event) => updateAchievement(item.id, { year: event.target.value })} placeholder="2025" className={fieldClass} />
+                              </label>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-[18px] border border-dashed border-white/[0.10] bg-white/[0.02] px-5 py-10 text-center text-sm text-[var(--text-secondary)]">
+                          No credibility items yet. Add your strongest certifications, medals, titles, and awards here.
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="mt-5 flex items-center gap-3">
@@ -421,6 +658,42 @@ export default function CoachProfilePage() {
                     <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">
                       {form.bio || "Your coach bio will appear here once saved."}
                     </p>
+                    <div className="mt-5">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--text-ghost)]">Marketplace photos</p>
+                      {form.gallery.length ? (
+                        <div className="mt-3 grid grid-cols-3 gap-3">
+                          {form.gallery.slice(0, 3).map((item) => (
+                            <div key={item.id} className="overflow-hidden rounded-[16px] border border-white/[0.07] bg-white/[0.03]">
+                              <div className="h-24 bg-[linear-gradient(135deg,rgba(37,99,235,0.18),rgba(16,185,129,0.08))]">
+                                {item.url ? <img src={item.url} alt={item.caption || "Marketplace photo"} className="h-full w-full object-cover" /> : null}
+                              </div>
+                              <div className="px-3 py-2 text-[11px] text-[var(--text-secondary)]">{item.caption || "Marketplace preview"}</div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mt-3 rounded-[16px] border border-dashed border-white/[0.08] bg-white/[0.02] px-4 py-5 text-sm text-[var(--text-secondary)]">
+                          Add profile photos to make the marketplace card feel alive.
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-5">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--text-ghost)]">Certifications & titles</p>
+                      {form.achievements.length ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {form.achievements.slice(0, 6).map((item) => (
+                            <div key={item.id} className="rounded-full border border-[rgba(245,158,11,0.18)] bg-[rgba(245,158,11,0.10)] px-3 py-1.5 text-[11px] text-[var(--amber)]">
+                              {item.title}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mt-3 rounded-[16px] border border-dashed border-white/[0.08] bg-white/[0.02] px-4 py-5 text-sm text-[var(--text-secondary)]">
+                          Add your certifications, medals, titles, or awards to boost marketplace trust.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </GlassPanel>
@@ -441,6 +714,28 @@ export default function CoachProfilePage() {
               </GlassPanel>
 
               <GlassPanel className="animate-fade-up stagger-4 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-white/[0.08] bg-white/[0.04] text-white/72">
+                    <Award className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-[var(--text-ghost)]">Marketplace Trust</p>
+                    <p className="mt-1 text-sm text-[var(--text-secondary)]">What clients will notice when they compare coaches.</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-ghost)]">Gallery Posts</p>
+                    <p className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white">{form.gallery.length}</p>
+                  </div>
+                  <div className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-ghost)]">Achievements</p>
+                    <p className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white">{form.achievements.length}</p>
+                  </div>
+                </div>
+              </GlassPanel>
+
+              <GlassPanel className="animate-fade-up stagger-5 p-5">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-[var(--text-ghost)]">Quick Actions</p>
                 <div className="mt-4 grid gap-3">
                   <button

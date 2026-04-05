@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "No image file received." }, { status: 400 });
     }
 
-    if (!["avatar", "banner"].includes(kind)) {
+    if (!["avatar", "banner", "gallery"].includes(kind)) {
       return Response.json({ error: "Invalid upload kind." }, { status: 400 });
     }
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
     const supabase = getSupabaseAdminClient();
     const extension = sanitizeExtension(file);
-    const path = `${user.id}/${kind}-${Date.now()}.${extension}`;
+    const path = kind === "gallery" ? `${user.id}/gallery-${Date.now()}.${extension}` : `${user.id}/${kind}-${Date.now()}.${extension}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, buffer, {

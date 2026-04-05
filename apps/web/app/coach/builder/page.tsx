@@ -283,6 +283,23 @@ export default function CoachBuilderPage() {
     });
   }
 
+  function addPage() {
+    const pageNumber = Math.max(2, activeDocument.content.sections.length + 1);
+    const newSection: BuilderSection = {
+      id: createId("section"),
+      title: `Page ${pageNumber}`,
+      items: ["Start building the next page here."],
+      span: 2
+    };
+    updateDocument((current) => ({
+      ...current,
+      content: { ...current.content, sections: [...current.content.sections, newSection] }
+    }));
+    setSelectedSectionId(newSection.id);
+    setSuccess("New page added to the builder canvas.");
+    setError(null);
+  }
+
   async function uploadImageToSection(sectionId: string, file: File) {
     if (!supabase) return;
     setUploadingSectionId(sectionId);
@@ -385,7 +402,7 @@ export default function CoachBuilderPage() {
   return (
     <CoachShell profile={profile}>
       {loading ? (
-        <div style={{ display: "grid", minHeight: "620px", gridTemplateColumns: "220px 1fr 264px", gap: "0", overflow: "hidden", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.06)", background: "#0A0A0F" }}>
+        <div style={{ display: "grid", flex: 1, minHeight: 0, gridTemplateColumns: "220px 1fr 264px", gap: "0", overflow: "hidden", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.06)", background: "#0A0A0F" }}>
           <div className="skeleton" style={{ margin: "16px", borderRadius: "18px" }} />
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "16px" }}>
             <div className="skeleton" style={{ height: "52px", borderRadius: "14px" }} />
@@ -395,7 +412,7 @@ export default function CoachBuilderPage() {
           <div className="skeleton" style={{ margin: "16px", borderRadius: "18px" }} />
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 0 }}>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden", gap: 0 }}>
           {error ? <div style={{ marginBottom: "14px", borderRadius: "18px", border: "1px solid rgba(239,68,68,0.28)", background: "rgba(127,29,29,0.24)", padding: "14px 18px", color: "rgb(254 205 211)", fontSize: "14px" }}>{error}</div> : null}
           {success ? <div style={{ marginBottom: "14px", borderRadius: "18px", border: "1px solid rgba(52,211,153,0.24)", background: "rgba(6,78,59,0.22)", padding: "14px 18px", color: "rgb(167 243 208)", fontSize: "14px" }}>{success}</div> : null}
 
@@ -496,8 +513,8 @@ export default function CoachBuilderPage() {
                 </div>
               ) : null}
 
-              <div style={{ flex: 1, minWidth: 0, background: "#ECEEF4", overflow: "auto", display: "flex", flexDirection: "column", alignItems: "center", padding: "32px 40px", gap: "24px" }}>
-                <div style={{ width: "100%", maxWidth: "980px", minWidth: "620px", background: "#fff", borderRadius: "16px", boxShadow: "0 8px 40px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06)", overflow: "hidden", transform: `scale(${zoom / 100})`, transformOrigin: "top center", marginBottom: zoom < 100 ? `${(zoom - 100) * 6}px` : "0" }}>
+              <div style={{ flex: 1, minWidth: 0, minHeight: 0, background: "#ECEEF4", overflow: "auto", display: "flex", flexDirection: "column", alignItems: "center", padding: "32px 40px 120px", gap: "24px", boxSizing: "border-box" }}>
+                <div style={{ width: "100%", maxWidth: "980px", minWidth: "620px", flexShrink: 0, background: "#fff", borderRadius: "16px", boxShadow: "0 8px 40px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06)", overflow: "hidden", transform: `scale(${zoom / 100})`, transformOrigin: "top center", marginBottom: zoom < 100 ? `${(zoom - 100) * 6}px` : "0" }}>
                   <div style={{ background: "linear-gradient(135deg, #0A0A0F 0%, #141419 100%)", padding: "28px 32px 24px", position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "200px", height: "200px", borderRadius: "50%", background: activeDocument.kind === "onboarding_form" ? "radial-gradient(circle, rgba(0,163,255,0.15) 0%, transparent 70%)" : activeDocument.kind === "diet_plan" ? "radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)" : "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)", pointerEvents: "none" }} />
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "20px", position: "relative" }}>
@@ -682,7 +699,7 @@ export default function CoachBuilderPage() {
                   <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.40)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "120px" }}>{activeDocument.title}</p>
                 </div>
               </button>
-              <button type="button" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "7px 14px", borderRadius: "12px", background: "transparent", border: "1px dashed rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontSize: "12px", cursor: "pointer", flexShrink: 0, fontFamily: "'Cabinet Grotesk', sans-serif" }}><Plus style={{ width: 13, height: 13 }} />Add page</button>
+              <button type="button" onClick={addPage} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "7px 14px", borderRadius: "12px", background: "transparent", border: "1px dashed rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontSize: "12px", cursor: "pointer", flexShrink: 0, fontFamily: "'Cabinet Grotesk', sans-serif" }}><Plus style={{ width: 13, height: 13 }} />Add page</button>
             </div>
           </div>
         </div>

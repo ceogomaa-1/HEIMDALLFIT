@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const supabase = getSupabaseAdminClient();
 
   const [{ data: coaches }, { data: profiles }, { data: rooms }, { data: clients }] = await Promise.all([
-    supabase.from("coaches").select("id, brand_name, specialty, bio, banner_url").order("created_at", { ascending: false }).limit(40),
+    supabase.from("coaches").select("*").order("created_at", { ascending: false }).limit(40),
     supabase.from("profiles").select("id, full_name, avatar_url"),
     supabase.from("rooms").select("coach_id, room_id, room_name"),
     supabase.from("clients").select("coach_id, status")
@@ -25,10 +25,23 @@ export async function GET(request: Request) {
     (coaches || []).map(async (coach) => {
       const profile = profileMap.get(coach.id);
       const room = roomMap.get(coach.id);
+      const rawGallery = Array.isArray((coach as { marketplace_gallery?: unknown }).marketplace_gallery)
+        ? ((coach as { marketplace_gallery?: Array<{ path?: string; caption?: string; id?: string }> }).marketplace_gallery || [])
+        : [];
+      const rawAchievements = Array.isArray((coach as { achievements?: unknown }).achievements)
+        ? ((coach as { achievements?: Array<{ title?: string; category?: string; year?: string; issuer?: string; id?: string }> }).achievements || [])
+        : [];
       const [avatar, banner] = await Promise.all([
         resolveStorageAssetUrl(supabase, "coach-branding", profile?.avatar_url || null),
         resolveStorageAssetUrl(supabase, "coach-branding", coach.banner_url || null)
       ]);
+      const gallery = await Promise.all(
+        rawGallery.slice(0, 6).map(async (item, index) => ({
+          id: item.id || `gallery-${index}`,
+          caption: item.caption || "",
+          image: item.path ? await resolveStorageAssetUrl(supabase, "coach-branding", item.path) : null
+        }))
+      );
 
       return {
         id: coach.id,
@@ -39,7 +52,17 @@ export async function GET(request: Request) {
         banner,
         roomId: room?.room_id || null,
         roomName: room?.room_name || null,
-        activeMembers: activeCounts.get(coach.id) || 0
+        activeMembers: activeCounts.get(coach.id) || 0,
+        gallery,
+        achievements: rawAchievements
+          .map((item, index) => ({
+            id: item.id || `achievement-${index}`,
+            title: item.title || "",
+            category: item.category || "",
+            issuer: item.issuer || "",
+            year: item.year || ""
+          }))
+          .filter((item) => item.title)
       };
     })
   );

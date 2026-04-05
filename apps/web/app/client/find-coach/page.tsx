@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Compass, Search, Users } from "lucide-react";
+import { Award, Compass, Search, Users } from "lucide-react";
 import { ClientShell } from "../../../components/client-shell";
 import { GlassPanel } from "../../../components/glass";
 import { MorphingSquare } from "../../../components/ui/morphing-square";
@@ -18,6 +18,8 @@ type CoachCard = {
   roomId: string | null;
   roomName: string | null;
   activeMembers: number;
+  gallery: Array<{ id: string; image: string | null; caption: string }>;
+  achievements: Array<{ id: string; title: string; category: string; issuer: string; year: string }>;
 };
 
 export default function FindCoachPage() {
@@ -95,7 +97,7 @@ export default function FindCoachPage() {
 
   return (
     <ClientShell profile={profile}>
-      <div className="flex min-h-full flex-col gap-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-4 pr-1">
         <section className="flex flex-col gap-3 border-b border-[#232329] pb-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[13px] text-white/45">Coach discovery</p>
@@ -154,6 +156,34 @@ export default function FindCoachPage() {
                   </div>
                   <div className="space-y-4 p-5">
                     <p className="text-sm leading-7 text-white/58">{coach.bio}</p>
+                    {coach.gallery.length ? (
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">Profile highlights</p>
+                        <div className="mt-3 grid grid-cols-3 gap-3">
+                          {coach.gallery.slice(0, 3).map((item) => (
+                            <div key={item.id} className="overflow-hidden rounded-[16px] border border-[#2b2b34] bg-[#202028]">
+                              <div className="h-20 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.24),transparent_48%),linear-gradient(135deg,#17171d,#24242c)]">
+                                {item.image ? <img src={item.image} alt={item.caption || "Coach gallery"} className="h-full w-full object-cover" /> : null}
+                              </div>
+                              <div className="px-3 py-2 text-[11px] text-white/52">{item.caption || "Training preview"}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                    {coach.achievements.length ? (
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">Certifications & titles</p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {coach.achievements.slice(0, 4).map((item) => (
+                            <div key={item.id} className="inline-flex items-center gap-2 rounded-full border border-[rgba(245,158,11,0.18)] bg-[rgba(245,158,11,0.10)] px-3 py-1.5 text-[11px] text-amber-300">
+                              <Award className="h-3.5 w-3.5" />
+                              {item.title}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                     <div className="grid gap-3 md:grid-cols-2">
                       <div className="rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3">
                         <p className="text-[10px] uppercase tracking-[0.18em] text-white/30">Room ID</p>

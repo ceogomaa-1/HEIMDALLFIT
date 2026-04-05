@@ -1,4 +1,4 @@
-import type { UpdateCoachProfilePayload } from "../../../../lib/coach-profile-types";
+import type { CoachProfileAchievement, CoachProfileGalleryItem, UpdateCoachProfilePayload } from "../../../../lib/coach-profile-types";
 import { ensureCoachBootstrapped, getAuthenticatedUserFromToken } from "../../../../lib/coach-dashboard-server";
 import { getSupabaseAdminClient } from "../../../../lib/supabase-admin";
 import { resolveStorageAssetUrl } from "../../../../lib/storage";
@@ -24,26 +24,62 @@ async function getCoachProfile(token: string) {
 
   const [profileResponse, coachResponse] = await Promise.all([
     supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).single(),
-    supabase.from("coaches").select("brand_name, specialty, bio, banner_url").eq("id", user.id).single()
+    supabase.from("coaches").select("*").eq("id", user.id).single()
   ]);
 
-  const avatarUrl = await resolveStorageAssetUrl(supabase, "coach-branding", profileResponse.data?.avatar_url || null);
-  const bannerUrl = await resolveStorageAssetUrl(supabase, "coach-branding", coachResponse.data?.banner_url || null);
+  const coachData = coachResponse.data || {};
+  const rawGallery = Array.isArray((coachData as { marketplace_gallery?: unknown }).marketplace_gallery)
+    ? ((coachData as { marketplace_gallery?: unknown[] }).marketplace_gallery || [])
+    : [];
+  const rawAchievements = Array.isArray((coachData as { achievements?: unknown }).achievements)
+    ? ((coachData as { achievements?: unknown[] }).achievements || [])
+    : [];
+
+  const avatarPath = profileResponse.data?.avatar_url || null;
+  const bannerPath = (coachData as { banner_url?: string | null }).banner_url || null;
+  const avatarUrl = await resolveStorageAssetUrl(supabase, "coach-branding", avatarPath);
+  const bannerUrl = await resolveStorageAssetUrl(supabase, "coach-branding", bannerPath);
+  const gallery = await Promise.all(
+    rawGallery.map(async (item, index) => {
+      const galleryItem = item as { id?: string; path?: string; caption?: string };
+      const path = typeof galleryItem.path === "string" ? galleryItem.path : "";
+      const url = path ? await resolveStorageAssetUrl(supabase, "coach-branding", path) : null;
+      const normalized: CoachProfileGalleryItem = {
+        id: typeof galleryItem.id === "string" ? galleryItem.id : `gallery-${index}`,
+        path,
+        caption: typeof galleryItem.caption === "string" ? galleryItem.caption : "",
+        url
+      };
+      return normalized;
+    })
+  );
+  const achievements: CoachProfileAchievement[] = rawAchievements.map((item, index) => {
+    const achievement = item as { id?: string; title?: string; issuer?: string; year?: string; category?: string };
+    return {
+      id: typeof achievement.id === "string" ? achievement.id : `achievement-${index}`,
+      title: typeof achievement.title === "string" ? achievement.title : "",
+      issuer: typeof achievement.issuer === "string" ? achievement.issuer : "",
+      year: typeof achievement.year === "string" ? achievement.year : "",
+      category: typeof achievement.category === "string" ? achievement.category : ""
+    };
+  });
 
   return {
     id: user.id,
     fullName: profileResponse.data?.full_name || "Coach",
     handle: user.email ? `@${user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]+/g, "")}` : "@coach",
-    avatarPath: profileResponse.data?.avatar_url || null,
+    avatarPath,
     avatarUrl,
-    bannerPath: coachResponse.data?.banner_url || null,
+    bannerPath,
     bannerUrl,
-    brandName: coachResponse.data?.brand_name || "Coach",
-    specialty: coachResponse.data?.specialty || "",
-    bio: coachResponse.data?.bio || "",
+    brandName: (coachData as { brand_name?: string }).brand_name || "Coach",
+    specialty: (coachData as { specialty?: string }).specialty || "",
+    bio: (coachData as { bio?: string }).bio || "",
     roomId: room.room_id,
     roomName: room.room_name,
-    brandTagline: room.brand_tagline
+    brandTagline: room.brand_tagline,
+    gallery,
+    achievements
   };
 }
 
@@ -76,6 +112,22 @@ export async function POST(request: Request) {
     const sanitizedBrandName = payload.brandName.trim() || `${sanitizedFullName} Coaching`;
     const sanitizedRoomName = payload.roomName.trim() || `${sanitizedFullName}'s Room`;
     const sanitizedTagline = payload.brandTagline.trim() || "Invite, manage, and win.";
+    const sanitizedGallery = (payload.gallery || [])
+      .map((item) => ({
+        id: String(item.id || ""),
+        path: String(item.path || "").trim(),
+        caption: String(item.caption || "").trim()
+      }))
+      .filter((item) => item.id && item.path);
+    const sanitizedAchievements = (payload.achievements || [])
+      .map((item) => ({
+        id: String(item.id || ""),
+        title: String(item.title || "").trim(),
+        issuer: String(item.issuer || "").trim(),
+        year: String(item.year || "").trim(),
+        category: String(item.category || "").trim()
+      }))
+      .filter((item) => item.id && item.title);
 
     await ensureCoachBootstrapped(user);
 
@@ -93,7 +145,9 @@ export async function POST(request: Request) {
           brand_name: sanitizedBrandName,
           specialty: payload.specialty.trim(),
           bio: payload.bio.trim(),
-          banner_url: payload.bannerPath?.trim() || null
+          banner_url: payload.bannerPath?.trim() || null,
+          marketplace_gallery: sanitizedGallery,
+          achievements: sanitizedAchievements
         })
         .eq("id", user.id),
       supabase
@@ -113,6 +167,11 @@ export async function POST(request: Request) {
     const profile = await getCoachProfile(token);
     return Response.json(profile);
   } catch (error) {
-    return Response.json({ error: getErrorMessage(error, "Unable to save profile.") }, { status: 500 });
+    const message = getErrorMessage(error, "Unable to save profile.");
+    const schemaHint =
+      message.includes("marketplace_gallery") || message.includes("achievements")
+        ? "Run the latest Supabase coach profile marketplace migration before saving gallery posts or achievements."
+        : message;
+    return Response.json({ error: schemaHint }, { status: 500 });
   }
 }
