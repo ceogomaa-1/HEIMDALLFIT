@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ChevronDown, ImagePlus, Loader2, Paperclip, Plus, Search, SendHorizontal, ShieldCheck, Smile } from "lucide-react";
-import { MorphingSquare } from "./ui/morphing-square";
 import { cn } from "../lib/utils";
 
 type PortalRole = "coach" | "client";
@@ -84,6 +83,38 @@ function initials(name: string) {
 
 function isImage(attachment: ThreadAttachment) {
   return attachment.mimeType.startsWith("image/");
+}
+
+function ThreadListSkeleton() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3 rounded-[18px] border border-white/[0.05] bg-white/[0.02] px-3 py-3">
+          <div className="skeleton h-12 w-12 rounded-full" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="skeleton h-3 w-24" />
+            <div className="skeleton h-3 w-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ThreadViewportSkeleton() {
+  return (
+    <div className="flex h-full flex-col justify-between px-6 py-5">
+      <div className="skeleton h-10 w-48 rounded-full" />
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className={cn("flex", index % 2 === 0 ? "justify-start" : "justify-end")}>
+            <div className="skeleton h-16 w-[240px] rounded-[18px]" />
+          </div>
+        ))}
+      </div>
+      <div className="skeleton h-14 w-full rounded-[16px]" />
+    </div>
+  );
 }
 
 export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: MessagesWorkspaceProps) {
@@ -231,7 +262,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
   useEffect(() => {
     const payload = threadPayload;
     if (!payload) return;
-    const latestMessage = payload?.messages.at(-1);
+    const latestMessage = payload.messages.at(-1);
     if (!latestMessage) return;
 
     if (!previousMessageIdRef.current) {
@@ -368,10 +399,10 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
 
   return (
     <div
-      className="grid grid-cols-[360px_minmax(0,1fr)] overflow-hidden rounded-[24px] border border-[#23242b] bg-[#14151b]"
+      className="grid grid-cols-[340px_minmax(0,1fr)] overflow-hidden rounded-[26px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(12,12,20,0.96),rgba(8,8,14,0.98))] shadow-[var(--shadow-panel)]"
       style={{ flex: 1, minHeight: 0 }}
     >
-      <aside className="flex min-h-0 flex-col border-r border-white/[0.06] bg-[rgba(13,13,20,0.92)]">
+      <aside className="flex min-h-0 flex-col border-r border-white/[0.06] bg-[rgba(9,10,16,0.92)]">
         <div className="border-b border-white/[0.06] px-4 py-4">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -393,10 +424,10 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
               {quickThreads.map((thread) => (
                 <button key={`quick-${thread.id}`} type="button" onClick={() => setSelectedId(thread.id)} className="flex shrink-0 flex-col items-center gap-2">
                   <div className="relative">
-                    <div className={cn("flex h-14 w-14 items-center justify-center rounded-full border-2 text-base font-semibold text-white", selectedId === thread.id ? "border-[var(--accent)] shadow-[0_0_0_4px_rgba(0,163,255,0.10)]" : "border-white/[0.10]", thread.counterpartAvatar ? "bg-[#111219]" : "bg-[linear-gradient(135deg,rgba(0,163,255,0.28),rgba(67,208,127,0.18))]")}>
+                    <div className={cn("flex h-14 w-14 items-center justify-center rounded-full border-2 text-base font-semibold text-white transition-transform duration-200 hover:scale-[1.05]", selectedId === thread.id ? "border-[var(--accent)] shadow-[0_0_0_4px_rgba(37,99,235,0.10)]" : "border-white/[0.10]", thread.counterpartAvatar ? "bg-[#111219]" : "bg-[linear-gradient(135deg,rgba(37,99,235,0.28),rgba(16,185,129,0.18))]")}>
                       {thread.counterpartAvatar ? <img src={thread.counterpartAvatar} alt={thread.counterpartName} className="h-full w-full rounded-full object-cover" /> : initials(thread.counterpartName)}
                     </div>
-                    {thread.unread ? <span className="absolute -right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-[#17181f] bg-[var(--accent)] shadow-[0_0_8px_rgba(0,163,255,0.55)]" /> : null}
+                    {thread.unread ? <span className="absolute -right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-[#17181f] bg-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)]" /> : null}
                   </div>
                   <span className="max-w-[68px] truncate text-[11px] text-white/58">{thread.counterpartName}</span>
                 </button>
@@ -407,7 +438,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
 
         <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 pt-3">
           {loadingThreads ? (
-            <div className="flex h-full items-center justify-center"><MorphingSquare message="Loading threads..." /></div>
+            <ThreadListSkeleton />
           ) : filteredThreads.length === 0 ? (
             <div className="rounded-[24px] border border-[#2f313b] bg-[#1b1c24] p-6">
               <h3 className="text-lg font-semibold text-white">{emptyTitle}</h3>
@@ -416,8 +447,8 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
           ) : (
             <>
               <div className="flex items-center justify-between px-2 pb-2 pt-1">
-                <p className="font-display text-[1rem] font-semibold tracking-[-0.03em] text-white">Starred</p>
-                <p className="text-[11px] text-white/36">{filteredThreads.filter((thread) => thread.unread).length} unread messages</p>
+                <p className="font-display text-[1rem] font-semibold tracking-[-0.03em] text-white">Pinned</p>
+                <p className="text-[11px] text-white/36">{filteredThreads.filter((thread) => thread.unread).length} unread</p>
               </div>
               <div className="space-y-1">
                 {filteredThreads.slice(0, Math.min(2, filteredThreads.length)).map((thread) => (
@@ -425,15 +456,21 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
                     key={`starred-${thread.id}`}
                     type="button"
                     onClick={() => setSelectedId(thread.id)}
-                    className={cn("flex w-full items-center gap-3 rounded-[16px] border px-3 py-3 text-left transition", selectedId === thread.id ? "border-white/[0.12] bg-white/[0.06]" : "border-transparent hover:border-white/[0.08] hover:bg-white/[0.03]")}
+                    className={cn(
+                      "relative flex w-full items-center gap-3 rounded-[18px] border px-3 py-3 text-left transition-all duration-200",
+                      selectedId === thread.id
+                        ? "border-[rgba(37,99,235,0.24)] bg-[rgba(37,99,235,0.08)]"
+                        : "border-transparent hover:border-white/[0.08] hover:bg-white/[0.03]"
+                    )}
                   >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(255,255,255,0.06)] text-sm font-semibold text-white">
+                    {thread.unread ? <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-[var(--accent-bright)]" /> : null}
+                    <div className={cn("flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold text-white", thread.unread ? "border-[var(--accent-bright)] shadow-[0_0_0_3px_rgba(37,99,235,0.10)]" : "border-white/[0.08]")}>
                       {thread.counterpartAvatar ? <img src={thread.counterpartAvatar} alt={thread.counterpartName} className="h-full w-full rounded-full object-cover" /> : initials(thread.counterpartName)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="truncate text-[13px] font-medium text-white">{thread.counterpartName}</p>
-                        <span className="shrink-0 text-[11px] text-white/45">{thread.lastMessageAt || "Now"}</span>
+                        <p className="truncate text-[13px] font-semibold text-white">{thread.counterpartName}</p>
+                        <span className="shrink-0 font-mono text-[10px] text-white/38">{thread.lastMessageAt || "Now"}</span>
                       </div>
                       <p className="truncate text-[12px] text-white/55">{thread.lastMessagePreview}</p>
                     </div>
@@ -452,18 +489,25 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
                     key={thread.id}
                     type="button"
                     onClick={() => setSelectedId(thread.id)}
-                    className={cn("flex w-full items-center gap-3 rounded-[16px] border px-3 py-3 text-left transition", selectedId === thread.id ? "border-white/[0.12] bg-white/[0.06]" : "border-transparent hover:border-white/[0.08] hover:bg-white/[0.03]")}
+                    className={cn(
+                      "relative flex w-full items-center gap-3 rounded-[18px] border px-3 py-3 text-left transition-all duration-200",
+                      selectedId === thread.id
+                        ? "border-[rgba(37,99,235,0.24)] bg-[rgba(37,99,235,0.08)]"
+                        : "border-transparent hover:border-white/[0.08] hover:bg-white/[0.03]"
+                    )}
                   >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(255,255,255,0.06)] text-sm font-semibold text-white">
+                    {selectedId === thread.id ? <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-[var(--accent-bright)]" /> : null}
+                    <div className={cn("flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.05]", thread.unread ? "border-[var(--accent-bright)] shadow-[0_0_0_3px_rgba(37,99,235,0.10)]" : "border-white/[0.08]")}>
                       {thread.counterpartAvatar ? <img src={thread.counterpartAvatar} alt={thread.counterpartName} className="h-full w-full rounded-full object-cover" /> : initials(thread.counterpartName)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="truncate text-[13px] font-medium text-white">{thread.counterpartName}</p>
-                        <span className="shrink-0 text-[11px] text-white/42">{thread.lastMessageAt || "Now"}</span>
+                        <p className="truncate text-[13px] font-semibold text-white">{thread.counterpartName}</p>
+                        <span className="shrink-0 font-mono text-[10px] text-white/38">{thread.lastMessageAt || "Now"}</span>
                       </div>
                       <p className="truncate text-[12px] text-white/55">{thread.lastMessagePreview}</p>
                     </div>
+                    {thread.unread ? <span className="rounded-full bg-[var(--accent)] px-2 py-1 font-mono text-[10px] text-white">1</span> : null}
                   </button>
                 ))}
               </div>
@@ -472,38 +516,41 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
         </div>
       </aside>
 
-      <section className="flex min-h-0 flex-col bg-[radial-gradient(circle_at_top,_rgba(0,163,255,0.07)_0%,_#12131a_36%,_#16171f_100%)]">
+      <section className="flex min-h-0 flex-col bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.10)_0%,rgba(10,11,18,0.96)_40%,rgba(8,8,14,0.98)_100%)]">
         {!selectedThread ? (
-          <div className="flex h-full items-center justify-center"><MorphingSquare message="Choose a thread..." /></div>
+          <div className="flex h-full flex-col items-center justify-center gap-4">
+            <div className="skeleton h-14 w-14 rounded-full" />
+            <div className="skeleton h-4 w-48" />
+          </div>
         ) : loadingMessages && !threadPayload ? (
-          <div className="flex h-full items-center justify-center"><MorphingSquare message="Loading thread..." /></div>
+          <ThreadViewportSkeleton />
         ) : threadPayload ? (
           <>
-            <div className="flex h-14 shrink-0 items-center gap-3 border-b border-white/6 px-5 py-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-[#232530] text-sm font-semibold text-white">
-                {selectedThread?.counterpartAvatar ? (
+            <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/6 px-5">
+              <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border text-sm font-semibold text-white", selectedThread.unread ? "border-[var(--accent-bright)] shadow-[0_0_0_3px_rgba(37,99,235,0.10)]" : "border-white/[0.08]")}>
+                {selectedThread.counterpartAvatar ? (
                   <img src={selectedThread.counterpartAvatar} alt={threadPayload.thread.counterpartName} className="h-full w-full object-cover" />
                 ) : (
                   initials(threadPayload.thread.counterpartName)
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[14px] font-semibold leading-tight text-white">{threadPayload.thread.counterpartName}</p>
-                <p className="truncate text-[11px] leading-tight text-white/42">{typingLabel || threadPayload.thread.lastSeenLabel}</p>
+                <p className="truncate font-display text-[18px] font-semibold tracking-[-0.04em] text-white">{threadPayload.thread.counterpartName}</p>
+                <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-white/35">{typingLabel || threadPayload.thread.lastSeenLabel}</p>
               </div>
-              <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/[0.16] hover:bg-white/[0.09]">
+              <button type="button" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/[0.16] hover:bg-white/[0.09]">
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
 
             <div ref={threadViewportRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
               {portal === "client" && (threadPayload.onboarding.status === "pending" || threadPayload.onboarding.status === "submitted") ? (
-                <div className="mx-auto max-w-2xl rounded-[24px] border border-[rgba(0,163,255,0.12)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[var(--shadow-card)]">
+                <div className="mx-auto max-w-2xl rounded-[24px] border border-[rgba(37,99,235,0.16)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[var(--shadow-card)]">
                   <div className="flex items-center gap-3">
-                    <ShieldCheck className="h-4 w-4 text-[#45dd8e]" />
+                    <ShieldCheck className="h-4 w-4 text-[var(--green)]" />
                     <div>
                       <p className="text-[15px] font-semibold text-white">Client onboarding form</p>
-                      <p className="text-xs text-white/55">Send your core intake details back to your coach inside this thread.</p>
+                      <p className="text-xs text-white/55">Send your intake details back to your coach without leaving the thread.</p>
                     </div>
                   </div>
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -514,18 +561,28 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-4">
                     <p className="text-xs text-white/55">{threadPayload.onboarding.submittedAt ? `Last sent ${threadPayload.onboarding.submittedAt}` : "Not submitted yet."}</p>
-                    <button type="button" onClick={handleOnboardingSubmit} disabled={submittingOnboarding} className="rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-black disabled:opacity-60">
+                    <button type="button" onClick={handleOnboardingSubmit} disabled={submittingOnboarding} className="btn-primary rounded-full px-4 py-2.5 text-xs">
                       {submittingOnboarding ? "Sending..." : threadPayload.onboarding.status === "submitted" ? "Update onboarding" : "Submit onboarding"}
                     </button>
                   </div>
                 </div>
               ) : null}
 
-              {threadPayload.messages.map((message, index) => (
-                <div key={message.id} className={cn("flex", message.mine ? "justify-end" : "justify-start")}>
-                  <div className={cn("max-w-[64%] animate-fade-up rounded-[18px] px-4 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)]", index < 6 ? `stagger-${Math.min(index + 1, 6)}` : "", message.mine ? "rounded-br-[6px] border border-[rgba(0,163,255,0.24)] bg-[linear-gradient(135deg,rgba(0,163,255,0.22),rgba(0,163,255,0.14))] text-white" : "rounded-bl-[6px] border border-white/6 bg-[rgba(255,255,255,0.045)] text-white")}>
+              {threadPayload.messages.map((message) => (
+                <div key={message.id} className={cn("group flex flex-col", message.mine ? "items-end" : "items-start")}>
+                  <span className="mb-1 px-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/0 transition group-hover:text-white/35">
+                    {message.createdAt}
+                  </span>
+                  <div
+                    className={cn(
+                      "max-w-[70%] animate-bounce-in rounded-[18px] px-4 py-3 text-[13px] leading-6 shadow-[0_12px_30px_rgba(0,0,0,0.18)]",
+                      message.mine
+                        ? "rounded-br-[4px] border border-[rgba(37,99,235,0.25)] bg-[rgba(37,99,235,0.15)] text-[var(--text-primary)]"
+                        : "rounded-bl-[4px] border border-white/[0.08] bg-white/[0.05] text-[var(--text-secondary)]"
+                    )}
+                  >
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-55">{message.senderName}</p>
-                    <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6">{message.body}</p>
+                    <p className="mt-2 whitespace-pre-wrap">{message.body}</p>
                     {message.attachments.length ? (
                       <div className="mt-3 space-y-2">
                         {message.attachments.map((attachment) =>
@@ -553,11 +610,13 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
               {error ? <div className="mb-3 rounded-[16px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">{error}</div> : null}
               <div className="mb-3 flex flex-wrap gap-2">
                 {attachments.map((file) => (
-                  <span key={`${file.name}-${file.size}`} className="rounded-full border border-[#3b3d46] bg-[#1f2027] px-3 py-1.5 text-[11px] text-white/70">{file.name}</span>
+                  <span key={`${file.name}-${file.size}`} className="rounded-full border border-[#3b3d46] bg-[#1f2027] px-3 py-1.5 text-[11px] text-white/70">
+                    {file.name}
+                  </span>
                 ))}
               </div>
-              <div className="flex items-center gap-3 rounded-[18px] border border-white/8 bg-[rgba(255,255,255,0.03)] px-3 py-2.5 backdrop-blur-sm">
-                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:bg-white/[0.10]">
+              <div className="flex min-h-[56px] items-center gap-3 rounded-[16px] border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 backdrop-blur-sm">
+                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:scale-110 hover:bg-white/[0.10]">
                   <Smile className="h-4 w-4" />
                 </button>
                 <textarea
@@ -569,11 +628,11 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
                   placeholder={portal === "coach" ? "Write a message..." : "Text message"}
                   className="max-h-28 min-h-[28px] flex-1 resize-none bg-transparent text-sm text-white outline-none"
                 />
-                <label className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:bg-white/[0.10]">
+                <label className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:scale-110 hover:bg-white/[0.10]">
                   <ImagePlus className="h-4 w-4" />
                   <input type="file" multiple className="hidden" onChange={(event) => setAttachments(Array.from(event.target.files || []))} />
                 </label>
-                <button type="button" onClick={handleSendMessage} disabled={sending} className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,var(--accent),rgba(0,120,220,1))] text-white shadow-[0_8px_18px_rgba(0,163,255,0.28)] transition hover:scale-[1.04] disabled:opacity-60">
+                <button type="button" onClick={handleSendMessage} disabled={sending} className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[0_8px_18px_rgba(37,99,235,0.32)] transition hover:scale-[1.08] hover:shadow-[0_12px_28px_rgba(37,99,235,0.45)] disabled:opacity-60">
                   {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <SendHorizontal className="h-3.5 w-3.5" />}
                 </button>
               </div>

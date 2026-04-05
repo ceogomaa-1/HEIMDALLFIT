@@ -2,11 +2,12 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MessageSquareText, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
+import { ArrowUpRight, MessageSquareText, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
 import { ClientShell } from "../../components/client-shell";
 import { GlassPanel } from "../../components/glass";
-import { MorphingSquare } from "../../components/ui/morphing-square";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../lib/supabase";
+import { useCountUp } from "../../lib/use-count-up";
+import { useTilt } from "../../lib/use-tilt";
 
 type ClientDashboardResponse = {
   profile: {
@@ -50,7 +51,127 @@ type ClientDashboardResponse = {
   notifications: string[];
 };
 
-function ClientPortalContent() {
+function Speedometer({ label, value, max = 100, color }: { label: string; value: number; max?: number; color: string }) {
+  const radius = 20;
+  const circumference = 2 * Math.PI * radius;
+  const progress = Math.min(value / max, 1);
+  const current = useCountUp(value);
+
+  return (
+    <div className="animate-scale-in flex flex-col items-center gap-3 rounded-[20px] border border-white/[0.06] bg-white/[0.03] px-4 py-5">
+      <div className="relative h-14 w-14">
+        <svg viewBox="0 0 52 52" className="h-full w-full -rotate-90">
+          <circle cx="26" cy="26" r={radius} stroke="rgba(255,255,255,0.08)" strokeWidth="4" fill="none" />
+          <circle
+            cx="26"
+            cy="26"
+            r={radius}
+            stroke={color}
+            strokeWidth="4"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - progress)}
+            style={{ transition: "stroke-dashoffset 1.1s cubic-bezier(0.22,1,0.36,1)", filter: "drop-shadow(0 0 6px currentColor)" }}
+          />
+        </svg>
+        <span className="absolute inset-0 flex items-center justify-center font-display text-[13px] font-semibold text-white">{current}</span>
+      </div>
+      <p className="card-eyebrow text-center">{label}</p>
+    </div>
+  );
+}
+
+function ProgramCard({
+  title,
+  sport,
+  createdAt
+}: {
+  title: string;
+  sport: string;
+  createdAt: string;
+}) {
+  const tilt = useTilt(4);
+  const sportKey = sport.toLowerCase();
+  const sportStyle = sportKey.includes("boxing")
+    ? "from-[rgba(239,68,68,0.85)] to-[rgba(239,68,68,0.25)]"
+    : sportKey.includes("mma")
+      ? "from-[rgba(245,158,11,0.85)] to-[rgba(245,158,11,0.25)]"
+      : sportKey.includes("bjj")
+        ? "from-[rgba(37,99,235,0.85)] to-[rgba(37,99,235,0.25)]"
+        : "from-[rgba(37,99,235,0.85)] to-[rgba(16,185,129,0.25)]";
+
+  return (
+    <div
+      ref={tilt.ref}
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={tilt.onMouseLeave}
+      className="animate-slide-up overflow-hidden rounded-[22px] border border-white/[0.07] bg-[linear-gradient(180deg,rgba(12,12,20,0.95),rgba(8,8,14,0.98))] shadow-[var(--shadow-card)]"
+    >
+      <div className={`h-3 bg-gradient-to-r ${sportStyle}`} />
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="card-eyebrow text-[var(--accent-bright)]">{sport}</p>
+            <h3 className="mt-3 font-display text-[18px] font-semibold tracking-[-0.04em] text-white">{title}</h3>
+          </div>
+          <span className="rounded-full border border-[var(--border-accent)] bg-[var(--accent-dim)] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--accent-bright)]">
+            {createdAt}
+          </span>
+        </div>
+        <button className="mt-6 inline-flex items-center gap-2 rounded-full border border-[var(--border-accent)] bg-[var(--accent-dim)] px-4 py-2 text-[13px] font-semibold text-[var(--accent-bright)] transition hover:bg-[rgba(37,99,235,0.16)]">
+          Start
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function StoreCard({
+  title,
+  subtitle,
+  priceLabel,
+  image,
+  type
+}: {
+  title: string;
+  subtitle: string;
+  priceLabel: string;
+  image: string | null;
+  type: string;
+}) {
+  const tilt = useTilt(4);
+
+  return (
+    <div
+      ref={tilt.ref}
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={tilt.onMouseLeave}
+      className="animate-slide-up overflow-hidden rounded-[22px] border border-white/[0.07] bg-[linear-gradient(180deg,rgba(12,12,20,0.95),rgba(8,8,14,0.98))] shadow-[var(--shadow-card)]"
+    >
+      <div className="group relative h-36 overflow-hidden bg-[linear-gradient(135deg,#12151d,#191d28)]">
+        {image ? (
+          <img src={image} alt={title} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <span className="card-eyebrow">{type}</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      </div>
+      <div className="p-5">
+        <h3 className="font-display text-[18px] font-semibold tracking-[-0.04em] text-white">{title}</h3>
+        <p className="mt-2 text-[13px] leading-6 text-[var(--text-secondary)]">{subtitle}</p>
+        <span className="mt-4 inline-block rounded-full border border-[rgba(16,185,129,0.25)] bg-[rgba(16,185,129,0.12)] px-3 py-1.5 font-mono text-[12px] font-semibold text-[var(--green)]">
+          {priceLabel}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ClientDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roomIdParam = searchParams.get("roomId");
@@ -134,91 +255,59 @@ function ClientPortalContent() {
     avatar: null
   };
 
+  const programsValue = useCountUp(data?.stats.assignedPrograms || 0);
+  const storeValue = useCountUp(data?.stats.storeItems || 0);
+  const weightValue = useCountUp(Number.parseInt((data?.stats.currentWeight || "0").replace(/\D/g, ""), 10) || 0);
+
   return (
     <ClientShell profile={shellProfile}>
       {loading || joining ? (
-        <div className="flex min-h-[520px] items-center justify-center">
-          <MorphingSquare message={joining ? "Joining coach room..." : "Loading client portal..."} />
+        <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+          <div className="rounded-[24px] border border-white/[0.06] bg-white/[0.03] p-6">
+            <div className="skeleton h-4 w-32" />
+            <div className="mt-4 skeleton h-14 w-[70%]" />
+            <div className="mt-6 flex gap-3">
+              <div className="skeleton h-10 w-28 rounded-full" />
+              <div className="skeleton h-10 w-28 rounded-full" />
+            </div>
+          </div>
+          <div className="rounded-[24px] border border-white/[0.06] bg-white/[0.03] p-6">
+            <div className="skeleton h-28 w-full rounded-[18px]" />
+          </div>
         </div>
       ) : error ? (
         <GlassPanel className="px-5 py-4 text-sm text-red-200" style={{ background: "rgba(38,11,17,0.8)", borderColor: "rgba(239,68,68,0.22)" }}>
           {error}
         </GlassPanel>
       ) : data ? (
-        <div className="flex min-h-full flex-col gap-5">
-          <section className="grid gap-4 xl:grid-cols-[1.12fr_0.88fr]">
-            <GlassPanel className="animate-fade-up stagger-1 p-6">
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">Client Dashboard</p>
-              <h1 className="mt-3 font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.02] tracking-[-0.05em] text-white">
-                {data.linkedCoach ? `Welcome into ${data.linkedCoach.roomName}.` : "Welcome to your client portal."}
-              </h1>
-              <p className="mt-3 max-w-[700px] text-[14px] leading-7 text-[var(--text-secondary)]">
-                {data.linkedCoach
-                  ? `You are connected to ${data.linkedCoach.name}. Programs, messaging, and onboarding all live here now.`
-                  : "Sign in first, then either enter a coach room ID or explore coaches on the platform to get connected."}
-              </p>
-
-              <div className="mt-6 grid gap-3 md:grid-cols-4">
-                {[
-                  ["Status", data.stats.membershipStatus],
-                  ["Joined", data.stats.joinedDate],
-                  ["Weight", data.stats.currentWeight],
-                  ["Assigned Plans", String(data.stats.assignedPrograms)]
-                ].map(([label, value], index) => (
-                  <div
-                    key={label}
-                    style={{
-                      borderRadius: "18px",
-                      padding: "16px",
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.07)"
-                    }}
-                    className={`animate-scale-in transition-all duration-200 hover:-translate-y-[2px] hover:bg-white/[0.05] stagger-${Math.min(index + 1, 6)}`}
-                  >
-                    <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--text-ghost)]">{label}</p>
-                    <p className="mt-2 font-display text-[22px] font-bold tracking-[-0.04em] text-white">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </GlassPanel>
-
-            <GlassPanel className="animate-fade-up stagger-2 overflow-hidden p-0">
+        <div className="page-enter flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
+          <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+            <GlassPanel className="overflow-hidden p-0">
               <div className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05] text-white/75">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h2 className="font-display text-[1.6rem] font-bold tracking-[-0.04em] text-white">Your Coach</h2>
-                    <p className="text-[13px] text-[var(--text-secondary)]">
-                      The room connection that powers your onboarding and future messaging.
-                    </p>
-                  </div>
+                <p className="card-eyebrow text-[var(--accent-bright)]">Client HQ</p>
+                <h1 className="mt-3 font-display text-[clamp(2.5rem,5vw,3.6rem)] font-bold leading-[0.95] tracking-[-0.07em] text-white">
+                  Welcome back, {data.profile.name.split(" ")[0]}.
+                </h1>
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <span className="rounded-full border border-[rgba(16,185,129,0.25)] bg-[rgba(16,185,129,0.12)] px-4 py-2 text-[14px] font-semibold text-[var(--green-bright)]">
+                    {data.stats.membershipStatus}
+                  </span>
+                  <span className="rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+                    {data.stats.currentWeight}
+                  </span>
+                  <span className="rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+                    Joined {data.stats.joinedDate}
+                  </span>
                 </div>
               </div>
-
-              {data.linkedCoach ? (
-                <div className="mx-6 mb-6 overflow-hidden rounded-[22px] border border-white/[0.07] bg-[rgba(12,12,20,0.9)]">
-                  <div
-                    style={{
-                      height: "140px",
-                      position: "relative",
-                      overflow: "hidden",
-                      background: data.linkedCoach.banner
-                        ? undefined
-                        : "radial-gradient(ellipse at 20% 50%, rgba(0,163,255,0.15), transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(67,208,127,0.10), transparent 60%), rgba(12,12,20,1)",
-                      animation: data.linkedCoach.banner ? undefined : "orb-drift 10s ease-in-out infinite"
-                    }}
-                  >
-                    {data.linkedCoach.banner ? (
-                      <img src={data.linkedCoach.banner} alt={`${data.linkedCoach.name} banner`} className="h-full w-full object-cover" />
-                    ) : null}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#101117] via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-4 flex items-end gap-4">
+              <div className="border-t border-white/[0.06] px-6 py-5">
+                {data.linkedCoach ? (
+                  <div className="flex flex-col gap-4 rounded-[20px] border border-white/[0.07] bg-[linear-gradient(135deg,rgba(37,99,235,0.10),rgba(255,255,255,0.02))] p-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-center gap-3">
                       {data.linkedCoach.avatar ? (
-                        <img src={data.linkedCoach.avatar} alt={data.linkedCoach.name} className="h-16 w-16 rounded-full border-[3px] border-[#101117] object-cover shadow-[0_0_20px_rgba(0,163,255,0.25)]" />
+                        <img src={data.linkedCoach.avatar} alt={data.linkedCoach.name} className="h-12 w-12 rounded-full object-cover" />
                       ) : (
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-[rgba(0,163,255,0.5)] bg-[linear-gradient(135deg,rgba(0,163,255,0.3),rgba(67,208,127,0.2))] font-mono text-sm font-semibold text-white shadow-[0_0_20px_rgba(0,163,255,0.3)]">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(37,99,235,0.45),rgba(16,185,129,0.18))] font-mono text-sm font-medium text-white">
                           {data.linkedCoach.name
                             .split(/\s+/)
                             .filter(Boolean)
@@ -227,196 +316,115 @@ function ClientPortalContent() {
                             .join("")}
                         </div>
                       )}
-                      <div className="pb-1">
-                        <p className="font-display text-[20px] font-bold text-white">{data.linkedCoach.name}</p>
-                        <p className="text-sm text-[var(--text-secondary)]">{data.linkedCoach.specialty}</p>
+                      <div>
+                        <p className="font-display text-[20px] font-semibold tracking-[-0.04em] text-white">{data.linkedCoach.name}</p>
+                        <p className="text-[13px] text-[var(--text-secondary)]">{data.linkedCoach.specialty}</p>
                       </div>
                     </div>
-                  </div>
-                  <div className="space-y-4 p-4 text-sm text-[var(--text-secondary)]">
-                    <p className="leading-7">{data.linkedCoach.bio}</p>
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <div className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-3">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-ghost)]">Room ID</p>
-                        <div
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "5px",
-                            padding: "3px 10px",
-                            borderRadius: "20px",
-                            background: "rgba(0,163,255,0.10)",
-                            border: "1px solid rgba(0,163,255,0.20)",
-                            fontSize: "11px",
-                            color: "var(--accent)",
-                            marginTop: "10px"
-                          }}
-                          className="font-mono"
-                        >
-                          {data.linkedCoach.roomId}
-                        </div>
-                      </div>
-                      <div className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-3">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-ghost)]">Tagline</p>
-                        <p className="mt-3 font-medium text-white">{data.linkedCoach.tagline}</p>
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <span className="rounded-full border border-[var(--border-accent)] bg-[var(--accent-dim)] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--accent-bright)]">
+                        Room {data.linkedCoach.roomId}
+                      </span>
+                      <a href="/client/messages" className="btn-primary inline-flex items-center gap-2 px-4 py-3 text-[13px]">
+                        <MessageSquareText className="h-4 w-4" />
+                        Message Coach
+                      </a>
                     </div>
                   </div>
+                ) : (
+                  <div className="rounded-[20px] border border-dashed border-white/[0.08] bg-white/[0.02] px-6 py-12 text-center">
+                    <div className="text-3xl opacity-25 grayscale">◎</div>
+                    <p className="mx-auto mt-3 max-w-[320px] text-sm leading-7 text-[var(--text-ghost)]">
+                      No coach linked yet. Open <span className="font-semibold text-white">Find your coach</span> from the side menu or use your room code to connect.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </GlassPanel>
+
+            <GlassPanel className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-[var(--accent-bright)]">
+                  <ShieldCheck className="h-5 w-5" />
                 </div>
-              ) : (
-                <div className="mx-6 mb-6 rounded-[20px] border border-dashed border-white/[0.08] bg-white/[0.02] px-6 py-12 text-center">
-                  <div className="text-3xl opacity-25 grayscale">◎</div>
-                  <p className="mx-auto mt-3 max-w-[320px] text-sm leading-7 text-[var(--text-ghost)]">
-                    No coach linked yet. Open <span className="font-semibold text-white">Find your coach</span> from the side menu or use your coach room ID to join directly.
-                  </p>
+                <div>
+                  <p className="card-eyebrow">Signals</p>
+                  <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Your performance pulse</h2>
                 </div>
-              )}
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <Speedometer label="Programs" value={programsValue} max={10} color="#2563EB" />
+                <Speedometer label="Store" value={storeValue} max={10} color="#10B981" />
+                <Speedometer label="Weight" value={weightValue} max={250} color="#F59E0B" />
+                <Speedometer label="Coach Link" value={data.linkedCoach ? 100 : 0} max={100} color="#EF4444" />
+              </div>
             </GlassPanel>
           </section>
 
-          <section className="grid flex-1 gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-            <GlassPanel className="animate-fade-up stagger-3 p-6">
+          <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+            <GlassPanel className="p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05] text-white/75">
-                  <MessageSquareText className="h-5 w-5" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white/75">
+                  <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="font-display text-[1.6rem] font-bold tracking-[-0.04em] text-white">Client Signals</h2>
-                  <p className="text-[13px] text-[var(--text-secondary)]">What matters most right now in your room relationship.</p>
+                  <p className="card-eyebrow">Assigned Programs</p>
+                  <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Training stack</h2>
                 </div>
               </div>
-
-              <div className="mt-5 grid gap-3">
-                {data.notifications.map((item, index) => (
-                  <div
-                    key={item}
-                    className={`animate-fade-up rounded-[18px] border border-white/[0.06] bg-white/[0.03] px-4 py-4 text-sm text-[var(--text-secondary)] stagger-${Math.min(index + 1, 6)}`}
-                  >
-                    {item}
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                {data.programs.length ? (
+                  data.programs.map((program) => (
+                    <ProgramCard key={program.id} title={program.title} sport={program.sport} createdAt={program.createdAt} />
+                  ))
+                ) : (
+                  <div className="md:col-span-2 rounded-[20px] border border-dashed border-white/[0.08] bg-white/[0.02] px-6 py-14 text-center">
+                    <div className="text-3xl opacity-25 grayscale">◎</div>
+                    <p className="mx-auto mt-3 max-w-[280px] text-sm leading-7 text-[var(--text-ghost)]">
+                      No programs assigned yet. Once your coach builds one for you, it will appear here.
+                    </p>
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-5 rounded-[22px] border border-white/[0.06] bg-white/[0.03] p-5">
-                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--text-ghost)]">What comes next</p>
-                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-                  Your HEIMDALLFIT messaging system lives here to replace the back-and-forth across other apps. This portal is now structured around one continuous coach-client relationship.
-                </p>
+                )}
               </div>
             </GlassPanel>
 
             <div className="grid gap-4">
-              <GlassPanel className="animate-fade-up stagger-4 p-6">
+              <GlassPanel className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05] text-white/75">
-                    <Sparkles className="h-5 w-5" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white/75">
+                    <MessageSquareText className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="font-display text-[1.6rem] font-bold tracking-[-0.04em] text-white">Assigned Programs</h2>
-                    <p className="text-[13px] text-[var(--text-secondary)]">Programs already attached to your client record.</p>
+                    <p className="card-eyebrow">Room Signals</p>
+                    <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">What matters now</h2>
                   </div>
                 </div>
-
-                <div className="mt-5 space-y-3">
-                  {data.programs.length ? (
-                    data.programs.map((program, index) => (
-                      <div
-                        key={program.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "14px 16px",
-                          borderRadius: "16px",
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.06)",
-                          cursor: "pointer"
-                        }}
-                        className={`animate-fade-up mb-2 transition-all duration-200 hover:translate-x-[3px] hover:border-white/10 hover:bg-white/[0.05] stagger-${Math.min(index + 1, 6)}`}
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-white">{program.title}</p>
-                          <p className="mt-1 text-xs text-[var(--text-secondary)]">{program.sport}</p>
-                        </div>
-                        <span
-                          style={{
-                            padding: "3px 10px",
-                            borderRadius: "20px",
-                            fontSize: "9px",
-                            letterSpacing: "0.2em",
-                            textTransform: "uppercase",
-                            background: "rgba(0,163,255,0.10)",
-                            color: "var(--accent)",
-                            border: "1px solid rgba(0,163,255,0.20)"
-                          }}
-                          className="font-mono"
-                        >
-                          {program.createdAt}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-[20px] border border-dashed border-white/[0.08] bg-white/[0.02] px-6 py-12 text-center">
-                      <div className="text-3xl opacity-25 grayscale">◎</div>
-                      <p className="mx-auto mt-3 max-w-[280px] text-sm leading-7 text-[var(--text-ghost)]">
-                        No programs assigned yet. Once your coach builds one for you, it will appear here.
-                      </p>
+                <div className="mt-6 space-y-3">
+                  {data.notifications.map((item, index) => (
+                    <div key={item} className={`animate-slide-up rounded-[18px] border border-white/[0.06] bg-white/[0.03] px-4 py-4 text-[14px] leading-7 text-[var(--text-secondary)] stagger-${Math.min(index + 1, 6)}`}>
+                      {item}
                     </div>
-                  )}
+                  ))}
                 </div>
               </GlassPanel>
 
-              <GlassPanel className="animate-fade-up stagger-5 p-6">
+              <GlassPanel className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05] text-white/75">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white/75">
                     <ShoppingBag className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="font-display text-[1.6rem] font-bold tracking-[-0.04em] text-white">Coach Store</h2>
-                    <p className="text-[13px] text-[var(--text-secondary)]">Products your coach has already published for clients.</p>
+                    <p className="card-eyebrow">Coach Store</p>
+                    <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Available offers</h2>
                   </div>
                 </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="mt-6 grid gap-4">
                   {data.store.length ? (
-                    data.store.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[rgba(12,12,20,0.9)] transition-all duration-300 hover:-translate-y-1 hover:border-white/14 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
-                        style={{ animation: "fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both", animationDelay: `${Math.min(index, 6) * 0.05}s` }}
-                      >
-                        <div className="group relative h-32 overflow-hidden bg-[#0f121a]">
-                          {item.image ? (
-                            <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-[11px] uppercase tracking-[0.22em] text-white/25">{item.type}</div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                        </div>
-                        <div className="p-4">
-                          <p className="text-sm font-semibold text-white">{item.title}</p>
-                          <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">{item.subtitle}</p>
-                          <span
-                            style={{
-                              display: "inline-block",
-                              padding: "5px 14px",
-                              borderRadius: "20px",
-                              background: "rgba(67,208,127,0.12)",
-                              border: "1px solid rgba(67,208,127,0.25)",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              color: "var(--green)",
-                              marginTop: "14px"
-                            }}
-                            className="font-mono"
-                          >
-                            {item.priceLabel}
-                          </span>
-                        </div>
-                      </div>
+                    data.store.map((item) => (
+                      <StoreCard key={item.id} title={item.title} subtitle={item.subtitle} priceLabel={item.priceLabel} image={item.image} type={item.type} />
                     ))
                   ) : (
-                    <div className="rounded-[20px] border border-dashed border-white/[0.08] bg-white/[0.02] px-6 py-12 text-center sm:col-span-2">
+                    <div className="rounded-[20px] border border-dashed border-white/[0.08] bg-white/[0.02] px-6 py-14 text-center">
                       <div className="text-3xl opacity-25 grayscale">◎</div>
                       <p className="mx-auto mt-3 max-w-[280px] text-sm leading-7 text-[var(--text-ghost)]">
                         No products are published in your coach store yet.
@@ -436,7 +444,7 @@ function ClientPortalContent() {
 export default function ClientPortalPage() {
   return (
     <Suspense fallback={null}>
-      <ClientPortalContent />
+      <ClientDashboardContent />
     </Suspense>
   );
 }

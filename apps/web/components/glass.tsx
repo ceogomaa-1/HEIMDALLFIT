@@ -16,12 +16,12 @@ export function GlassPanel({
       id={id}
       className={className}
       style={{
-        background: "rgba(12,12,20,0.80)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.048) 0%, rgba(255,255,255,0.028) 100%)",
+        backdropFilter: "blur(28px) saturate(1.25)",
+        WebkitBackdropFilter: "blur(28px) saturate(1.25)",
         border: "1px solid rgba(255,255,255,0.07)",
-        borderRadius: "24px",
-        boxShadow: "0 8px 40px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.05)",
+        borderRadius: "22px",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.05)",
         position: "relative",
         overflow: "hidden",
         ...style
@@ -31,10 +31,10 @@ export function GlassPanel({
         style={{
           position: "absolute",
           top: 0,
-          left: "20%",
-          right: "20%",
+          left: "16%",
+          right: "16%",
           height: "1px",
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)",
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent)",
           pointerEvents: "none"
         }}
       />

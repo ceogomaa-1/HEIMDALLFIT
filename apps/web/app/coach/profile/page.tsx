@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, Copy, ExternalLink, ImagePlus, LoaderCircle, Save, UserCircle2 } from "lucide-react";
 import { CoachShell } from "../../../components/coach-shell";
 import { GlassPanel } from "../../../components/glass";
-import { MorphingSquare } from "../../../components/ui/morphing-square";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../../lib/supabase";
 import type { CoachProfileResponse } from "../../../lib/coach-profile-types";
 
@@ -244,8 +243,13 @@ export default function CoachProfilePage() {
         </section>
 
         {loading ? (
-          <div className="flex min-h-[420px] items-center justify-center">
-            <MorphingSquare message="Loading profile..." />
+          <div className="grid min-h-[420px] gap-5 xl:grid-cols-[1.08fr_0.92fr]">
+            <div className="skeleton rounded-[28px]" />
+            <div className="grid gap-5">
+              <div className="skeleton rounded-[28px]" />
+              <div className="skeleton rounded-[28px]" />
+              <div className="skeleton rounded-[28px]" />
+            </div>
           </div>
         ) : form ? (
           <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr]">
@@ -407,7 +411,7 @@ export default function CoachProfilePage() {
                         )}
                       </div>
                       <div className="pb-2">
-                        <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 700, color: "var(--text-primary)" }}>
+                        <h3 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "20px", fontWeight: 700, color: "var(--text-primary)" }}>
                           {form.fullName}
                         </h3>
                         <p className="text-sm text-[var(--text-secondary)]">{profile?.handle}</p>
@@ -457,8 +461,8 @@ export default function CoachProfilePage() {
             </div>
           </div>
         ) : (
-          <div className="flex min-h-[420px] items-center justify-center">
-            <MorphingSquare message="Preparing profile..." />
+          <div className="flex min-h-[420px] items-center justify-center rounded-[28px] border border-[var(--border-soft)] bg-[var(--glass-1)] px-8 text-center text-sm text-[var(--text-secondary)]">
+            Preparing profile workspace...
           </div>
         )}
       </div>

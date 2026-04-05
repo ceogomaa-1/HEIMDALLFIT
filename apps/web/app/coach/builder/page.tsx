@@ -19,7 +19,6 @@ import {
   ZoomOut
 } from "lucide-react";
 import { CoachShell } from "../../../components/coach-shell";
-import { MorphingSquare } from "../../../components/ui/morphing-square";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../../lib/supabase";
 
 type BuilderKind = "onboarding_form" | "diet_plan" | "training_plan";
@@ -386,8 +385,14 @@ export default function CoachBuilderPage() {
   return (
     <CoachShell profile={profile}>
       {loading ? (
-        <div style={{ display: "flex", minHeight: "620px", alignItems: "center", justifyContent: "center" }}>
-          <MorphingSquare message="Loading builder studio..." />
+        <div style={{ display: "grid", minHeight: "620px", gridTemplateColumns: "220px 1fr 264px", gap: "0", overflow: "hidden", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.06)", background: "#0A0A0F" }}>
+          <div className="skeleton" style={{ margin: "16px", borderRadius: "18px" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "16px" }}>
+            <div className="skeleton" style={{ height: "52px", borderRadius: "14px" }} />
+            <div className="skeleton" style={{ flex: 1, borderRadius: "18px" }} />
+            <div className="skeleton" style={{ height: "68px", borderRadius: "14px" }} />
+          </div>
+          <div className="skeleton" style={{ margin: "16px", borderRadius: "18px" }} />
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 0 }}>
@@ -410,15 +415,15 @@ export default function CoachBuilderPage() {
             />
             <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "52px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(10,10,16,0.95)", padding: "0 16px", gap: "12px", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
-                <input value={activeDocument.title} onChange={(e) => updateDocument((cur) => ({ ...cur, title: e.target.value }))} style={{ background: "transparent", border: "none", outline: "none", fontSize: "14px", fontWeight: "600", fontFamily: "'Syne', sans-serif", color: "rgba(255,255,255,0.90)", maxWidth: "240px", minWidth: "80px" }} />
-                <span style={{ padding: "2px 10px", borderRadius: "20px", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", background: "rgba(0,163,255,0.10)", border: "1px solid rgba(0,163,255,0.20)", color: "#00A3FF", fontFamily: "'DM Mono', monospace", whiteSpace: "nowrap" }}>
+                <input value={activeDocument.title} onChange={(e) => updateDocument((cur) => ({ ...cur, title: e.target.value }))} style={{ background: "transparent", border: "none", outline: "none", fontSize: "14px", fontWeight: "600", fontFamily: "'Clash Display', sans-serif", color: "rgba(255,255,255,0.90)", maxWidth: "240px", minWidth: "80px" }} />
+                <span style={{ padding: "2px 10px", borderRadius: "20px", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", background: "rgba(37,99,235,0.10)", border: "1px solid rgba(37,99,235,0.20)", color: "#3B82F6", fontFamily: "'JetBrains Mono', monospace", whiteSpace: "nowrap" }}>
                   {activeDocument.kind.replace(/_/g, " ")}
                 </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <button type="button" onClick={() => setZoom((z) => Math.max(50, z - 10))} style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ZoomOut style={{ width: 13, height: 13 }} /></button>
-                <span style={{ width: "46px", textAlign: "center", fontSize: "12px", fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.65)" }}>{zoom}%</span>
+                <span style={{ width: "46px", textAlign: "center", fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.65)" }}>{zoom}%</span>
                 <button type="button" onClick={() => setZoom((z) => Math.min(150, z + 10))} style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ZoomIn style={{ width: 13, height: 13 }} /></button>
               </div>
 
@@ -440,7 +445,7 @@ export default function CoachBuilderPage() {
               </div>
               {leftPanel ? (
                 <div style={{ width: "240px", flexShrink: 0, background: "rgba(11,11,18,0.97)", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", overflowY: "auto", padding: "16px 12px" }}>
-                  <p style={{ fontSize: "9px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>{leftPanel === "templates" ? "Templates" : leftPanel === "blocks" ? "Add Block" : "Saved Drafts"}</p>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "10px", fontFamily: "'JetBrains Mono', monospace" }}>{leftPanel === "templates" ? "Templates" : leftPanel === "blocks" ? "Add Block" : "Saved Drafts"}</p>
 
                   {leftPanel === "templates" ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -483,7 +488,7 @@ export default function CoachBuilderPage() {
                       {documents.map((doc) => (
                         <button key={doc.id} type="button" onClick={() => { setActiveDocument(doc); setSelectedSectionId(doc.content.sections[0]?.id || null); }} style={{ textAlign: "left", borderRadius: "12px", padding: "10px 12px", background: activeDocument.id === doc.id ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)", border: `1px solid ${activeDocument.id === doc.id ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, cursor: "pointer" }}>
                           <p style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,0.85)", margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title}</p>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "rgba(255,255,255,0.38)", fontFamily: "'DM Mono', monospace" }}><span>{kindLabel(doc.kind)}</span><span>{formatUpdatedAt(doc.updatedAt)}</span></div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "rgba(255,255,255,0.38)", fontFamily: "'JetBrains Mono', monospace" }}><span>{kindLabel(doc.kind)}</span><span>{formatUpdatedAt(doc.updatedAt)}</span></div>
                         </button>
                       ))}
                     </div>
@@ -497,10 +502,10 @@ export default function CoachBuilderPage() {
                     <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "200px", height: "200px", borderRadius: "50%", background: activeDocument.kind === "onboarding_form" ? "radial-gradient(circle, rgba(0,163,255,0.15) 0%, transparent 70%)" : activeDocument.kind === "diet_plan" ? "radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)" : "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)", pointerEvents: "none" }} />
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "20px", position: "relative" }}>
                       <div>
-                        <p style={{ fontSize: "9px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>{kindLabel(activeDocument.kind)} · HEIMDALLFIT</p>
-                        <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.04em", color: "#fff", margin: 0, fontFamily: "'Syne', sans-serif" }}>{activeDocument.title}</h1>
+                        <p style={{ fontSize: "9px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)", marginBottom: "10px", fontFamily: "'JetBrains Mono', monospace" }}>{kindLabel(activeDocument.kind)} · HEIMDALLFIT</p>
+                        <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.04em", color: "#fff", margin: 0, fontFamily: "'Clash Display', sans-serif" }}>{activeDocument.title}</h1>
                       </div>
-                      <div style={{ padding: "6px 14px", borderRadius: "20px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", fontSize: "11px", color: "rgba(255,255,255,0.65)", whiteSpace: "nowrap", fontFamily: "'DM Mono', monospace" }}>{assignedClient?.name || "Unassigned"}</div>
+                      <div style={{ padding: "6px 14px", borderRadius: "20px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", fontSize: "11px", color: "rgba(255,255,255,0.65)", whiteSpace: "nowrap", fontFamily: "'JetBrains Mono', monospace" }}>{assignedClient?.name || "Unassigned"}</div>
                     </div>
                     <textarea value={activeDocument.content.coverNote} onChange={(e) => updateDocument((cur) => ({ ...cur, content: { ...cur.content, coverNote: e.target.value } }))} placeholder="Add a cover note..." style={{ marginTop: "16px", width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: "12px", padding: "12px 16px", fontSize: "14px", lineHeight: "1.7", color: "rgba(255,255,255,0.75)", resize: "none", outline: "none", minHeight: "72px", boxSizing: "border-box" }} />
                   </div>
@@ -535,7 +540,7 @@ export default function CoachBuilderPage() {
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px 10px", borderBottom: "1px solid #F0F2F7", background: selectedSection?.id === section.id ? "#FAFAFE" : "#FAFCFF" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }}>
                             <GripVertical style={{ width: 14, height: 14, color: "#A0A8BA", flexShrink: 0 }} />
-                            <input value={section.title} onChange={(e) => updateSection(section.id, { title: e.target.value })} onClick={(e) => e.stopPropagation()} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", fontWeight: "700", color: "#0F172A", fontFamily: "'Syne', sans-serif", flex: 1, minWidth: 0 }} />
+                            <input value={section.title} onChange={(e) => updateSection(section.id, { title: e.target.value })} onClick={(e) => e.stopPropagation()} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", fontWeight: "700", color: "#0F172A", fontFamily: "'Clash Display', sans-serif", flex: 1, minWidth: 0 }} />
                           </div>
                           <button type="button" onClick={(e) => { e.stopPropagation(); removeSection(section.id); }} style={{ width: "26px", height: "26px", borderRadius: "8px", background: "transparent", border: "none", color: "#B0B8CC", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Trash2 style={{ width: 13, height: 13 }} /></button>
                         </div>
@@ -574,19 +579,19 @@ export default function CoachBuilderPage() {
                               {section.items.map((item, idx) => (
                                 <div key={`${section.id}-${idx}`} style={{ display: "flex", alignItems: "flex-start", gap: "8px", borderRadius: "9px", background: "#F5F7FB", padding: "7px 10px" }} onClick={(e) => e.stopPropagation()}>
                                   <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: selectedSection?.id === section.id ? "#6F67FF" : "#C5CADC", marginTop: "7px", flexShrink: 0 }} />
-                                  <input value={item} onChange={(e) => updateItem(section.id, idx, e.target.value)} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", lineHeight: "1.6", color: "#334155", fontFamily: "'DM Sans', sans-serif", flex: 1, minWidth: 0 }} />
+                                  <input value={item} onChange={(e) => updateItem(section.id, idx, e.target.value)} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", lineHeight: "1.6", color: "#334155", fontFamily: "'Cabinet Grotesk', sans-serif", flex: 1, minWidth: 0 }} />
                                 </div>
                               ))}
                             </div>
                             <div style={{ padding: "8px 14px 12px" }}>
-                              <button type="button" onClick={(e) => { e.stopPropagation(); addItem(section.id); }} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "transparent", border: "1px solid #DDE2EC", fontSize: "11px", color: "#4B5565", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}><Plus style={{ width: 11, height: 11 }} />Add line</button>
+                              <button type="button" onClick={(e) => { e.stopPropagation(); addItem(section.id); }} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "transparent", border: "1px solid #DDE2EC", fontSize: "11px", color: "#4B5565", cursor: "pointer", fontFamily: "'Cabinet Grotesk', sans-serif" }}><Plus style={{ width: 11, height: 11 }} />Add line</button>
                             </div>
                           </>
                         )}
                       </div>
                     ))}
 
-                    <button type="button" onClick={() => addSection()} style={{ borderRadius: "16px", background: "transparent", border: "2px dashed #CBD2E0", minHeight: "140px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer", color: "#8A94AA", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                    <button type="button" onClick={() => addSection()} style={{ borderRadius: "16px", background: "transparent", border: "2px dashed #CBD2E0", minHeight: "140px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer", color: "#8A94AA", fontSize: "12px", fontFamily: "'Cabinet Grotesk', sans-serif" }}>
                       <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#EDF0F7", display: "flex", alignItems: "center", justifyContent: "center" }}><Plus style={{ width: 16, height: 16, color: "#8A94AA" }} /></div>
                       Add Section
                     </button>
@@ -596,17 +601,17 @@ export default function CoachBuilderPage() {
 
               <div style={{ width: "264px", flexShrink: 0, background: "rgba(10,10,16,0.95)", borderLeft: "1px solid rgba(255,255,255,0.06)", overflowY: "auto", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <section>
-                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>Document</p>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'JetBrains Mono', monospace" }}>Document</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <label style={{ display: "block" }}>
-                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Assign Client</span>
+                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'JetBrains Mono', monospace" }}>Assign Client</span>
                       <select value={activeDocument.clientId || ""} onChange={(e) => updateDocument((cur) => ({ ...cur, clientId: e.target.value || null, clientName: clients.find((c) => c.id === e.target.value)?.name || null }))} style={{ width: "100%", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.80)", fontSize: "12px", paddingLeft: "10px", outline: "none" }}>
                         <option value="">No client selected</option>
                         {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     </label>
                     <label style={{ display: "block" }}>
-                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Description</span>
+                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'JetBrains Mono', monospace" }}>Description</span>
                       <textarea value={activeDocument.description} onChange={(e) => updateDocument((cur) => ({ ...cur, description: e.target.value }))} style={{ width: "100%", borderRadius: "10px", padding: "8px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.72)", fontSize: "12px", resize: "none", outline: "none", minHeight: "64px", boxSizing: "border-box" }} />
                     </label>
                   </div>
@@ -615,22 +620,22 @@ export default function CoachBuilderPage() {
                 <div style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
 
                 <section>
-                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>Selected Block</p>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'JetBrains Mono', monospace" }}>Selected Block</p>
                   {selectedSection ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       <label style={{ display: "block" }}>
-                        <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Block Title</span>
+                        <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'JetBrains Mono', monospace" }}>Block Title</span>
                         <input value={selectedSection.title} onChange={(e) => updateSection(selectedSection.id, { title: e.target.value })} style={{ width: "100%", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.88)", fontSize: "12px", paddingLeft: "10px", outline: "none", boxSizing: "border-box" }} />
                       </label>
                       <div style={{ padding: "10px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>{isSelectedImageBlock ? "Block Type" : "Lines"}</span>
-                        <span style={{ fontSize: "13px", fontWeight: "600", color: "rgba(255,255,255,0.85)", fontFamily: "'DM Mono', monospace" }}>{isSelectedImageBlock ? "IMAGE" : selectedSection.items.length}</span>
+                        <span style={{ fontSize: "13px", fontWeight: "600", color: "rgba(255,255,255,0.85)", fontFamily: "'JetBrains Mono', monospace" }}>{isSelectedImageBlock ? "IMAGE" : selectedSection.items.length}</span>
                       </div>
                       {isSelectedImageBlock ? (
                         <>
                           <button type="button" onClick={() => fileInputRef.current?.click()} style={{ width: "100%", padding: "9px", borderRadius: "10px", background: "rgba(0,163,255,0.09)", border: "1px solid rgba(0,163,255,0.18)", color: "#8DD3FF", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}><ImagePlus style={{ width: 12, height: 12 }} />{uploadingSectionId === selectedSection.id ? "Uploading..." : "Replace Image"}</button>
                           <label style={{ display: "block" }}>
-                            <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'DM Mono', monospace" }}>Caption</span>
+                            <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "6px", fontFamily: "'JetBrains Mono', monospace" }}>Caption</span>
                             <textarea value={selectedSection.imageCaption || ""} onChange={(e) => updateSection(selectedSection.id, { imageCaption: e.target.value })} style={{ width: "100%", minHeight: "78px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.88)", fontSize: "12px", padding: "10px", outline: "none", boxSizing: "border-box", resize: "none" }} />
                           </label>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
@@ -655,11 +660,11 @@ export default function CoachBuilderPage() {
                 <div style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
 
                 <section>
-                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'DM Mono', monospace" }}>Dispatch</p>
+                  <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'JetBrains Mono', monospace" }}>Dispatch</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     {[{ label: "Assigned To", value: assignedClient?.name || "No client yet" }, { label: "Status", value: activeDocument.status }].map((row) => (
                       <div key={row.label} style={{ padding: "10px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.14em", fontFamily: "'DM Mono', monospace" }}>{row.label}</span>
+                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.14em", fontFamily: "'JetBrains Mono', monospace" }}>{row.label}</span>
                         <span style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,0.80)", textTransform: "capitalize" }}>{row.value}</span>
                       </div>
                     ))}
@@ -677,7 +682,7 @@ export default function CoachBuilderPage() {
                   <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.40)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "120px" }}>{activeDocument.title}</p>
                 </div>
               </button>
-              <button type="button" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "7px 14px", borderRadius: "12px", background: "transparent", border: "1px dashed rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontSize: "12px", cursor: "pointer", flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}><Plus style={{ width: 13, height: 13 }} />Add page</button>
+              <button type="button" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "7px 14px", borderRadius: "12px", background: "transparent", border: "1px dashed rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontSize: "12px", cursor: "pointer", flexShrink: 0, fontFamily: "'Cabinet Grotesk', sans-serif" }}><Plus style={{ width: 13, height: 13 }} />Add page</button>
             </div>
           </div>
         </div>

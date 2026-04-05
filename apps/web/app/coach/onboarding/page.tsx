@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Mail, ShieldCheck, Sparkles, UserRoundPlus } from "lucide-react";
 import { CoachShell } from "../../../components/coach-shell";
 import { GlassPanel } from "../../../components/glass";
-import { MorphingSquare } from "../../../components/ui/morphing-square";
 import { SlideButton } from "../../../components/ui/slide-button";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../../lib/supabase";
 import type { CoachDashboardProfile } from "../../../lib/coach-dashboard-types";
@@ -171,7 +170,7 @@ export default function CoachOnboardingPage() {
 
   return (
     <CoachShell profile={shellProfile}>
-      <div className="portal-page flex min-h-full flex-col gap-5 pb-4">
+      <div className="portal-page flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-4 pr-1">
         <section className="flex flex-col gap-3 border-b border-white/[0.06] pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-[var(--accent)]">Coach onboarding</p>
@@ -188,8 +187,13 @@ export default function CoachOnboardingPage() {
         </section>
 
         {loading ? (
-          <div className="flex min-h-[420px] items-center justify-center">
-            <MorphingSquare message="Loading onboarding..." />
+          <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+            <div className="skeleton min-h-[520px] rounded-[28px]" />
+            <div className="grid gap-4">
+              <div className="skeleton rounded-[28px]" />
+              <div className="skeleton min-h-[220px] rounded-[28px]" />
+              <div className="skeleton rounded-[28px]" />
+            </div>
           </div>
         ) : (
           <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">

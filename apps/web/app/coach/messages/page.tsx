@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CoachShell } from "../../../components/coach-shell";
 import { MessagesWorkspace } from "../../../components/messages-workspace";
-import { MorphingSquare } from "../../../components/ui/morphing-square";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../../lib/supabase";
 
 export default function CoachMessagesPage() {
@@ -67,8 +66,18 @@ export default function CoachMessagesPage() {
   return (
     <CoachShell profile={profile}>
       {checking ? (
-        <div className="flex h-full min-h-[520px] flex-1 items-center justify-center">
-          <MorphingSquare message="Loading messages..." />
+        <div className="grid h-full min-h-[520px] flex-1 grid-cols-[320px_minmax(0,1fr)] gap-0 overflow-hidden rounded-[24px] border border-[var(--border-soft)] bg-[var(--bg-surface)]">
+          <div className="flex flex-col gap-4 p-5">
+            <div className="skeleton h-11 rounded-[14px]" />
+            <div className="skeleton h-20 rounded-[18px]" />
+            <div className="skeleton h-20 rounded-[18px]" />
+            <div className="skeleton h-20 rounded-[18px]" />
+          </div>
+          <div className="flex flex-col gap-4 p-5">
+            <div className="skeleton h-14 rounded-[16px]" />
+            <div className="skeleton flex-1 rounded-[22px]" />
+            <div className="skeleton h-14 rounded-[16px]" />
+          </div>
         </div>
       ) : error ? (
         <div className="rounded-[24px] border border-[#2b2b34] bg-[#18181f] px-5 py-4 text-sm text-red-300">{error}</div>
