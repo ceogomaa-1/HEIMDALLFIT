@@ -53,7 +53,7 @@ function avatarInitials(name: string) {
 const coachNav = [
   { href: "/coach", label: "Clients", icon: Users, match: (pathname: string) => pathname === "/coach" },
   { href: "/coach/messages", label: "Messages", icon: MessageCircleMore, match: (pathname: string) => pathname.startsWith("/coach/messages") },
-  { href: "/coach#store", label: "My Store", icon: ShoppingBag, match: () => false },
+  { href: "/coach/store", label: "My Store", icon: ShoppingBag, match: (pathname: string) => pathname.startsWith("/coach/store") },
   { href: "/coach/profile", label: "My Profile", icon: UserCircle2, match: (pathname: string) => pathname.startsWith("/coach/profile") },
   { href: "/coach/builder", label: "Plan & Diet Builder", icon: SlidersHorizontal, match: (pathname: string) => pathname.startsWith("/coach/builder") },
   { href: "/coach/onboarding", label: "Onboarding", icon: CirclePlus, match: (pathname: string) => pathname.startsWith("/coach/onboarding") },
