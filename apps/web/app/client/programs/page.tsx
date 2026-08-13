@@ -2,7 +2,6 @@
 
 import { ArrowUpRight, CalendarDays, Dumbbell, Play, Sparkles } from "lucide-react";
 import { ClientShell } from "../../../components/client-shell";
-import { GlassPanel } from "../../../components/glass";
 import { useClientDashboard } from "../../../lib/use-client-dashboard";
 
 const fallbackProfile = { name: "Client", handle: "@client", role: "Client", avatar: null as string | null };
@@ -29,8 +28,8 @@ export default function ClientProgramsPage() {
         ) : data?.programs.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {data.programs.map((program, index) => (
-              <GlassPanel key={program.id} className="group relative overflow-hidden p-0">
-                <div className="h-1.5 bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500" />
+              <article key={program.id} className="group relative overflow-hidden rounded-[26px] bg-[#17181d]">
+                <div className="h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500" />
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10 text-blue-300">
@@ -44,15 +43,15 @@ export default function ClientProgramsPage() {
                     Open program <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </div>
-              </GlassPanel>
+              </article>
             ))}
           </div>
         ) : (
-          <GlassPanel className="flex min-h-[320px] flex-col items-center justify-center px-6 text-center">
+          <div className="flex min-h-[320px] flex-col items-center justify-center rounded-[28px] bg-white/[0.035] px-6 text-center">
             <span className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-blue-400/15 bg-blue-500/10 text-blue-300"><Sparkles className="h-7 w-7" /></span>
             <h2 className="mt-5 font-display text-xl font-semibold text-white">Your first program will land here</h2>
             <p className="mt-2 max-w-sm text-sm leading-6 text-white/45">Once your coach assigns a training plan, you’ll be able to open and follow it from this dedicated view.</p>
-          </GlassPanel>
+          </div>
         )}
       </div>
     </ClientShell>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Activity, CalendarDays, ChevronRight, Compass, Dumbbell, Scale, ShieldCheck, UserRound } from "lucide-react";
 import { ClientShell } from "../../../components/client-shell";
-import { GlassPanel } from "../../../components/glass";
 import { useClientDashboard } from "../../../lib/use-client-dashboard";
 
 const fallbackProfile = { name: "Client", handle: "@client", role: "Client", avatar: null as string | null };
@@ -35,7 +34,7 @@ export default function ClientProfilePage() {
           <div className="rounded-[22px] border border-red-400/20 bg-red-500/10 px-5 py-4 text-sm text-red-200">{error}</div>
         ) : data ? (
           <>
-            <GlassPanel className="overflow-hidden p-0">
+            <section className="overflow-hidden rounded-[28px] bg-white/[0.045]">
               <div className="relative bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.22),transparent_42%),linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] p-5 sm:p-6">
                 <div className="flex items-center gap-4">
                   <ProfileAvatar name={data.profile.name} avatar={data.profile.avatar} />
@@ -46,7 +45,7 @@ export default function ClientProfilePage() {
                   </div>
                 </div>
               </div>
-            </GlassPanel>
+            </section>
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               {[
@@ -55,15 +54,15 @@ export default function ClientProfilePage() {
                 { label: "Membership", value: data.stats.membershipStatus, icon: Activity, color: "text-emerald-300" },
                 { label: "Joined", value: data.stats.joinedDate, icon: CalendarDays, color: "text-violet-300" }
               ].map((item) => (
-                <GlassPanel key={item.label} className="min-w-0 p-4">
+                <div key={item.label} className="min-w-0 rounded-[22px] bg-white/[0.045] p-4">
                   <item.icon className={`h-5 w-5 ${item.color}`} />
                   <p className="mt-4 truncate font-display text-lg font-semibold text-white">{item.value}</p>
                   <p className="mt-1 text-xs text-white/38">{item.label}</p>
-                </GlassPanel>
+                </div>
               ))}
             </div>
 
-            <GlassPanel className="p-3">
+            <section className="rounded-[24px] bg-white/[0.045] p-3">
               {data.linkedCoach ? (
                 <Link href="/client/messages" className="flex min-h-16 touch-manipulation items-center gap-3 rounded-[18px] px-3 transition hover:bg-white/[0.04]">
                   {data.linkedCoach.avatar ? <img src={data.linkedCoach.avatar} alt={data.linkedCoach.name} className="h-11 w-11 rounded-full object-cover" /> : <span className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-500/15 text-sm font-semibold text-blue-200">{data.linkedCoach.name[0]}</span>}
@@ -77,12 +76,12 @@ export default function ClientProfilePage() {
                   <ChevronRight className="h-5 w-5 text-white/30" />
                 </Link>
               )}
-            </GlassPanel>
+            </section>
 
-            <GlassPanel className="flex items-center gap-3 p-5 text-sm leading-6 text-white/46">
+            <section className="flex items-center gap-3 rounded-[24px] bg-white/[0.035] p-5 text-sm leading-6 text-white/46">
               <UserRound className="h-5 w-5 shrink-0 text-blue-300" />
               Profile editing, preferences, and privacy controls will live here as the client account system expands.
-            </GlassPanel>
+            </section>
           </>
         ) : null}
       </div>

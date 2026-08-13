@@ -2,10 +2,8 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Award, Compass, Search, Users } from "lucide-react";
+import { ArrowUpRight, Award, Compass, Search, Users } from "lucide-react";
 import { ClientShell } from "../../../components/client-shell";
-import { GlassPanel } from "../../../components/glass";
-import { MorphingSquare } from "../../../components/ui/morphing-square";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../../lib/supabase";
 
 type CoachCard = {
@@ -98,13 +96,12 @@ export default function FindCoachPage() {
 
   return (
     <ClientShell profile={profile}>
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-4 xl:pr-1">
-        <section className="flex flex-col gap-4 border-b border-[#232329] pb-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-4 xl:pr-1">
+        <section className="flex flex-col gap-5 pt-1 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[13px] text-white/45">Coach discovery</p>
-            <h1 className="mt-1 font-display text-[1.65rem] font-semibold tracking-[-0.05em] text-white sm:text-[1.8rem]">Find your coach</h1>
-            <p className="mt-2 max-w-[720px] text-[13px] leading-6 text-white/45">
-              Explore coaches on HEIMDALLFIT, review their positioning, and join a room the moment you already have their room code.
+            <h1 className="font-display text-[2rem] font-semibold tracking-[-0.055em] text-white sm:text-[2.4rem]">Find your fit.</h1>
+            <p className="mt-2 max-w-[620px] text-[14px] leading-6 text-white/52">
+              Discover coaches by specialty, style, and the people already training with them.
             </p>
           </div>
           <div className="relative w-full lg:max-w-[380px]">
@@ -113,34 +110,36 @@ export default function FindCoachPage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search coaches..."
-              className="w-full rounded-full border border-[#2b2b34] bg-[#18181f] py-3 pl-11 pr-4 text-sm text-white outline-none transition focus:border-white/20"
+              className="w-full rounded-2xl border-0 bg-white/[0.07] py-3.5 pl-11 pr-4 text-sm text-white outline-none ring-1 ring-inset ring-white/[0.06] transition placeholder:text-white/35 focus:bg-white/[0.09] focus:ring-white/15"
             />
           </div>
         </section>
 
         {loading ? (
-          <div className="flex min-h-[460px] items-center justify-center">
-            <MorphingSquare message="Loading coaches..." />
+          <div className="grid gap-5 sm:grid-cols-2">
+            {[0, 1, 2, 3].map((item) => (
+              <div key={item} className="aspect-[4/5] animate-pulse rounded-[28px] bg-white/[0.045]" />
+            ))}
           </div>
         ) : error ? (
-          <div className="rounded-[24px] border border-[#2b2b34] bg-[#18181f] px-5 py-4 text-sm text-red-300">{error}</div>
+          <div className="rounded-2xl bg-red-500/10 px-5 py-4 text-sm text-red-200">{error}</div>
         ) : (
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {coaches.length ? (
               coaches.map((coach) => (
-                <GlassPanel key={coach.id} className="overflow-hidden border-[#24242b] bg-[#1a1a20] p-0">
-                  <div className="relative h-36 w-full overflow-hidden sm:h-40">
+                <article key={coach.id} className="group overflow-hidden rounded-[28px] bg-white/[0.05] transition hover:bg-white/[0.07]">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden">
                     {coach.banner ? (
-                      <img src={coach.banner} alt={`${coach.name} banner`} className="h-full w-full object-cover" />
+                      <img src={coach.banner} alt={`${coach.name} banner`} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]" />
                     ) : (
-                      <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(110,18,18,0.32),transparent_28%),linear-gradient(135deg,#17171d,#24242c)]" />
+                      <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.26),transparent_42%),linear-gradient(135deg,#18181b,#27272a)]" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#17171d] to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     <div className="absolute inset-x-4 bottom-4 flex min-w-0 items-end gap-3">
                       {coach.avatar ? (
-                        <img src={coach.avatar} alt={coach.name} className="h-14 w-14 rounded-full border-4 border-[#17171d] object-cover" />
+                        <img src={coach.avatar} alt={coach.name} className="h-12 w-12 rounded-full object-cover ring-2 ring-white/70" />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-[#17171d] bg-white text-sm font-semibold text-black">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-sm font-semibold text-black ring-2 ring-white/70">
                           {coach.name
                             .split(/\s+/)
                             .filter(Boolean)
@@ -150,23 +149,22 @@ export default function FindCoachPage() {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="truncate text-lg font-semibold text-white sm:text-xl">{coach.name}</p>
-                        <p className="truncate text-sm text-white/60">{coach.specialty}</p>
+                        <p className="truncate text-[17px] font-semibold text-white">{coach.name}</p>
+                        <p className="truncate text-[13px] text-white/70">{coach.specialty}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-4 p-4 sm:p-5">
-                    <p className="text-sm leading-7 text-white/58">{coach.bio}</p>
+                  <div className="space-y-5 p-5">
+                    <p className="line-clamp-3 text-[14px] leading-6 text-white/58">{coach.bio}</p>
                     {coach.gallery.length ? (
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">Profile highlights</p>
-                        <div className="mt-3 grid grid-cols-3 gap-3">
+                        <p className="text-[13px] font-medium text-white/82">Training style</p>
+                        <div className="mt-3 grid grid-cols-3 gap-2">
                           {coach.gallery.slice(0, 3).map((item) => (
-                            <div key={item.id} className="overflow-hidden rounded-[16px] border border-[#2b2b34] bg-[#202028]">
-                              <div className="h-20 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.24),transparent_48%),linear-gradient(135deg,#17171d,#24242c)]">
+                            <div key={item.id} className="overflow-hidden rounded-xl bg-white/[0.05]">
+                              <div className="aspect-square bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.24),transparent_48%),linear-gradient(135deg,#17171d,#24242c)]">
                                 {item.image ? <img src={item.image} alt={item.caption || "Coach gallery"} className="h-full w-full object-cover" /> : null}
                               </div>
-                              <div className="px-3 py-2 text-[11px] text-white/52">{item.caption || "Training preview"}</div>
                             </div>
                           ))}
                         </div>
@@ -174,10 +172,10 @@ export default function FindCoachPage() {
                     ) : null}
                     {coach.achievements.length ? (
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">Certifications & titles</p>
+                        <p className="text-[13px] font-medium text-white/82">Credentials</p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {coach.achievements.slice(0, 4).map((item) => (
-                            <div key={item.id} className="inline-flex items-center gap-2 rounded-full border border-[rgba(245,158,11,0.18)] bg-[rgba(245,158,11,0.10)] px-3 py-1.5 text-[11px] text-amber-300">
+                            <div key={item.id} className="inline-flex items-center gap-2 rounded-full bg-amber-400/10 px-3 py-1.5 text-[11px] text-amber-200">
                               <Award className="h-3.5 w-3.5" />
                               {item.title}
                             </div>
@@ -185,39 +183,34 @@ export default function FindCoachPage() {
                         </div>
                       </div>
                     ) : null}
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <div className="rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3">
-                        <p className="text-[10px] uppercase tracking-[0.18em] text-white/30">Room ID</p>
-                        <p className="mt-1 font-semibold text-white">{coach.roomId || "Private"}</p>
-                      </div>
-                      <div className="rounded-[18px] border border-[#2b2b34] bg-[#202028] px-4 py-3">
-                        <p className="text-[10px] uppercase tracking-[0.18em] text-white/30">Active Members</p>
-                        <p className="mt-1 font-semibold text-white">{coach.activeMembers}</p>
-                      </div>
+                    <div className="flex items-center gap-2 text-[13px] text-white/45">
+                      <Users className="h-4 w-4" />
+                      {coach.activeMembers} active {coach.activeMembers === 1 ? "member" : "members"}
                     </div>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex gap-2">
                       <a
                         href={`/join/${coach.id}`}
-                        className="inline-flex items-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
                       >
-                        View coach profile
+                        View profile
+                        <ArrowUpRight className="h-4 w-4" />
                       </a>
                       {coach.roomId ? (
                         <a
                           href={`/client/auth?roomId=${encodeURIComponent(coach.roomId)}`}
-                          className="inline-flex items-center rounded-full border border-[#2b2b34] bg-[#202028] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#262630]"
+                          className="inline-flex items-center rounded-full bg-white/[0.08] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.12]"
                         >
-                          Join with room ID
+                          Join
                         </a>
                       ) : null}
                     </div>
                   </div>
-                </GlassPanel>
+                </article>
               ))
             ) : (
-              <GlassPanel className="border-[#24242b] bg-[#1a1a20] p-5 xl:col-span-2">
+              <div className="rounded-[24px] bg-white/[0.045] p-5 sm:col-span-2 xl:col-span-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#202028] text-white/75">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.07] text-white/75">
                     <Compass className="h-5 w-5" />
                   </div>
                   <div>
@@ -225,7 +218,7 @@ export default function FindCoachPage() {
                     <p className="text-[13px] text-white/45">Try a different name, specialty, or room keyword.</p>
                   </div>
                 </div>
-              </GlassPanel>
+              </div>
             )}
           </div>
         )}

@@ -33,10 +33,10 @@ export default function FuturisticNav() {
   return (
     <nav
       aria-label="Client navigation"
-      className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[60] mx-auto max-w-[390px] xl:hidden"
+      className="fixed inset-x-3 bottom-[calc(0.55rem+env(safe-area-inset-bottom))] z-[60] mx-auto max-w-[382px] xl:hidden"
     >
       <LayoutGroup id="client-mobile-navigation">
-        <div className="relative isolate flex h-[72px] items-center rounded-full border border-white/[0.10] bg-[rgba(9,10,17,0.74)] px-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[rgba(9,10,17,0.62)]">
+        <div className="relative isolate flex h-[66px] items-center rounded-full border border-white/[0.09] bg-[rgba(18,18,21,0.84)] px-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[rgba(18,18,21,0.76)]">
           <div className="pointer-events-none absolute inset-x-10 bottom-[-18px] h-10 rounded-full bg-blue-600/10 blur-2xl" />
 
           {clientNavItems.map((item) => {
@@ -51,7 +51,7 @@ export default function FuturisticNav() {
                 draggable={false}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group relative flex h-[60px] min-w-0 flex-1 touch-manipulation select-none flex-col items-center justify-center gap-1 rounded-full text-[10px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-400/80",
+                  "group relative flex h-[56px] min-w-0 flex-1 touch-manipulation select-none flex-col items-center justify-center gap-0.5 rounded-full text-[10px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-400/80",
                   active ? "text-white" : "text-white/46 hover:text-white/78"
                 )}
                 style={{ WebkitTapHighlightColor: "transparent" }}
@@ -59,10 +59,10 @@ export default function FuturisticNav() {
                 {active ? (
                   <motion.span
                     layoutId="client-nav-active-pill"
-                    className="pointer-events-none absolute inset-1.5 rounded-full border border-blue-400/20 bg-[linear-gradient(145deg,rgba(59,130,246,0.20),rgba(139,92,246,0.08))] shadow-[0_8px_24px_rgba(37,99,235,0.18)]"
+                    className="pointer-events-none absolute inset-1.5 rounded-full bg-white/[0.08]"
                     transition={{ type: "spring", stiffness: 460, damping: 36, mass: 0.75 }}
                   >
-                    <span className="absolute inset-x-3 top-1 h-6 rounded-full bg-gradient-to-r from-blue-400/25 to-violet-500/20 blur-xl" />
+                    <span className="absolute inset-x-4 top-1 h-5 rounded-full bg-blue-400/15 blur-xl" />
                   </motion.span>
                 ) : null}
 
@@ -71,7 +71,7 @@ export default function FuturisticNav() {
                   animate={{ scale: active ? 1.12 : 1, y: active ? -1 : 0 }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 >
-                  <Icon className={cn("h-[21px] w-[21px]", active ? "text-blue-300" : "text-current")} strokeWidth={active ? 2.25 : 1.8} />
+                  <Icon className={cn("h-5 w-5", active ? "text-white" : "text-current")} strokeWidth={active ? 2.2 : 1.8} />
                 </motion.span>
                 <span className="relative z-10 max-w-full truncate px-1 leading-none">{item.label}</span>
               </Link>

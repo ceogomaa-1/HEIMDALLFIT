@@ -163,6 +163,13 @@ code,
   font-family: "JetBrains Mono", monospace;
 }
 
+.client-portal .font-mono,
+.client-portal .card-eyebrow {
+  font-family: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 a {
   color: inherit;
   text-decoration: none;

@@ -56,10 +56,9 @@ export function ClientShell({
   const isMessages = pathname.startsWith("/client/messages");
 
   return (
-    <div className="relative h-[100dvh] overflow-hidden bg-[#050507] text-[var(--text-primary)]">
+    <div className="client-portal relative h-[100dvh] overflow-hidden bg-[#09090b] text-[var(--text-primary)]">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 right-[-12rem] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.10),transparent_68%)]" />
-        <div className="absolute -bottom-52 left-[-10rem] h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.055),transparent_68%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_0%,rgba(37,99,235,0.07),transparent_30%)]" />
       </div>
 
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-white/[0.055] bg-[rgba(7,7,12,0.90)] p-4 backdrop-blur-3xl xl:flex">
@@ -92,12 +91,12 @@ export function ClientShell({
       </aside>
 
       <div className="relative flex h-full min-w-0 flex-col xl:pl-[248px]">
-        <header className="z-20 flex shrink-0 items-center justify-between border-b border-white/[0.055] bg-[rgba(5,5,8,0.82)] px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:px-6 xl:h-[72px] xl:px-8 xl:py-0">
+        <header className="z-20 flex shrink-0 items-center justify-between bg-[rgba(9,9,11,0.80)] px-4 pb-3 pt-[max(0.8rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:px-6 xl:h-[72px] xl:border-b xl:border-white/[0.055] xl:px-8 xl:py-0">
           <div className="flex min-w-0 items-center gap-3">
-            <Link href="/client" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] border border-blue-400/20 bg-blue-500/10 font-display text-sm font-bold text-white xl:hidden">H</Link>
+            <Link href="/client" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white font-display text-sm font-bold text-[#09090b] xl:hidden">H</Link>
             <div className="min-w-0">
               <p className="hidden font-mono text-[9px] uppercase tracking-[0.22em] text-white/28 xl:block">Client portal</p>
-              <h1 className="truncate font-display text-[17px] font-semibold tracking-[-0.03em] text-white xl:mt-1 xl:text-lg">{activeNav.desktopLabel}</h1>
+              <h1 className="truncate text-[17px] font-semibold tracking-[-0.035em] text-white xl:mt-1 xl:text-lg">{activeNav.href === "/client" ? "HEIMDALLFIT" : activeNav.desktopLabel}</h1>
             </div>
           </div>
 
@@ -107,7 +106,7 @@ export function ClientShell({
           </label>
 
           <div className="flex items-center gap-2">
-            <Link href="/client/messages" aria-label="Open messages" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.035] text-white/62 transition hover:text-white">
+            <Link href="/client/messages" aria-label="Open messages" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.055] text-white/62 transition hover:bg-white/[0.09] hover:text-white">
               <Bell className="h-[18px] w-[18px]" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-[#09090d] bg-blue-500" />
             </Link>
@@ -115,7 +114,7 @@ export function ClientShell({
           </div>
         </header>
 
-        <div className={cn("flex min-h-0 flex-1 flex-col", isMessages ? "px-0 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-0 xl:px-6 xl:py-5" : "px-4 pb-0 pt-4 sm:px-6 xl:px-8 xl:pb-6 xl:pt-6")}>
+        <div className={cn("flex min-h-0 flex-1 flex-col", isMessages ? "px-0 pb-[calc(5.75rem+env(safe-area-inset-bottom))] pt-0 xl:px-6 xl:py-5" : "px-4 pb-0 pt-3 sm:px-6 xl:px-8 xl:pb-6 xl:pt-6")}>
           <main className="portal-page flex min-h-0 flex-1 flex-col">{children}</main>
         </div>
       </div>
