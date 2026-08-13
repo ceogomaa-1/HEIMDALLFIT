@@ -596,19 +596,19 @@ export default function CoachBuilderPage() {
                               {section.items.map((item, idx) => (
                                 <div key={`${section.id}-${idx}`} style={{ display: "flex", alignItems: "flex-start", gap: "8px", borderRadius: "9px", background: "#F5F7FB", padding: "7px 10px" }} onClick={(e) => e.stopPropagation()}>
                                   <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: selectedSection?.id === section.id ? "#6F67FF" : "#C5CADC", marginTop: "7px", flexShrink: 0 }} />
-                                  <input value={item} onChange={(e) => updateItem(section.id, idx, e.target.value)} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", lineHeight: "1.6", color: "#334155", fontFamily: "'Cabinet Grotesk', sans-serif", flex: 1, minWidth: 0 }} />
+                                  <input value={item} onChange={(e) => updateItem(section.id, idx, e.target.value)} style={{ background: "transparent", border: "none", outline: "none", fontSize: "13px", lineHeight: "1.6", color: "#334155", fontFamily: "'Inter', ui-sans-serif, sans-serif", flex: 1, minWidth: 0 }} />
                                 </div>
                               ))}
                             </div>
                             <div style={{ padding: "8px 14px 12px" }}>
-                              <button type="button" onClick={(e) => { e.stopPropagation(); addItem(section.id); }} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "transparent", border: "1px solid #DDE2EC", fontSize: "11px", color: "#4B5565", cursor: "pointer", fontFamily: "'Cabinet Grotesk', sans-serif" }}><Plus style={{ width: 11, height: 11 }} />Add line</button>
+                              <button type="button" onClick={(e) => { e.stopPropagation(); addItem(section.id); }} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "transparent", border: "1px solid #DDE2EC", fontSize: "11px", color: "#4B5565", cursor: "pointer", fontFamily: "'Inter', ui-sans-serif, sans-serif" }}><Plus style={{ width: 11, height: 11 }} />Add line</button>
                             </div>
                           </>
                         )}
                       </div>
                     ))}
 
-                    <button type="button" onClick={() => addSection()} style={{ borderRadius: "16px", background: "transparent", border: "2px dashed #CBD2E0", minHeight: "140px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer", color: "#8A94AA", fontSize: "12px", fontFamily: "'Cabinet Grotesk', sans-serif" }}>
+                    <button type="button" onClick={() => addSection()} style={{ borderRadius: "16px", background: "transparent", border: "2px dashed #CBD2E0", minHeight: "140px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer", color: "#8A94AA", fontSize: "12px", fontFamily: "'Inter', ui-sans-serif, sans-serif" }}>
                       <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#EDF0F7", display: "flex", alignItems: "center", justifyContent: "center" }}><Plus style={{ width: 16, height: 16, color: "#8A94AA" }} /></div>
                       Add Section
                     </button>
@@ -699,7 +699,7 @@ export default function CoachBuilderPage() {
                   <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.40)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "120px" }}>{activeDocument.title}</p>
                 </div>
               </button>
-              <button type="button" onClick={addPage} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "7px 14px", borderRadius: "12px", background: "transparent", border: "1px dashed rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontSize: "12px", cursor: "pointer", flexShrink: 0, fontFamily: "'Cabinet Grotesk', sans-serif" }}><Plus style={{ width: 13, height: 13 }} />Add page</button>
+              <button type="button" onClick={addPage} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "7px 14px", borderRadius: "12px", background: "transparent", border: "1px dashed rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontSize: "12px", cursor: "pointer", flexShrink: 0, fontFamily: "'Inter', ui-sans-serif, sans-serif" }}><Plus style={{ width: 13, height: 13 }} />Add page</button>
             </div>
           </div>
         </div>

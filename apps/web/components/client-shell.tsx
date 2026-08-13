@@ -3,28 +3,12 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import {
-  Bell,
-  ChevronRight,
-  Compass,
-  Dumbbell,
-  LayoutGrid,
-  Menu,
-  MessageCircleMore,
-  Search,
-  X
-} from "lucide-react";
+import { Bell, ChevronRight, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { cn } from "../lib/utils";
-
-const clientNav = [
-  { href: "/client", label: "Today", desktopLabel: "Overview", icon: LayoutGrid, match: (pathname: string, hash: string) => pathname === "/client" && hash !== "#programs" },
-  { href: "/client#programs", label: "Programs", desktopLabel: "My programs", icon: Dumbbell, match: (pathname: string, hash: string) => pathname === "/client" && hash === "#programs" },
-  { href: "/client/find-coach", label: "Coach", desktopLabel: "Find a coach", icon: Compass, match: (pathname: string) => pathname.startsWith("/client/find-coach") },
-  { href: "/client/messages", label: "Messages", desktopLabel: "Messages", icon: MessageCircleMore, match: (pathname: string) => pathname.startsWith("/client/messages") }
-] as const;
+import FuturisticNav, { clientNavItems, isClientNavItemActive } from "./ui/futuristic-nav";
 
 function InitialAvatar({ profile, size = "md" }: { profile: { name: string; avatar: string | null }; size?: "sm" | "md" | "lg" }) {
   const initials = profile.name
@@ -60,43 +44,16 @@ function DesktopNavLink({ href, label, icon: Icon, active }: { href: string; lab
   );
 }
 
-function MobileNavLink({ href, label, icon: Icon, active }: { href: string; label: string; icon: LucideIcon; active: boolean }) {
-  return (
-    <Link href={href as Route} className={cn("relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 px-1 py-2 text-[10px] font-medium", active ? "text-blue-400" : "text-white/42")}>
-      {active ? <span className="absolute top-0 h-[3px] w-7 rounded-b-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.72)]" /> : null}
-      <Icon className="h-5 w-5" strokeWidth={active ? 2.25 : 1.8} />
-      <span className="truncate">{label}</span>
-    </Link>
-  );
-}
-
 export function ClientShell({
   profile,
   children
 }: PropsWithChildren<{ profile: { name: string; handle?: string; role: string; avatar: string | null } }>) {
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [hash, setHash] = useState("");
-  const activeNav = useMemo(() => clientNav.find((item) => item.match(pathname, hash)) || clientNav[0], [hash, pathname]);
+  const activeNav = useMemo(
+    () => clientNavItems.find((item) => isClientNavItemActive(pathname, item.href)) || clientNavItems[0],
+    [pathname]
+  );
   const isMessages = pathname.startsWith("/client/messages");
-
-  useEffect(() => setMenuOpen(false), [pathname]);
-
-  useEffect(() => {
-    const syncHash = () => setHash(window.location.hash);
-    syncHash();
-    window.addEventListener("hashchange", syncHash);
-    return () => window.removeEventListener("hashchange", syncHash);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [menuOpen]);
 
   return (
     <div className="relative h-[100dvh] overflow-hidden bg-[#050507] text-[var(--text-primary)]">
@@ -116,7 +73,7 @@ export function ClientShell({
 
         <p className="px-4 font-mono text-[9px] uppercase tracking-[0.24em] text-white/22">Your space</p>
         <nav className="mt-3 space-y-1">
-          {clientNav.map((item) => (
+          {clientNavItems.map((item) => (
             <DesktopNavLink key={item.href} href={item.href} label={item.desktopLabel} icon={item.icon} active={activeNav.href === item.href} />
           ))}
         </nav>
@@ -127,11 +84,11 @@ export function ClientShell({
           <span className="mt-4 flex items-center gap-1 text-xs font-semibold text-blue-300">Explore coaches <ChevronRight className="h-3.5 w-3.5" /></span>
         </Link>
 
-        <button type="button" onClick={() => setMenuOpen(true)} className="mt-4 flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-2.5 text-left">
+        <Link href={"/client/profile" as Route} className="mt-4 flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-2.5 text-left transition hover:border-white/[0.12] hover:bg-white/[0.045]">
           <span className="relative"><InitialAvatar profile={profile} /><span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0b0b11] bg-emerald-400" /></span>
           <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-white">{profile.name}</span><span className="block truncate text-[11px] text-white/35">{profile.handle || profile.role}</span></span>
           <ChevronRight className="h-4 w-4 text-white/25" />
-        </button>
+        </Link>
       </aside>
 
       <div className="relative flex h-full min-w-0 flex-col xl:pl-[248px]">
@@ -154,43 +111,16 @@ export function ClientShell({
               <Bell className="h-[18px] w-[18px]" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-[#09090d] bg-blue-500" />
             </Link>
-            <button type="button" aria-label="Open account menu" onClick={() => setMenuOpen(true)} className="rounded-full p-0.5"><InitialAvatar profile={profile} size="sm" /></button>
+            <Link href={"/client/profile" as Route} aria-label="Open profile" className="rounded-full p-0.5"><InitialAvatar profile={profile} size="sm" /></Link>
           </div>
         </header>
 
-        <div className={cn("flex min-h-0 flex-1 flex-col", isMessages ? "px-0 pb-[calc(68px+env(safe-area-inset-bottom))] pt-0 xl:px-6 xl:py-5" : "px-4 pb-0 pt-4 sm:px-6 xl:px-8 xl:pb-6 xl:pt-6")}>
+        <div className={cn("flex min-h-0 flex-1 flex-col", isMessages ? "px-0 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-0 xl:px-6 xl:py-5" : "px-4 pb-0 pt-4 sm:px-6 xl:px-8 xl:pb-6 xl:pt-6")}>
           <main className="portal-page flex min-h-0 flex-1 flex-col">{children}</main>
         </div>
       </div>
 
-      <nav aria-label="Client navigation" className="fixed inset-x-0 bottom-0 z-40 flex min-h-[68px] border-t border-white/[0.08] bg-[rgba(7,7,11,0.94)] pb-[env(safe-area-inset-bottom)] backdrop-blur-3xl xl:hidden">
-        {clientNav.map((item) => <MobileNavLink key={item.href} href={item.href} label={item.label} icon={item.icon} active={activeNav.href === item.href} />)}
-        <button type="button" onClick={() => setMenuOpen(true)} className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 px-1 py-2 text-[10px] font-medium text-white/42">
-          <Menu className="h-5 w-5" strokeWidth={1.8} /><span>More</span>
-        </button>
-      </nav>
-
-      {menuOpen ? (
-        <div className="fixed inset-0 z-[70] flex items-end bg-black/70 backdrop-blur-sm xl:items-center xl:justify-center" role="dialog" aria-modal="true" aria-label="Client menu" onMouseDown={(event) => { if (event.currentTarget === event.target) setMenuOpen(false); }}>
-          <section className="w-full rounded-t-[30px] border border-white/[0.08] bg-[#0d0d13] px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 shadow-2xl xl:max-w-sm xl:rounded-[28px] xl:p-6">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/15 xl:hidden" />
-            <div className="flex items-center gap-3">
-              <InitialAvatar profile={profile} size="lg" />
-              <div className="min-w-0 flex-1"><p className="truncate font-display text-lg font-semibold text-white">{profile.name}</p><p className="truncate text-xs text-white/40">{profile.handle || profile.role}</p></div>
-              <button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.05] text-white/60"><X className="h-5 w-5" /></button>
-            </div>
-            <div className="my-5 h-px bg-white/[0.06]" />
-            <nav className="grid grid-cols-2 gap-2">
-              {clientNav.map((item) => (
-                <Link key={`menu-${item.href}`} href={item.href} className="flex min-h-20 flex-col justify-between rounded-[18px] border border-white/[0.06] bg-white/[0.025] p-3.5 text-white/70">
-                  <item.icon className="h-5 w-5 text-blue-400" /><span className="text-sm font-semibold">{item.desktopLabel}</span>
-                </Link>
-              ))}
-            </nav>
-            <p className="mt-5 text-center font-mono text-[9px] uppercase tracking-[0.22em] text-white/20">HEIMDALLFIT · Client OS</p>
-          </section>
-        </div>
-      ) : null}
+      <FuturisticNav />
     </div>
   );
 }

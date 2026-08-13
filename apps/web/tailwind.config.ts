@@ -21,7 +21,7 @@ const config: Config = {
       },
       fontFamily: {
         display: ["'Clash Display'", "sans-serif"],
-        body: ["'Cabinet Grotesk'", "sans-serif"],
+        body: ["'Inter'", "ui-sans-serif", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "sans-serif"],
         mono: ["'JetBrains Mono'", "monospace"]
       },
       boxShadow: {
