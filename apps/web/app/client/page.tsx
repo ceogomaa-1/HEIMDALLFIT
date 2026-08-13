@@ -262,7 +262,7 @@ function ClientDashboardContent() {
   return (
     <ClientShell profile={shellProfile}>
       {loading || joining ? (
-        <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="grid gap-4 pb-24 xl:grid-cols-[1.2fr_0.8fr] xl:pb-0">
           <div className="rounded-[24px] border border-white/[0.06] bg-white/[0.03] p-6">
             <div className="skeleton h-4 w-32" />
             <div className="mt-4 skeleton h-14 w-[70%]" />
@@ -280,16 +280,16 @@ function ClientDashboardContent() {
           {error}
         </GlassPanel>
       ) : data ? (
-        <div className="page-enter flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
+        <div className="page-enter flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pb-[calc(6rem+env(safe-area-inset-bottom))] sm:gap-5 xl:pb-0">
           <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
             <GlassPanel className="overflow-hidden p-0">
-              <div className="p-6">
+              <div className="p-5 sm:p-6">
                 <p className="card-eyebrow text-[var(--accent-bright)]">Client HQ</p>
-                <h1 className="mt-3 font-display text-[clamp(2.5rem,5vw,3.6rem)] font-bold leading-[0.95] tracking-[-0.07em] text-white">
+                <h1 className="mt-3 max-w-[12ch] font-display text-[2.15rem] font-bold leading-[0.98] tracking-[-0.065em] text-white sm:text-[clamp(2.5rem,5vw,3.6rem)]">
                   Welcome back, {data.profile.name.split(" ")[0]}.
                 </h1>
-                <div className="mt-5 flex flex-wrap items-center gap-3">
-                  <span className="rounded-full border border-[rgba(16,185,129,0.25)] bg-[rgba(16,185,129,0.12)] px-4 py-2 text-[14px] font-semibold text-[var(--green-bright)]">
+                <div className="mt-5 flex flex-wrap items-center gap-2 sm:gap-3">
+                  <span className="rounded-full border border-[rgba(16,185,129,0.25)] bg-[rgba(16,185,129,0.12)] px-3.5 py-2 text-[12px] font-semibold text-[var(--green-bright)] sm:px-4 sm:text-[14px]">
                     {data.stats.membershipStatus}
                   </span>
                   <span className="rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--text-secondary)]">
@@ -300,9 +300,9 @@ function ClientDashboardContent() {
                   </span>
                 </div>
               </div>
-              <div className="border-t border-white/[0.06] px-6 py-5">
+              <div className="border-t border-white/[0.06] px-4 py-4 sm:px-6 sm:py-5">
                 {data.linkedCoach ? (
-                  <div className="flex flex-col gap-4 rounded-[20px] border border-white/[0.07] bg-[linear-gradient(135deg,rgba(37,99,235,0.10),rgba(255,255,255,0.02))] p-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex flex-col gap-4 rounded-[20px] border border-white/[0.07] bg-[linear-gradient(135deg,rgba(37,99,235,0.10),rgba(255,255,255,0.02))] p-3.5 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-3">
                       {data.linkedCoach.avatar ? (
                         <img src={data.linkedCoach.avatar} alt={data.linkedCoach.name} className="h-12 w-12 rounded-full object-cover" />
@@ -321,11 +321,11 @@ function ClientDashboardContent() {
                         <p className="text-[13px] text-[var(--text-secondary)]">{data.linkedCoach.specialty}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="rounded-full border border-[var(--border-accent)] bg-[var(--accent-dim)] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--accent-bright)]">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2 sm:flex sm:gap-3">
+                      <span className="whitespace-nowrap rounded-full border border-[var(--border-accent)] bg-[var(--accent-dim)] px-3 py-2 text-center font-mono text-[9px] uppercase tracking-[0.13em] text-[var(--accent-bright)] sm:px-4 sm:text-[11px] sm:tracking-[0.16em]">
                         Room {data.linkedCoach.roomId}
                       </span>
-                      <a href="/client/messages" className="btn-primary inline-flex items-center gap-2 px-4 py-3 text-[13px]">
+                      <a href="/client/messages" className="btn-primary inline-flex min-w-0 items-center justify-center gap-2 px-3 py-3 text-[12px] sm:px-4 sm:text-[13px]">
                         <MessageSquareText className="h-4 w-4" />
                         Message Coach
                       </a>
@@ -335,21 +335,21 @@ function ClientDashboardContent() {
                   <div className="rounded-[20px] border border-dashed border-white/[0.08] bg-white/[0.02] px-6 py-12 text-center">
                     <div className="text-3xl opacity-25 grayscale">◎</div>
                     <p className="mx-auto mt-3 max-w-[320px] text-sm leading-7 text-[var(--text-ghost)]">
-                      No coach linked yet. Open <span className="font-semibold text-white">Find your coach</span> from the side menu or use your room code to connect.
+                      No coach linked yet. Open <span className="font-semibold text-white">Coach</span> from the bottom navigation or use your room code to connect.
                     </p>
                   </div>
                 )}
               </div>
             </GlassPanel>
 
-            <GlassPanel className="p-6">
+            <GlassPanel className="p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-[var(--accent-bright)]">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="card-eyebrow">Signals</p>
-                  <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Your performance pulse</h2>
+                  <h2 className="mt-2 font-display text-[1.5rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.8rem]">Your performance pulse</h2>
                 </div>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
@@ -361,15 +361,15 @@ function ClientDashboardContent() {
             </GlassPanel>
           </section>
 
-          <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-            <GlassPanel className="p-6">
+          <section id="programs" className="grid scroll-mt-24 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+            <GlassPanel className="p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white/75">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="card-eyebrow">Assigned Programs</p>
-                  <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Training stack</h2>
+                  <h2 className="mt-2 font-display text-[1.5rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.8rem]">Training stack</h2>
                 </div>
               </div>
               <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -389,14 +389,14 @@ function ClientDashboardContent() {
             </GlassPanel>
 
             <div className="grid gap-4">
-              <GlassPanel className="p-6">
+              <GlassPanel className="p-5 sm:p-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white/75">
                     <MessageSquareText className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="card-eyebrow">Room Signals</p>
-                    <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">What matters now</h2>
+                    <h2 className="mt-2 font-display text-[1.5rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.8rem]">What matters now</h2>
                   </div>
                 </div>
                 <div className="mt-6 space-y-3">
@@ -408,14 +408,14 @@ function ClientDashboardContent() {
                 </div>
               </GlassPanel>
 
-              <GlassPanel className="p-6">
+              <GlassPanel className="p-5 sm:p-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white/75">
                     <ShoppingBag className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="card-eyebrow">Coach Store</p>
-                    <h2 className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Available offers</h2>
+                    <h2 className="mt-2 font-display text-[1.5rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.8rem]">Available offers</h2>
                   </div>
                 </div>
                 <div className="mt-6 grid gap-4">

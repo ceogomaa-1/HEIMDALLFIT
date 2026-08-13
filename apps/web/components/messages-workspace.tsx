@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ChevronDown, ImagePlus, Loader2, Paperclip, Plus, Search, SendHorizontal, ShieldCheck, Smile } from "lucide-react";
+import { ArrowLeft, ChevronDown, ImagePlus, Loader2, Paperclip, Plus, Search, SendHorizontal, ShieldCheck, Smile } from "lucide-react";
 import { cn } from "../lib/utils";
 
 type PortalRole = "coach" | "client";
@@ -181,7 +181,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
 
       const nextThreads = (payload.threads || []) as ThreadSummary[];
       setThreads(nextThreads);
-      setSelectedId((current) => current || nextThreads[0]?.id || null);
+      setSelectedId((current) => current || (window.matchMedia("(min-width: 768px)").matches ? nextThreads[0]?.id || null : null));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load conversations.");
     } finally {
@@ -399,10 +399,10 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
 
   return (
     <div
-      className="grid grid-cols-[340px_minmax(0,1fr)] overflow-hidden rounded-[26px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(12,12,20,0.96),rgba(8,8,14,0.98))] shadow-[var(--shadow-panel)]"
+      className="grid grid-cols-1 overflow-hidden bg-[linear-gradient(180deg,rgba(12,12,20,0.96),rgba(8,8,14,0.98))] md:grid-cols-[320px_minmax(0,1fr)] md:rounded-[26px] md:border md:border-white/[0.06] md:shadow-[var(--shadow-panel)] xl:grid-cols-[340px_minmax(0,1fr)]"
       style={{ flex: 1, minHeight: 0 }}
     >
-      <aside className="flex min-h-0 flex-col border-r border-white/[0.06] bg-[rgba(9,10,16,0.92)]">
+      <aside className={cn("min-h-0 flex-col border-r border-white/[0.06] bg-[rgba(9,10,16,0.92)]", selectedId ? "hidden md:flex" : "flex")}>
         <div className="border-b border-white/[0.06] px-4 py-4">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -516,7 +516,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
         </div>
       </aside>
 
-      <section className="flex min-h-0 flex-col bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.10)_0%,rgba(10,11,18,0.96)_40%,rgba(8,8,14,0.98)_100%)]">
+      <section className={cn("min-h-0 flex-col bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.10)_0%,rgba(10,11,18,0.96)_40%,rgba(8,8,14,0.98)_100%)]", selectedId ? "flex" : "hidden md:flex")}>
         {!selectedThread ? (
           <div className="flex h-full flex-col items-center justify-center gap-4">
             <div className="skeleton h-14 w-14 rounded-full" />
@@ -526,7 +526,10 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
           <ThreadViewportSkeleton />
         ) : threadPayload ? (
           <>
-            <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/6 px-5">
+            <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/6 px-3 sm:px-5">
+              <button type="button" aria-label="Back to conversations" onClick={() => setSelectedId(null)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 md:hidden">
+                <ArrowLeft className="h-5 w-5" />
+              </button>
               <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border text-sm font-semibold text-white", selectedThread.unread ? "border-[var(--accent-bright)] shadow-[0_0_0_3px_rgba(37,99,235,0.10)]" : "border-white/[0.08]")}>
                 {selectedThread.counterpartAvatar ? (
                   <img src={selectedThread.counterpartAvatar} alt={threadPayload.thread.counterpartName} className="h-full w-full object-cover" />
@@ -543,7 +546,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
               </button>
             </div>
 
-            <div ref={threadViewportRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
+            <div ref={threadViewportRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-6 sm:py-5">
               {portal === "client" && (threadPayload.onboarding.status === "pending" || threadPayload.onboarding.status === "submitted") ? (
                 <div className="mx-auto max-w-2xl rounded-[24px] border border-[rgba(37,99,235,0.16)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[var(--shadow-card)]">
                   <div className="flex items-center gap-3">
@@ -559,7 +562,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
                     <textarea value={onboardingDraft.injuries} onChange={(event) => setOnboardingDraft((current) => ({ ...current, injuries: event.target.value }))} placeholder="Injuries / limitations" className="min-h-[92px] rounded-[16px] border border-[#343540] bg-[#12131a] px-3 py-2.5 text-sm text-white outline-none md:col-span-2" />
                     <textarea value={onboardingDraft.goals} onChange={(event) => setOnboardingDraft((current) => ({ ...current, goals: event.target.value }))} placeholder="Goals" className="min-h-[92px] rounded-[16px] border border-[#343540] bg-[#12131a] px-3 py-2.5 text-sm text-white outline-none md:col-span-2" />
                   </div>
-                  <div className="mt-4 flex items-center justify-between gap-4">
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <p className="text-xs text-white/55">{threadPayload.onboarding.submittedAt ? `Last sent ${threadPayload.onboarding.submittedAt}` : "Not submitted yet."}</p>
                     <button type="button" onClick={handleOnboardingSubmit} disabled={submittingOnboarding} className="btn-primary rounded-full px-4 py-2.5 text-xs">
                       {submittingOnboarding ? "Sending..." : threadPayload.onboarding.status === "submitted" ? "Update onboarding" : "Submit onboarding"}
@@ -575,7 +578,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
                   </span>
                   <div
                     className={cn(
-                      "max-w-[70%] animate-bounce-in rounded-[18px] px-4 py-3 text-[13px] leading-6 shadow-[0_12px_30px_rgba(0,0,0,0.18)]",
+                      "max-w-[86%] animate-bounce-in rounded-[18px] px-4 py-3 text-[13px] leading-6 shadow-[0_12px_30px_rgba(0,0,0,0.18)] sm:max-w-[78%] xl:max-w-[70%]",
                       message.mine
                         ? "rounded-br-[4px] border border-[rgba(37,99,235,0.25)] bg-[rgba(37,99,235,0.15)] text-[var(--text-primary)]"
                         : "rounded-bl-[4px] border border-white/[0.08] bg-white/[0.05] text-[var(--text-secondary)]"
@@ -606,7 +609,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
               ))}
             </div>
 
-            <div className="shrink-0 border-t border-white/6 px-5 py-4">
+            <div className="shrink-0 border-t border-white/6 px-3 py-3 sm:px-5 sm:py-4">
               {error ? <div className="mb-3 rounded-[16px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">{error}</div> : null}
               <div className="mb-3 flex flex-wrap gap-2">
                 {attachments.map((file) => (
@@ -615,8 +618,8 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
                   </span>
                 ))}
               </div>
-              <div className="flex min-h-[56px] items-center gap-3 rounded-[16px] border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 backdrop-blur-sm">
-                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:scale-110 hover:bg-white/[0.10]">
+              <div className="flex min-h-[54px] items-center gap-2 rounded-[16px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 backdrop-blur-sm sm:gap-3 sm:px-3 sm:py-2.5">
+                <button type="button" className="hidden h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:scale-110 hover:bg-white/[0.10] sm:flex">
                   <Smile className="h-4 w-4" />
                 </button>
                 <textarea

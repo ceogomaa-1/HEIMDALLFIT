@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Award, Compass, Search, Users } from "lucide-react";
 import { ClientShell } from "../../../components/client-shell";
@@ -28,6 +28,7 @@ export default function FindCoachPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const [profile, setProfile] = useState({
     name: "Client",
     handle: "@client",
@@ -74,7 +75,7 @@ export default function FindCoachPage() {
       });
 
       try {
-        const response = await fetch(`/api/client/coaches?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/client/coaches?q=${encodeURIComponent(deferredQuery)}`);
         const payload = await response.json();
         if (!response.ok) {
           throw new Error(payload.error || "Unable to load coaches.");
@@ -93,20 +94,20 @@ export default function FindCoachPage() {
     return () => {
       active = false;
     };
-  }, [query, router, supabase]);
+  }, [deferredQuery, router, supabase]);
 
   return (
     <ClientShell profile={profile}>
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-4 pr-1">
-        <section className="flex flex-col gap-3 border-b border-[#232329] pb-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-4 xl:pr-1">
+        <section className="flex flex-col gap-4 border-b border-[#232329] pb-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[13px] text-white/45">Coach discovery</p>
-            <h1 className="mt-1 text-[1.8rem] font-semibold tracking-[-0.05em] text-white">Find your coach</h1>
-            <p className="mt-2 max-w-[720px] text-[13px] text-white/45">
+            <h1 className="mt-1 font-display text-[1.65rem] font-semibold tracking-[-0.05em] text-white sm:text-[1.8rem]">Find your coach</h1>
+            <p className="mt-2 max-w-[720px] text-[13px] leading-6 text-white/45">
               Explore coaches on HEIMDALLFIT, review their positioning, and join a room the moment you already have their room code.
             </p>
           </div>
-          <div className="relative w-full max-w-[380px]">
+          <div className="relative w-full lg:max-w-[380px]">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
             <input
               value={query}
@@ -128,14 +129,14 @@ export default function FindCoachPage() {
             {coaches.length ? (
               coaches.map((coach) => (
                 <GlassPanel key={coach.id} className="overflow-hidden border-[#24242b] bg-[#1a1a20] p-0">
-                  <div className="relative h-40 w-full overflow-hidden">
+                  <div className="relative h-36 w-full overflow-hidden sm:h-40">
                     {coach.banner ? (
                       <img src={coach.banner} alt={`${coach.name} banner`} className="h-full w-full object-cover" />
                     ) : (
                       <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(110,18,18,0.32),transparent_28%),linear-gradient(135deg,#17171d,#24242c)]" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#17171d] to-transparent" />
-                    <div className="absolute bottom-4 left-4 flex items-end gap-3">
+                    <div className="absolute inset-x-4 bottom-4 flex min-w-0 items-end gap-3">
                       {coach.avatar ? (
                         <img src={coach.avatar} alt={coach.name} className="h-14 w-14 rounded-full border-4 border-[#17171d] object-cover" />
                       ) : (
@@ -148,13 +149,13 @@ export default function FindCoachPage() {
                             .join("")}
                         </div>
                       )}
-                      <div>
-                        <p className="text-xl font-semibold text-white">{coach.name}</p>
-                        <p className="text-sm text-white/60">{coach.specialty}</p>
+                      <div className="min-w-0">
+                        <p className="truncate text-lg font-semibold text-white sm:text-xl">{coach.name}</p>
+                        <p className="truncate text-sm text-white/60">{coach.specialty}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-4 p-5">
+                  <div className="space-y-4 p-4 sm:p-5">
                     <p className="text-sm leading-7 text-white/58">{coach.bio}</p>
                     {coach.gallery.length ? (
                       <div>
