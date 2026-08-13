@@ -14,7 +14,7 @@ export function GlassPanel({
   return (
     <div
       id={id}
-      className={className}
+      className={`glass-panel ${className}`}
       style={{
         background: "linear-gradient(180deg, rgba(255,255,255,0.048) 0%, rgba(255,255,255,0.028) 100%)",
         backdropFilter: "blur(28px) saturate(1.25)",
@@ -28,6 +28,7 @@ export function GlassPanel({
       }}
     >
       <div
+        className="glass-panel-shine"
         style={{
           position: "absolute",
           top: 0,

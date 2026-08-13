@@ -328,13 +328,13 @@ export default function CoachProfilePage() {
 
   return (
     <CoachShell profile={shellProfile}>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-4 pr-1">
-        <section className="flex flex-col gap-4 border-b border-white/[0.06] pb-5 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex min-h-0 flex-1 flex-col gap-6 pb-24 lg:pb-4">
+        <section className="flex flex-col gap-4 pb-2 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">Coach workspace</p>
-            <h1 className="mt-2 font-display text-[clamp(2rem,4vw,2.8rem)] font-bold tracking-[-0.05em] text-white">My Profile</h1>
+            <p className="text-sm font-medium text-blue-400">Public profile</p>
+            <h1 className="mt-2 font-display text-[clamp(2.1rem,5vw,3.4rem)] font-bold tracking-[-0.055em] text-white">Make a strong first impression.</h1>
             <p className="mt-2 text-[14px] text-[var(--text-secondary)]">
-              Configure your public coach identity, brand, and room details.
+              Keep your coaching identity, proof, and room details up to date.
             </p>
           </div>
 

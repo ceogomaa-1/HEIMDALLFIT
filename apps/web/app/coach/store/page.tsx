@@ -893,8 +893,8 @@ export default function CoachStorePage() {
 
   return (
     <CoachShell profile={profile}>
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] px-5">
+      <div className="flex min-h-0 flex-1 flex-col pb-24 lg:pb-0">
+        <div className="flex shrink-0 flex-col gap-4 pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-[var(--border-accent)] bg-[var(--accent-dim)] text-[var(--accent-bright)]">
               <ShoppingBag className="h-4 w-4" />
@@ -926,7 +926,7 @@ export default function CoachStorePage() {
           ) : <div />}
 
           <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-[200px] items-center rounded-full border border-white/[0.08] bg-white/[0.04] p-[3px]">
+            <div className="relative flex h-10 w-[180px] items-center rounded-full bg-white/[0.05] p-[3px] sm:w-[200px]">
               <div style={{ position: "absolute", top: "3px", left: mode === "edit" ? "3px" : "calc(50% + 0px)", width: "calc(50% - 3px)", bottom: "3px", background: mode === "edit" ? "rgba(37,99,235,0.25)" : "rgba(255,255,255,0.10)", border: mode === "edit" ? "1px solid rgba(37,99,235,0.40)" : "1px solid rgba(255,255,255,0.15)", borderRadius: "999px", transition: "left 0.3s cubic-bezier(0.22,1,0.36,1), background 0.3s" }} />
               {(["edit", "preview"] as PageMode[]).map((entry) => (
                 <button key={entry} type="button" onClick={() => setMode(entry)} style={{ position: "relative", flex: 1, padding: "6px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: mode === entry ? "white" : "rgba(255,255,255,0.4)", transition: "color 0.2s", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
@@ -940,7 +940,7 @@ export default function CoachStorePage() {
         </div>
 
         {loading ? (
-          <div className="grid min-h-0 flex-1 gap-5 overflow-hidden p-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid min-h-0 flex-1 gap-5 pt-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-h-0 overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.02] p-5">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -967,7 +967,7 @@ export default function CoachStorePage() {
             </div>
           </div>
         ) : mode === "edit" ? (
-          <div className="grid min-h-0 flex-1 gap-5 overflow-hidden p-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid min-h-0 flex-1 gap-5 pt-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="flex min-h-0 flex-col overflow-hidden">
               <div className="mb-4 flex flex-wrap items-center gap-3">
                 <div className="flex flex-1 flex-wrap items-center gap-2">

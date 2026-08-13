@@ -412,11 +412,11 @@ export default function CoachBuilderPage() {
           <div className="skeleton" style={{ margin: "16px", borderRadius: "18px" }} />
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden", gap: 0 }}>
+        <div className="coach-builder-page" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden", gap: 0 }}>
           {error ? <div style={{ marginBottom: "14px", borderRadius: "18px", border: "1px solid rgba(239,68,68,0.28)", background: "rgba(127,29,29,0.24)", padding: "14px 18px", color: "rgb(254 205 211)", fontSize: "14px" }}>{error}</div> : null}
           {success ? <div style={{ marginBottom: "14px", borderRadius: "18px", border: "1px solid rgba(52,211,153,0.24)", background: "rgba(6,78,59,0.22)", padding: "14px 18px", color: "rgb(167 243 208)", fontSize: "14px" }}>{success}</div> : null}
 
-          <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", background: "#0A0A0F" }}>
+          <div className="coach-builder-shell" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", background: "#0A0A0F" }}>
             <input
               ref={fileInputRef}
               type="file"
@@ -430,7 +430,7 @@ export default function CoachBuilderPage() {
                 event.target.value = "";
               }}
             />
-            <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "52px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(10,10,16,0.95)", padding: "0 16px", gap: "12px", flexShrink: 0 }}>
+            <header className="coach-builder-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "52px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(10,10,16,0.95)", padding: "0 16px", gap: "12px", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
                 <input value={activeDocument.title} onChange={(e) => updateDocument((cur) => ({ ...cur, title: e.target.value }))} style={{ background: "transparent", border: "none", outline: "none", fontSize: "14px", fontWeight: "600", fontFamily: "'Clash Display', sans-serif", color: "rgba(255,255,255,0.90)", maxWidth: "240px", minWidth: "80px" }} />
                 <span style={{ padding: "2px 10px", borderRadius: "20px", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", background: "rgba(37,99,235,0.10)", border: "1px solid rgba(37,99,235,0.20)", color: "#3B82F6", fontFamily: "'JetBrains Mono', monospace", whiteSpace: "nowrap" }}>
@@ -438,20 +438,20 @@ export default function CoachBuilderPage() {
                 </span>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <div className="coach-builder-zoom" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <button type="button" onClick={() => setZoom((z) => Math.max(50, z - 10))} style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ZoomOut style={{ width: 13, height: 13 }} /></button>
                 <span style={{ width: "46px", textAlign: "center", fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.65)" }}>{zoom}%</span>
                 <button type="button" onClick={() => setZoom((z) => Math.min(150, z + 10))} style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ZoomIn style={{ width: 13, height: 13 }} /></button>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="coach-builder-actions" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <button type="button" onClick={saveDocument} disabled={saving} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.80)", fontSize: "12px", fontWeight: "500", cursor: "pointer", opacity: saving ? 0.6 : 1 }}><Save style={{ width: 13, height: 13 }} />{saving ? "Saving..." : "Save"}</button>
                 <button type="button" onClick={sendDocument} disabled={sending} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 16px", borderRadius: "10px", background: "linear-gradient(135deg, #00A3FF, #0070CC)", border: "none", color: "#fff", fontSize: "12px", fontWeight: "600", cursor: "pointer", boxShadow: "0 3px 14px rgba(0,163,255,0.40)", opacity: sending ? 0.6 : 1 }}><Send style={{ width: 13, height: 13 }} />{sending ? "Sending..." : "Send to Client"}</button>
               </div>
             </header>
 
-            <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
-              <div style={{ width: "60px", flexShrink: 0, background: "rgba(10,10,16,0.90)", borderRight: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "12px", gap: "6px" }}>
+            <div className="coach-builder-body" style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+              <div className="coach-builder-rail" style={{ width: "60px", flexShrink: 0, background: "rgba(10,10,16,0.90)", borderRight: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "12px", gap: "6px" }}>
                 {[{ key: "templates", Icon: LayoutTemplate, label: "Templates" }, { key: "blocks", Icon: Sparkles, label: "Blocks" }, { key: "drafts", Icon: Layers3, label: "Drafts" }].map(({ key, Icon, label }) => (
                   <button key={key} type="button" title={label} onClick={() => setLeftPanel((prev) => (prev === key ? null : (key as "templates" | "blocks" | "drafts")))} style={{ width: "40px", height: "40px", borderRadius: "12px", background: leftPanel === key ? "rgba(0,163,255,0.12)" : "rgba(255,255,255,0.04)", border: `1px solid ${leftPanel === key ? "rgba(0,163,255,0.30)" : "rgba(255,255,255,0.07)"}`, color: leftPanel === key ? "#00A3FF" : "rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                     <Icon style={{ width: 16, height: 16 }} />
@@ -461,7 +461,7 @@ export default function CoachBuilderPage() {
                 <button type="button" title="Add Section" onClick={() => addSection()} style={{ width: "40px", height: "40px", borderRadius: "12px", background: "rgba(67,208,127,0.10)", border: "1px solid rgba(67,208,127,0.22)", color: "#43D07F", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Plus style={{ width: 16, height: 16 }} /></button>
               </div>
               {leftPanel ? (
-                <div style={{ width: "240px", flexShrink: 0, background: "rgba(11,11,18,0.97)", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", overflowY: "auto", padding: "16px 12px" }}>
+                <div className="coach-builder-library" style={{ width: "240px", flexShrink: 0, background: "rgba(11,11,18,0.97)", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", overflowY: "auto", padding: "16px 12px" }}>
                   <p style={{ fontSize: "9px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "10px", fontFamily: "'JetBrains Mono', monospace" }}>{leftPanel === "templates" ? "Templates" : leftPanel === "blocks" ? "Add Block" : "Saved Drafts"}</p>
 
                   {leftPanel === "templates" ? (
@@ -513,8 +513,8 @@ export default function CoachBuilderPage() {
                 </div>
               ) : null}
 
-              <div style={{ flex: 1, minWidth: 0, minHeight: 0, background: "#ECEEF4", overflow: "auto", display: "flex", flexDirection: "column", alignItems: "center", padding: "32px 40px 120px", gap: "24px", boxSizing: "border-box" }}>
-                <div style={{ width: "100%", maxWidth: "980px", minWidth: "620px", flexShrink: 0, background: "#fff", borderRadius: "16px", boxShadow: "0 8px 40px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06)", overflow: "hidden", transform: `scale(${zoom / 100})`, transformOrigin: "top center", marginBottom: zoom < 100 ? `${(zoom - 100) * 6}px` : "0" }}>
+              <div className="coach-builder-canvas" style={{ flex: 1, minWidth: 0, minHeight: 0, background: "#ECEEF4", overflow: "auto", display: "flex", flexDirection: "column", alignItems: "center", padding: "32px 40px 120px", gap: "24px", boxSizing: "border-box" }}>
+                <div className="coach-builder-document" style={{ width: "100%", maxWidth: "980px", minWidth: "620px", flexShrink: 0, background: "#fff", borderRadius: "16px", boxShadow: "0 8px 40px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06)", overflow: "hidden", transform: `scale(${zoom / 100})`, transformOrigin: "top center", marginBottom: zoom < 100 ? `${(zoom - 100) * 6}px` : "0" }}>
                   <div style={{ background: "linear-gradient(135deg, #0A0A0F 0%, #141419 100%)", padding: "28px 32px 24px", position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "200px", height: "200px", borderRadius: "50%", background: activeDocument.kind === "onboarding_form" ? "radial-gradient(circle, rgba(0,163,255,0.15) 0%, transparent 70%)" : activeDocument.kind === "diet_plan" ? "radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)" : "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)", pointerEvents: "none" }} />
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "20px", position: "relative" }}>
@@ -616,7 +616,7 @@ export default function CoachBuilderPage() {
                 </div>
               </div>
 
-              <div style={{ width: "264px", flexShrink: 0, background: "rgba(10,10,16,0.95)", borderLeft: "1px solid rgba(255,255,255,0.06)", overflowY: "auto", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div className="coach-builder-properties" style={{ width: "264px", flexShrink: 0, background: "rgba(10,10,16,0.95)", borderLeft: "1px solid rgba(255,255,255,0.06)", overflowY: "auto", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <section>
                   <p style={{ fontSize: "9px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "10px", fontFamily: "'JetBrains Mono', monospace" }}>Document</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
