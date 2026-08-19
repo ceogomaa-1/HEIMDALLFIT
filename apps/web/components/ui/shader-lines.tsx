@@ -254,7 +254,7 @@ export function HomePortalHero() {
               transition={{ duration: 0.5 }}
               className="flex flex-1 flex-col items-center justify-center text-center"
             >
-              <h1 className="text-5xl font-bold tracking-[-0.05em] md:text-7xl">HEIMDALLFIT</h1>
+              <h1 className="text-5xl font-bold tracking-[-0.02em] md:text-7xl">HEIMDALLFIT</h1>
               <p className="mt-4 text-sm font-medium uppercase tracking-[0.45em] text-white/55 md:text-base">
                 Invite, Manage, Win.
               </p>

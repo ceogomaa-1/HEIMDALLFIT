@@ -66,8 +66,8 @@ export default function ClientMessagesPage() {
   return (
     <ClientShell profile={profile}>
       {checking ? (
-        <div className="grid h-full min-h-[520px] flex-1 grid-cols-[320px_minmax(0,1fr)] gap-0 overflow-hidden rounded-[24px] border border-[var(--border-soft)] bg-[var(--bg-surface)]">
-          <div className="flex flex-col gap-4 p-5">
+        <div className="grid h-full min-h-[420px] flex-1 grid-cols-1 gap-0 overflow-hidden bg-[var(--bg-surface)] md:min-h-[520px] md:grid-cols-[320px_minmax(0,1fr)] md:rounded-[24px] md:border md:border-[var(--border-soft)]">
+          <div className="hidden flex-col gap-4 p-5 md:flex">
             <div className="skeleton h-11 rounded-[14px]" />
             <div className="skeleton h-20 rounded-[18px]" />
             <div className="skeleton h-20 rounded-[18px]" />

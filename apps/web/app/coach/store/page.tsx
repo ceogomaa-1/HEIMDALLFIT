@@ -256,12 +256,12 @@ function ProductCard({
 
       <div className="space-y-4 p-5">
         <div>
-          <h3 className="font-display text-[18px] font-semibold tracking-[-0.04em] text-white">{product.title}</h3>
+          <h3 className="font-display text-[18px] font-semibold tracking-[-0.015em] text-white">{product.title}</h3>
           <p className="mt-2 line-clamp-2 text-[13px] leading-6 text-[var(--text-secondary)]">{product.description || "No description yet."}</p>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="font-display text-[22px] font-semibold tracking-[-0.05em] text-white">{formatCurrency(product.price)}</span>
+          <span className="font-display text-[22px] font-semibold tracking-[-0.02em] text-white">{formatCurrency(product.price)}</span>
           {product.compare_at_price ? (
             <span className="text-[14px] text-[var(--text-muted)] line-through">{formatCurrency(product.compare_at_price)}</span>
           ) : null}
@@ -387,7 +387,7 @@ function ProductDrawer({
         <header className="flex items-center justify-between border-b border-white/[0.06] px-6 py-5">
           <div>
             <p className="card-eyebrow">Store Product</p>
-            <h2 className="mt-2 font-display text-[22px] font-semibold tracking-[-0.04em] text-white">
+            <h2 className="mt-2 font-display text-[22px] font-semibold tracking-[-0.015em] text-white">
               {drawerMode === "add" ? "Add Product" : "Edit Product"}
             </h2>
           </div>
@@ -893,14 +893,14 @@ export default function CoachStorePage() {
 
   return (
     <CoachShell profile={profile}>
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] px-5">
+      <div className="flex min-h-0 flex-1 flex-col pb-24 lg:pb-0">
+        <div className="flex shrink-0 flex-col gap-4 pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-[var(--border-accent)] bg-[var(--accent-dim)] text-[var(--accent-bright)]">
               <ShoppingBag className="h-4 w-4" />
             </div>
             <div className="flex items-center gap-3">
-              <h1 className="font-display text-[20px] font-semibold tracking-[-0.04em] text-white">My Store</h1>
+              <h1 className="font-display text-[20px] font-semibold tracking-[-0.015em] text-white">My Store</h1>
               <span className="rounded-full border border-[rgba(16,185,129,0.24)] bg-[rgba(16,185,129,0.12)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--green)]">
                 {activeProductsCount} live
               </span>
@@ -926,7 +926,7 @@ export default function CoachStorePage() {
           ) : <div />}
 
           <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-[200px] items-center rounded-full border border-white/[0.08] bg-white/[0.04] p-[3px]">
+            <div className="relative flex h-10 w-[180px] items-center rounded-full bg-white/[0.05] p-[3px] sm:w-[200px]">
               <div style={{ position: "absolute", top: "3px", left: mode === "edit" ? "3px" : "calc(50% + 0px)", width: "calc(50% - 3px)", bottom: "3px", background: mode === "edit" ? "rgba(37,99,235,0.25)" : "rgba(255,255,255,0.10)", border: mode === "edit" ? "1px solid rgba(37,99,235,0.40)" : "1px solid rgba(255,255,255,0.15)", borderRadius: "999px", transition: "left 0.3s cubic-bezier(0.22,1,0.36,1), background 0.3s" }} />
               {(["edit", "preview"] as PageMode[]).map((entry) => (
                 <button key={entry} type="button" onClick={() => setMode(entry)} style={{ position: "relative", flex: 1, padding: "6px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: mode === entry ? "white" : "rgba(255,255,255,0.4)", transition: "color 0.2s", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
@@ -940,7 +940,7 @@ export default function CoachStorePage() {
         </div>
 
         {loading ? (
-          <div className="grid min-h-0 flex-1 gap-5 overflow-hidden p-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid min-h-0 flex-1 gap-5 pt-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-h-0 overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.02] p-5">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -967,7 +967,7 @@ export default function CoachStorePage() {
             </div>
           </div>
         ) : mode === "edit" ? (
-          <div className="grid min-h-0 flex-1 gap-5 overflow-hidden p-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid min-h-0 flex-1 gap-5 pt-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="flex min-h-0 flex-col overflow-hidden">
               <div className="mb-4 flex flex-wrap items-center gap-3">
                 <div className="flex flex-1 flex-wrap items-center gap-2">
@@ -1028,7 +1028,7 @@ export default function CoachStorePage() {
                   <GlassPanel className="flex h-[300px] items-center justify-center p-8 text-center">
                     <div className="max-w-[360px]">
                       <ShoppingBag className="mx-auto h-12 w-12 text-white/15" />
-                      <h3 className="mt-6 font-display text-[24px] font-semibold tracking-[-0.04em] text-white">
+                      <h3 className="mt-6 font-display text-[24px] font-semibold tracking-[-0.015em] text-white">
                         {filterTab === "all" ? "No products yet" : "No products match this view"}
                       </h3>
                       <p className="mt-3 text-[14px] leading-7 text-[var(--text-secondary)]">
@@ -1052,7 +1052,7 @@ export default function CoachStorePage() {
               <div className="space-y-4">
                 <GlassPanel className="p-5">
                   <p className="card-eyebrow">Store Revenue</p>
-                  <div className="mt-3 font-display text-[34px] font-semibold tracking-[-0.06em] text-white">
+                  <div className="mt-3 font-display text-[34px] font-semibold tracking-[-0.025em] text-white">
                     {formatCurrency(totalRevenueCount)}
                   </div>
                   <div className="mt-3">
@@ -1185,7 +1185,7 @@ export default function CoachStorePage() {
                   <div className="relative flex h-full flex-col justify-between gap-8 lg:flex-row lg:items-end">
                     <div className="max-w-[680px]">
                       <p className="card-eyebrow">Coach Storefront</p>
-                      <h2 className="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.06em] text-white">
+                      <h2 className="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.025em] text-white">
                         {profile.name}&apos;s Store
                       </h2>
                       <p className="mt-4 max-w-[520px] text-[15px] leading-7 text-[var(--text-secondary)]">
@@ -1194,7 +1194,7 @@ export default function CoachStorePage() {
                     </div>
                     <div className="rounded-[20px] border border-white/[0.08] bg-black/25 px-5 py-4 backdrop-blur-md">
                       <p className="card-eyebrow">Available</p>
-                      <p className="mt-2 font-display text-[28px] font-semibold tracking-[-0.05em] text-white">
+                      <p className="mt-2 font-display text-[28px] font-semibold tracking-[-0.02em] text-white">
                         {activePreviewProducts.length} products
                       </p>
                     </div>
@@ -1248,14 +1248,14 @@ export default function CoachStorePage() {
                         ★ Featured
                       </span>
                       <div>
-                        <h3 className="font-display text-[32px] font-semibold tracking-[-0.05em] text-white">{featuredProduct.title}</h3>
+                        <h3 className="font-display text-[32px] font-semibold tracking-[-0.02em] text-white">{featuredProduct.title}</h3>
                         <p className="mt-3 max-w-[560px] text-[15px] leading-7 text-[var(--text-secondary)]">
                           {featuredProduct.description || "A high-conviction offer presented exactly how clients will discover it in your storefront."}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-3">
-                          <span className="font-display text-[28px] font-semibold tracking-[-0.05em] text-white">{formatCurrency(featuredProduct.price)}</span>
+                          <span className="font-display text-[28px] font-semibold tracking-[-0.02em] text-white">{formatCurrency(featuredProduct.price)}</span>
                           {featuredProduct.compare_at_price ? (
                             <span className="text-[15px] text-[var(--text-muted)] line-through">{formatCurrency(featuredProduct.compare_at_price)}</span>
                           ) : null}
@@ -1300,13 +1300,13 @@ export default function CoachStorePage() {
                             {meta.label}
                           </span>
                           <div>
-                            <h3 className="font-display text-[20px] font-semibold tracking-[-0.04em] text-white">{product.title}</h3>
+                            <h3 className="font-display text-[20px] font-semibold tracking-[-0.015em] text-white">{product.title}</h3>
                             <p className="mt-2 line-clamp-2 text-[14px] leading-6 text-[var(--text-secondary)]">
                               {product.description || "This offer is ready to convert clients directly from the portal."}
                             </p>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="font-display text-[24px] font-semibold tracking-[-0.05em] text-white">{formatCurrency(product.price)}</span>
+                            <span className="font-display text-[24px] font-semibold tracking-[-0.02em] text-white">{formatCurrency(product.price)}</span>
                             {product.compare_at_price ? (
                               <span className="text-[14px] text-[var(--text-muted)] line-through">{formatCurrency(product.compare_at_price)}</span>
                             ) : null}
@@ -1333,7 +1333,7 @@ export default function CoachStorePage() {
                 <GlassPanel className="flex min-h-[320px] items-center justify-center p-8 text-center">
                   <div className="max-w-[420px]">
                     <ShoppingBag className="mx-auto h-14 w-14 text-white/15" />
-                    <h3 className="mt-6 font-display text-[24px] font-semibold tracking-[-0.05em] text-white">Your store is empty</h3>
+                    <h3 className="mt-6 font-display text-[24px] font-semibold tracking-[-0.02em] text-white">Your store is empty</h3>
                     <p className="mt-3 text-[14px] leading-7 text-[var(--text-secondary)]">
                       Add products in Edit mode and they&apos;ll instantly show up here exactly the way clients will experience them.
                     </p>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ChevronDown, ImagePlus, Loader2, Paperclip, Plus, Search, SendHorizontal, ShieldCheck, Smile } from "lucide-react";
+import { ArrowLeft, CheckCheck, FileText, Loader2, MessageCircleMore, Paperclip, Search, SendHorizontal, ShieldCheck, X } from "lucide-react";
 import { cn } from "../lib/utils";
 
 type PortalRole = "coach" | "client";
@@ -87,13 +87,13 @@ function isImage(attachment: ThreadAttachment) {
 
 function ThreadListSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="divide-y divide-white/[0.055]">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex items-center gap-3 rounded-[18px] border border-white/[0.05] bg-white/[0.02] px-3 py-3">
-          <div className="skeleton h-12 w-12 rounded-full" />
+        <div key={index} className="flex items-center gap-3 px-4 py-4">
+          <div className="skeleton h-[52px] w-[52px] rounded-full" />
           <div className="min-w-0 flex-1 space-y-2">
-            <div className="skeleton h-3 w-24" />
-            <div className="skeleton h-3 w-full" />
+            <div className="skeleton h-3.5 w-28" />
+            <div className="skeleton h-3 w-4/5" />
           </div>
         </div>
       ))}
@@ -103,16 +103,16 @@ function ThreadListSkeleton() {
 
 function ThreadViewportSkeleton() {
   return (
-    <div className="flex h-full flex-col justify-between px-6 py-5">
-      <div className="skeleton h-10 w-48 rounded-full" />
-      <div className="space-y-4">
+    <div className="flex h-full flex-col justify-between px-4 py-6 sm:px-8">
+      <div />
+      <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, index) => (
           <div key={index} className={cn("flex", index % 2 === 0 ? "justify-start" : "justify-end")}>
-            <div className="skeleton h-16 w-[240px] rounded-[18px]" />
+            <div className="skeleton h-14 w-[min(72%,260px)] rounded-[20px]" />
           </div>
         ))}
       </div>
-      <div className="skeleton h-14 w-full rounded-[16px]" />
+      <div />
     </div>
   );
 }
@@ -153,8 +153,6 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
       return haystack.includes(query);
     });
   }, [threadQuery, threads]);
-  const quickThreads = useMemo(() => filteredThreads.slice(0, 6), [filteredThreads]);
-
   async function getAccessToken() {
     if (tokenRef.current) return tokenRef.current;
     const {
@@ -181,7 +179,7 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
 
       const nextThreads = (payload.threads || []) as ThreadSummary[];
       setThreads(nextThreads);
-      setSelectedId((current) => current || nextThreads[0]?.id || null);
+      setSelectedId((current) => current || (window.matchMedia("(min-width: 768px)").matches ? nextThreads[0]?.id || null : null));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load conversations.");
     } finally {
@@ -397,246 +395,222 @@ export function MessagesWorkspace({ portal, supabase, emptyTitle, emptyCopy }: M
     }
   }
 
-  return (
-    <div
-      className="grid grid-cols-[340px_minmax(0,1fr)] overflow-hidden rounded-[26px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(12,12,20,0.96),rgba(8,8,14,0.98))] shadow-[var(--shadow-panel)]"
-      style={{ flex: 1, minHeight: 0 }}
-    >
-      <aside className="flex min-h-0 flex-col border-r border-white/[0.06] bg-[rgba(9,10,16,0.92)]">
-        <div className="border-b border-white/[0.06] px-4 py-4">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
-              <input
-                value={threadQuery}
-                onChange={(event) => setThreadQuery(event.target.value)}
-                placeholder="Search conversations"
-                className="w-full rounded-[16px] border border-white/[0.08] bg-white/[0.04] py-3 pl-9 pr-3 text-sm text-white outline-none placeholder:text-white/28"
-              />
-            </div>
-            <button type="button" className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/[0.08] bg-white/[0.04] text-white/70 transition hover:border-white/[0.14] hover:bg-white/[0.08]">
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+  const unreadCount = threads.filter((thread) => thread.unread).length;
 
-          {quickThreads.length ? (
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
-              {quickThreads.map((thread) => (
-                <button key={`quick-${thread.id}`} type="button" onClick={() => setSelectedId(thread.id)} className="flex shrink-0 flex-col items-center gap-2">
-                  <div className="relative">
-                    <div className={cn("flex h-14 w-14 items-center justify-center rounded-full border-2 text-base font-semibold text-white transition-transform duration-200 hover:scale-[1.05]", selectedId === thread.id ? "border-[var(--accent)] shadow-[0_0_0_4px_rgba(37,99,235,0.10)]" : "border-white/[0.10]", thread.counterpartAvatar ? "bg-[#111219]" : "bg-[linear-gradient(135deg,rgba(37,99,235,0.28),rgba(16,185,129,0.18))]")}>
-                      {thread.counterpartAvatar ? <img src={thread.counterpartAvatar} alt={thread.counterpartName} className="h-full w-full rounded-full object-cover" /> : initials(thread.counterpartName)}
-                    </div>
-                    {thread.unread ? <span className="absolute -right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-[#17181f] bg-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)]" /> : null}
-                  </div>
-                  <span className="max-w-[68px] truncate text-[11px] text-white/58">{thread.counterpartName}</span>
-                </button>
-              ))}
+  return (
+    <div className="grid h-full min-h-0 flex-1 grid-cols-1 overflow-hidden bg-[#0c0d10] md:grid-cols-[340px_minmax(0,1fr)] md:border md:border-white/[0.06] lg:rounded-[24px] xl:grid-cols-[370px_minmax(0,1fr)]">
+      <aside className={cn("min-h-0 flex-col border-r border-white/[0.06] bg-[#101115]", selectedId ? "hidden md:flex" : "flex")}>
+        <div className="shrink-0 border-b border-white/[0.055] px-4 pb-4 pt-5 sm:px-5">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-[22px] font-semibold tracking-[-0.035em] text-white">Chats</h2>
+              <p className="mt-0.5 text-[13px] text-white/42">{threads.length} {threads.length === 1 ? "conversation" : "conversations"}</p>
             </div>
-          ) : null}
+            {unreadCount ? <span className="mb-1 rounded-full bg-blue-500 px-2.5 py-1 text-[11px] font-semibold text-white">{unreadCount} new</span> : null}
+          </div>
+          <label className="relative mt-4 block">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/34" />
+            <input
+              value={threadQuery}
+              onChange={(event) => setThreadQuery(event.target.value)}
+              placeholder="Search messages"
+              aria-label="Search messages"
+              className="h-11 w-full rounded-[14px] border border-white/[0.065] bg-white/[0.045] pl-10 pr-4 text-[16px] text-white outline-none transition placeholder:text-white/30 focus:border-blue-400/40 focus:bg-white/[0.065] sm:text-sm"
+            />
+          </label>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 pt-3">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {loadingThreads ? (
             <ThreadListSkeleton />
           ) : filteredThreads.length === 0 ? (
-            <div className="rounded-[24px] border border-[#2f313b] bg-[#1b1c24] p-6">
-              <h3 className="text-lg font-semibold text-white">{emptyTitle}</h3>
-              <p className="mt-3 text-sm leading-6 text-white/60">{emptyCopy}</p>
+            <div className="flex min-h-[320px] flex-col items-center justify-center px-8 text-center">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.055] text-white/40"><MessageCircleMore className="h-6 w-6" /></span>
+              <h3 className="mt-5 text-[17px] font-semibold text-white">{threadQuery ? "No matching chats" : emptyTitle}</h3>
+              <p className="mt-2 max-w-[260px] text-[13px] leading-6 text-white/45">{threadQuery ? "Try a different name or keyword." : emptyCopy}</p>
             </div>
           ) : (
-            <>
-              <div className="flex items-center justify-between px-2 pb-2 pt-1">
-                <p className="font-display text-[1rem] font-semibold tracking-[-0.03em] text-white">Pinned</p>
-                <p className="text-[11px] text-white/36">{filteredThreads.filter((thread) => thread.unread).length} unread</p>
-              </div>
-              <div className="space-y-1">
-                {filteredThreads.slice(0, Math.min(2, filteredThreads.length)).map((thread) => (
-                  <button
-                    key={`starred-${thread.id}`}
-                    type="button"
-                    onClick={() => setSelectedId(thread.id)}
-                    className={cn(
-                      "relative flex w-full items-center gap-3 rounded-[18px] border px-3 py-3 text-left transition-all duration-200",
-                      selectedId === thread.id
-                        ? "border-[rgba(37,99,235,0.24)] bg-[rgba(37,99,235,0.08)]"
-                        : "border-transparent hover:border-white/[0.08] hover:bg-white/[0.03]"
-                    )}
-                  >
-                    {thread.unread ? <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-[var(--accent-bright)]" /> : null}
-                    <div className={cn("flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold text-white", thread.unread ? "border-[var(--accent-bright)] shadow-[0_0_0_3px_rgba(37,99,235,0.10)]" : "border-white/[0.08]")}>
-                      {thread.counterpartAvatar ? <img src={thread.counterpartAvatar} alt={thread.counterpartName} className="h-full w-full rounded-full object-cover" /> : initials(thread.counterpartName)}
+            <div className="divide-y divide-white/[0.05]">
+              {filteredThreads.map((thread) => (
+                <button
+                  key={thread.id}
+                  type="button"
+                  onClick={() => setSelectedId(thread.id)}
+                  className={cn(
+                    "relative flex min-h-[78px] w-full touch-manipulation items-center gap-3 px-4 py-3 text-left transition-colors sm:px-5",
+                    selectedId === thread.id ? "bg-white/[0.07]" : "hover:bg-white/[0.035] active:bg-white/[0.06]"
+                  )}
+                >
+                  <div className="relative flex h-[52px] w-[52px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#253354,#172b2b)] text-[15px] font-semibold text-white">
+                    {thread.counterpartAvatar ? <img src={thread.counterpartAvatar} alt={thread.counterpartName} className="h-full w-full object-cover" /> : initials(thread.counterpartName)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className={cn("truncate text-[15px] tracking-[-0.015em]", thread.unread ? "font-semibold text-white" : "font-medium text-white/88")}>{thread.counterpartName}</p>
+                      <span className={cn("max-w-[92px] shrink-0 truncate text-[11px]", thread.unread ? "font-medium text-blue-400" : "text-white/35")}>{thread.lastMessageAt || "Now"}</span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="truncate text-[13px] font-semibold text-white">{thread.counterpartName}</p>
-                        <span className="shrink-0 font-mono text-[10px] text-white/38">{thread.lastMessageAt || "Now"}</span>
-                      </div>
-                      <p className="truncate text-[12px] text-white/55">{thread.lastMessagePreview}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <p className={cn("min-w-0 flex-1 truncate text-[13px]", thread.unread ? "font-medium text-white/78" : "text-white/43")}>{thread.lastMessagePreview}</p>
+                      {thread.unread ? <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-500" aria-label="Unread" /> : null}
                     </div>
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between px-2 pb-2 pt-4">
-                <p className="font-display text-[1rem] font-semibold tracking-[-0.03em] text-white">Messages</p>
-                <p className="text-[11px] text-white/36">{filteredThreads.length} conversations</p>
-              </div>
-
-              <div className="space-y-1">
-                {filteredThreads.map((thread) => (
-                  <button
-                    key={thread.id}
-                    type="button"
-                    onClick={() => setSelectedId(thread.id)}
-                    className={cn(
-                      "relative flex w-full items-center gap-3 rounded-[18px] border px-3 py-3 text-left transition-all duration-200",
-                      selectedId === thread.id
-                        ? "border-[rgba(37,99,235,0.24)] bg-[rgba(37,99,235,0.08)]"
-                        : "border-transparent hover:border-white/[0.08] hover:bg-white/[0.03]"
-                    )}
-                  >
-                    {selectedId === thread.id ? <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-[var(--accent-bright)]" /> : null}
-                    <div className={cn("flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.05]", thread.unread ? "border-[var(--accent-bright)] shadow-[0_0_0_3px_rgba(37,99,235,0.10)]" : "border-white/[0.08]")}>
-                      {thread.counterpartAvatar ? <img src={thread.counterpartAvatar} alt={thread.counterpartName} className="h-full w-full rounded-full object-cover" /> : initials(thread.counterpartName)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="truncate text-[13px] font-semibold text-white">{thread.counterpartName}</p>
-                        <span className="shrink-0 font-mono text-[10px] text-white/38">{thread.lastMessageAt || "Now"}</span>
-                      </div>
-                      <p className="truncate text-[12px] text-white/55">{thread.lastMessagePreview}</p>
-                    </div>
-                    {thread.unread ? <span className="rounded-full bg-[var(--accent)] px-2 py-1 font-mono text-[10px] text-white">1</span> : null}
-                  </button>
-                ))}
-              </div>
-            </>
+                  </div>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </aside>
 
-      <section className="flex min-h-0 flex-col bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.10)_0%,rgba(10,11,18,0.96)_40%,rgba(8,8,14,0.98)_100%)]">
+      <section className={cn("min-h-0 flex-col bg-[#0c0d10]", selectedId ? "flex" : "hidden md:flex")}>
         {!selectedThread ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4">
-            <div className="skeleton h-14 w-14 rounded-full" />
-            <div className="skeleton h-4 w-48" />
+          <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.05] text-white/36"><MessageCircleMore className="h-7 w-7" /></span>
+            <p className="mt-5 text-[17px] font-semibold text-white">Choose a conversation</p>
+            <p className="mt-2 text-sm text-white/40">Your private coaching messages will appear here.</p>
           </div>
         ) : loadingMessages && !threadPayload ? (
           <ThreadViewportSkeleton />
         ) : threadPayload ? (
           <>
-            <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/6 px-5">
-              <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border text-sm font-semibold text-white", selectedThread.unread ? "border-[var(--accent-bright)] shadow-[0_0_0_3px_rgba(37,99,235,0.10)]" : "border-white/[0.08]")}>
-                {selectedThread.counterpartAvatar ? (
-                  <img src={selectedThread.counterpartAvatar} alt={threadPayload.thread.counterpartName} className="h-full w-full object-cover" />
-                ) : (
-                  initials(threadPayload.thread.counterpartName)
-                )}
+            <header className="flex h-[66px] shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#101115]/95 px-3 backdrop-blur-xl sm:px-5">
+              <button type="button" aria-label="Back to chats" onClick={() => setSelectedId(null)} className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full text-white/75 transition active:bg-white/[0.08] md:hidden">
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#253354,#172b2b)] text-sm font-semibold text-white">
+                {selectedThread.counterpartAvatar ? <img src={selectedThread.counterpartAvatar} alt={threadPayload.thread.counterpartName} className="h-full w-full object-cover" /> : initials(threadPayload.thread.counterpartName)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-display text-[18px] font-semibold tracking-[-0.04em] text-white">{threadPayload.thread.counterpartName}</p>
-                <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-white/35">{typingLabel || threadPayload.thread.lastSeenLabel}</p>
+                <p className="truncate text-[16px] font-semibold tracking-[-0.025em] text-white">{threadPayload.thread.counterpartName}</p>
+                <p className={cn("mt-0.5 truncate text-[12px]", typingLabel ? "text-emerald-400" : "text-white/38")}>{typingLabel || threadPayload.thread.lastSeenLabel}</p>
               </div>
-              <button type="button" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/[0.16] hover:bg-white/[0.09]">
-                <ChevronDown className="h-4 w-4" />
-              </button>
-            </div>
+              <div className="hidden items-center gap-1.5 text-[11px] text-white/34 sm:flex"><ShieldCheck className="h-3.5 w-3.5" /> Private</div>
+            </header>
 
-            <div ref={threadViewportRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
-              {portal === "client" && (threadPayload.onboarding.status === "pending" || threadPayload.onboarding.status === "submitted") ? (
-                <div className="mx-auto max-w-2xl rounded-[24px] border border-[rgba(37,99,235,0.16)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[var(--shadow-card)]">
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="h-4 w-4 text-[var(--green)]" />
-                    <div>
-                      <p className="text-[15px] font-semibold text-white">Client onboarding form</p>
-                      <p className="text-xs text-white/55">Send your intake details back to your coach without leaving the thread.</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 grid gap-3 md:grid-cols-2">
-                    <input value={onboardingDraft.age} onChange={(event) => setOnboardingDraft((current) => ({ ...current, age: event.target.value }))} placeholder="Age" className="rounded-[16px] border border-[#343540] bg-[#12131a] px-3 py-2.5 text-sm text-white outline-none" />
-                    <input value={onboardingDraft.weight} onChange={(event) => setOnboardingDraft((current) => ({ ...current, weight: event.target.value }))} placeholder="Weight" className="rounded-[16px] border border-[#343540] bg-[#12131a] px-3 py-2.5 text-sm text-white outline-none" />
-                    <textarea value={onboardingDraft.injuries} onChange={(event) => setOnboardingDraft((current) => ({ ...current, injuries: event.target.value }))} placeholder="Injuries / limitations" className="min-h-[92px] rounded-[16px] border border-[#343540] bg-[#12131a] px-3 py-2.5 text-sm text-white outline-none md:col-span-2" />
-                    <textarea value={onboardingDraft.goals} onChange={(event) => setOnboardingDraft((current) => ({ ...current, goals: event.target.value }))} placeholder="Goals" className="min-h-[92px] rounded-[16px] border border-[#343540] bg-[#12131a] px-3 py-2.5 text-sm text-white outline-none md:col-span-2" />
-                  </div>
-                  <div className="mt-4 flex items-center justify-between gap-4">
-                    <p className="text-xs text-white/55">{threadPayload.onboarding.submittedAt ? `Last sent ${threadPayload.onboarding.submittedAt}` : "Not submitted yet."}</p>
-                    <button type="button" onClick={handleOnboardingSubmit} disabled={submittingOnboarding} className="btn-primary rounded-full px-4 py-2.5 text-xs">
-                      {submittingOnboarding ? "Sending..." : threadPayload.onboarding.status === "submitted" ? "Update onboarding" : "Submit onboarding"}
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-
-              {threadPayload.messages.map((message) => (
-                <div key={message.id} className={cn("group flex flex-col", message.mine ? "items-end" : "items-start")}>
-                  <span className="mb-1 px-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/0 transition group-hover:text-white/35">
-                    {message.createdAt}
-                  </span>
-                  <div
-                    className={cn(
-                      "max-w-[70%] animate-bounce-in rounded-[18px] px-4 py-3 text-[13px] leading-6 shadow-[0_12px_30px_rgba(0,0,0,0.18)]",
-                      message.mine
-                        ? "rounded-br-[4px] border border-[rgba(37,99,235,0.25)] bg-[rgba(37,99,235,0.15)] text-[var(--text-primary)]"
-                        : "rounded-bl-[4px] border border-white/[0.08] bg-white/[0.05] text-[var(--text-secondary)]"
-                    )}
-                  >
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-55">{message.senderName}</p>
-                    <p className="mt-2 whitespace-pre-wrap">{message.body}</p>
-                    {message.attachments.length ? (
-                      <div className="mt-3 space-y-2">
-                        {message.attachments.map((attachment) =>
-                          isImage(attachment) && attachment.url ? (
-                            <img key={attachment.id} src={attachment.url} alt={attachment.fileName} className="max-h-[220px] w-full rounded-[16px] object-cover" />
-                          ) : (
-                            <a key={attachment.id} href={attachment.url || "#"} target="_blank" rel="noreferrer" className={cn("flex items-center gap-3 rounded-[14px] border px-3 py-2.5 text-xs", message.mine ? "border-white/10 bg-white/10" : "border-white/10 bg-white/5")}>
-                              <Paperclip className="h-3.5 w-3.5" />
-                              <span className="truncate">{attachment.fileName}</span>
-                            </a>
-                          )
-                        )}
+            <div ref={threadViewportRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5 sm:px-7 sm:py-7 lg:px-10">
+              <div className="mx-auto flex min-h-full w-full max-w-[860px] flex-col justify-end">
+                {portal === "client" && (threadPayload.onboarding.status === "pending" || threadPayload.onboarding.status === "submitted") ? (
+                  <details className="group mb-6 overflow-hidden rounded-[18px] border border-white/[0.07] bg-white/[0.035]">
+                    <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 px-4 py-3 marker:hidden">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-400"><ShieldCheck className="h-[18px] w-[18px]" /></span>
+                      <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-white">Your onboarding details</span><span className="mt-0.5 block truncate text-xs text-white/42">{threadPayload.onboarding.status === "submitted" ? "Submitted — tap to review or update" : "Your coach is waiting for these details"}</span></span>
+                      <span className="text-xs font-medium text-blue-400">Open</span>
+                    </summary>
+                    <div className="border-t border-white/[0.06] px-4 pb-4 pt-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input value={onboardingDraft.age} onChange={(event) => setOnboardingDraft((current) => ({ ...current, age: event.target.value }))} placeholder="Age" aria-label="Age" className="h-11 rounded-[13px] border border-white/[0.08] bg-black/20 px-3 text-[16px] text-white outline-none focus:border-blue-400/45 sm:text-sm" />
+                        <input value={onboardingDraft.weight} onChange={(event) => setOnboardingDraft((current) => ({ ...current, weight: event.target.value }))} placeholder="Current weight" aria-label="Current weight" className="h-11 rounded-[13px] border border-white/[0.08] bg-black/20 px-3 text-[16px] text-white outline-none focus:border-blue-400/45 sm:text-sm" />
+                        <textarea value={onboardingDraft.injuries} onChange={(event) => setOnboardingDraft((current) => ({ ...current, injuries: event.target.value }))} placeholder="Injuries or limitations" aria-label="Injuries or limitations" className="min-h-[86px] rounded-[13px] border border-white/[0.08] bg-black/20 px-3 py-3 text-[16px] text-white outline-none focus:border-blue-400/45 sm:col-span-2 sm:text-sm" />
+                        <textarea value={onboardingDraft.goals} onChange={(event) => setOnboardingDraft((current) => ({ ...current, goals: event.target.value }))} placeholder="Goals" aria-label="Goals" className="min-h-[86px] rounded-[13px] border border-white/[0.08] bg-black/20 px-3 py-3 text-[16px] text-white outline-none focus:border-blue-400/45 sm:col-span-2 sm:text-sm" />
                       </div>
-                    ) : null}
-                    <div className="mt-2.5 flex items-center justify-between gap-3 text-[11px] opacity-65">
-                      <span>{message.createdAt}</span>
-                      {message.mine ? <span>{threadPayload.thread.lastSeenLabel}</span> : null}
+                      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-xs text-white/40">{threadPayload.onboarding.submittedAt ? `Last sent ${threadPayload.onboarding.submittedAt}` : "Only your coach can see this."}</p>
+                        <button type="button" onClick={handleOnboardingSubmit} disabled={submittingOnboarding} className="min-h-11 rounded-full bg-blue-600 px-5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-55">
+                          {submittingOnboarding ? "Sending..." : threadPayload.onboarding.status === "submitted" ? "Update details" : "Send to coach"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </details>
+                ) : null}
+
+                <div className="space-y-1">
+                  {threadPayload.messages.map((message, index) => {
+                    const previous = threadPayload.messages[index - 1];
+                    const next = threadPayload.messages[index + 1];
+                    const sameAsPrevious = Boolean(previous && previous.mine === message.mine);
+                    const sameAsNext = Boolean(next && next.mine === message.mine);
+                    const showIncomingAvatar = !message.mine && !sameAsNext;
+                    const isLastMine = message.mine && !threadPayload.messages.slice(index + 1).some((item) => item.mine);
+
+                    return (
+                      <div key={message.id} className={cn("flex items-end gap-2", message.mine ? "justify-end" : "justify-start", !sameAsPrevious && index > 0 && "pt-3")}>
+                        {!message.mine ? (
+                          showIncomingAvatar ? (
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.08] text-[9px] font-semibold text-white/80">
+                              {selectedThread.counterpartAvatar ? <img src={selectedThread.counterpartAvatar} alt="" className="h-full w-full object-cover" /> : initials(threadPayload.thread.counterpartName)}
+                            </div>
+                          ) : <span className="w-7 shrink-0" />
+                        ) : null}
+                        <div className={cn("flex max-w-[82%] flex-col sm:max-w-[72%] lg:max-w-[66%]", message.mine ? "items-end" : "items-start")}>
+                          <div className={cn(
+                            "overflow-hidden px-3.5 py-2.5 text-[15px] leading-[1.42] shadow-sm",
+                            message.mine ? "bg-blue-600 text-white" : "bg-[#202126] text-white/90",
+                            message.mine
+                              ? cn("rounded-[20px]", sameAsPrevious && "rounded-tr-[7px]", sameAsNext && "rounded-br-[7px]")
+                              : cn("rounded-[20px]", sameAsPrevious && "rounded-tl-[7px]", sameAsNext && "rounded-bl-[7px]")
+                          )}>
+                            {message.attachments.length ? (
+                              <div className={cn("space-y-2", message.body && "mb-2")}>
+                                {message.attachments.map((attachment) => isImage(attachment) && attachment.url ? (
+                                  <a key={attachment.id} href={attachment.url} target="_blank" rel="noreferrer"><img src={attachment.url} alt={attachment.fileName} className="max-h-[320px] w-full rounded-[14px] object-cover" /></a>
+                                ) : (
+                                  <a key={attachment.id} href={attachment.url || "#"} target="_blank" rel="noreferrer" className="flex min-h-12 items-center gap-3 rounded-[13px] bg-black/15 px-3 py-2.5 text-sm">
+                                    <FileText className="h-5 w-5 shrink-0 opacity-70" /><span className="min-w-0 truncate">{attachment.fileName}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            ) : null}
+                            {message.body ? <p className="whitespace-pre-wrap break-words">{message.body}</p> : null}
+                          </div>
+                          {!sameAsNext ? (
+                            <div className={cn("mt-1 flex items-center gap-1.5 px-1 text-[10px] text-white/32", message.mine && "justify-end")}>
+                              <span>{message.createdAt}</span>
+                              {isLastMine ? <CheckCheck className="h-3 w-3 text-blue-400" aria-label={threadPayload.thread.lastSeenLabel} /> : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              </div>
             </div>
 
-            <div className="shrink-0 border-t border-white/6 px-5 py-4">
-              {error ? <div className="mb-3 rounded-[16px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">{error}</div> : null}
-              <div className="mb-3 flex flex-wrap gap-2">
-                {attachments.map((file) => (
-                  <span key={`${file.name}-${file.size}`} className="rounded-full border border-[#3b3d46] bg-[#1f2027] px-3 py-1.5 text-[11px] text-white/70">
-                    {file.name}
-                  </span>
-                ))}
+            <footer className="shrink-0 border-t border-white/[0.06] bg-[#101115] px-3 pb-[max(0.7rem,env(safe-area-inset-bottom))] pt-2.5 sm:px-5 sm:pb-4 sm:pt-3">
+              <div className="mx-auto max-w-[900px]">
+                {error ? <div className="mb-2 rounded-[13px] bg-red-500/10 px-3.5 py-2.5 text-xs text-red-200">{error}</div> : null}
+                {attachments.length ? (
+                  <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+                    {attachments.map((file, index) => (
+                      <span key={`${file.name}-${file.size}`} className="flex max-w-[220px] shrink-0 items-center gap-2 rounded-full bg-white/[0.07] py-1.5 pl-3 pr-1.5 text-xs text-white/70">
+                        <Paperclip className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{file.name}</span>
+                        <button type="button" aria-label={`Remove ${file.name}`} onClick={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/45 transition hover:bg-white/[0.08] hover:text-white"><X className="h-3.5 w-3.5" /></button>
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="flex items-end gap-2">
+                  <label className="flex h-11 w-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full text-white/55 transition hover:bg-white/[0.06] hover:text-white active:bg-white/[0.1]">
+                    <Paperclip className="h-5 w-5" />
+                    <span className="sr-only">Attach files</span>
+                    <input type="file" multiple className="hidden" onChange={(event) => setAttachments(Array.from(event.target.files || []))} />
+                  </label>
+                  <div className="flex min-h-11 flex-1 items-end rounded-[22px] bg-white/[0.065] px-4 py-[11px] ring-1 ring-inset ring-white/[0.055] focus-within:ring-blue-400/35">
+                    <textarea
+                      value={messageBody}
+                      rows={1}
+                      onChange={(event) => {
+                        setMessageBody(event.target.value);
+                        event.currentTarget.style.height = "auto";
+                        event.currentTarget.style.height = `${Math.min(event.currentTarget.scrollHeight, 112)}px`;
+                        void broadcastTyping();
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          void handleSendMessage();
+                        }
+                      }}
+                      placeholder="Message"
+                      aria-label="Message"
+                      className="max-h-28 min-h-[22px] w-full resize-none overflow-y-auto bg-transparent text-[16px] leading-[22px] text-white outline-none placeholder:text-white/30"
+                    />
+                  </div>
+                  <button type="button" aria-label="Send message" onClick={handleSendMessage} disabled={sending || (!messageBody.trim() && attachments.length === 0)} className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full bg-blue-600 text-white transition active:scale-95 disabled:bg-white/[0.06] disabled:text-white/25">
+                    {sending ? <Loader2 className="h-[18px] w-[18px] animate-spin" /> : <SendHorizontal className="h-[18px] w-[18px]" />}
+                  </button>
+                </div>
               </div>
-              <div className="flex min-h-[56px] items-center gap-3 rounded-[16px] border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 backdrop-blur-sm">
-                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:scale-110 hover:bg-white/[0.10]">
-                  <Smile className="h-4 w-4" />
-                </button>
-                <textarea
-                  value={messageBody}
-                  onChange={(event) => {
-                    setMessageBody(event.target.value);
-                    void broadcastTyping();
-                  }}
-                  placeholder={portal === "coach" ? "Write a message..." : "Text message"}
-                  className="max-h-28 min-h-[28px] flex-1 resize-none bg-transparent text-sm text-white outline-none"
-                />
-                <label className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/5 text-white/68 transition hover:scale-110 hover:bg-white/[0.10]">
-                  <ImagePlus className="h-4 w-4" />
-                  <input type="file" multiple className="hidden" onChange={(event) => setAttachments(Array.from(event.target.files || []))} />
-                </label>
-                <button type="button" onClick={handleSendMessage} disabled={sending} className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[0_8px_18px_rgba(37,99,235,0.32)] transition hover:scale-[1.08] hover:shadow-[0_12px_28px_rgba(37,99,235,0.45)] disabled:opacity-60">
-                  {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <SendHorizontal className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-            </div>
+            </footer>
           </>
         ) : null}
       </section>

@@ -49,7 +49,7 @@ export default async function JoinCoachPage({ params }: { params: { coachId: str
             )}
             <div className="pb-1">
               <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-[var(--accent)]">Coach Invite</p>
-              <h1 className="mt-2 font-display text-4xl font-bold tracking-[-0.05em]">{coachName}</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold tracking-[-0.02em]">{coachName}</h1>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">{coach?.specialty || coach?.brand_name || "Coach Room"}</p>
             </div>
           </div>
@@ -57,7 +57,7 @@ export default async function JoinCoachPage({ params }: { params: { coachId: str
 
         <div className="grid gap-6 px-7 py-7 md:grid-cols-[1.2fr_0.8fr]">
           <div>
-            <h2 className="font-display text-3xl font-semibold tracking-[-0.04em]">
+            <h2 className="font-display text-3xl font-semibold tracking-[-0.015em]">
               Join {room?.room_name || `${coachName}'s Room`}
             </h2>
             <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">

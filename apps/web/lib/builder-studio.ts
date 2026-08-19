@@ -2,138 +2,168 @@ import type { User } from "@supabase/supabase-js";
 import { ensureCoachBootstrapped, getAuthenticatedUserFromToken } from "./coach-dashboard-server";
 import { ensureConversationForPair } from "./messages-server";
 import { getSupabaseAdminClient } from "./supabase-admin";
+import {
+  ARTBOARD_HEIGHT,
+  ARTBOARD_WIDTH,
+  DEFAULT_LAYER_STYLE,
+  type BuilderClient as BuilderClientOption,
+  type BuilderContent,
+  type BuilderDocument as BuilderDocumentRecord,
+  type BuilderKind,
+  type BuilderLayer,
+  type BuilderLayerStyle,
+  type BuilderPage,
+  type LegacyBuilderSection
+} from "./builder-types";
 
-export type BuilderKind = "onboarding_form" | "diet_plan" | "training_plan";
-
-export type BuilderSection = {
-  id: string;
-  title: string;
-  items: string[];
-  type?: "text" | "image";
-  imageUrl?: string | null;
-  imagePath?: string | null;
-  imageCaption?: string;
-  span?: 1 | 2;
-  height?: "sm" | "md" | "lg";
-};
-
-export type BuilderContent = {
-  coverNote: string;
-  sections: BuilderSection[];
-};
-
-export type BuilderDocumentRecord = {
-  id: string;
-  title: string;
-  description: string;
-  kind: BuilderKind;
-  theme: string;
-  status: string;
-  clientId: string | null;
-  clientName: string | null;
-  updatedAt: string;
-  content: BuilderContent;
-};
-
-export type BuilderClientOption = {
-  id: string;
-  name: string;
-  email: string | null;
-  status: string;
-};
+export type { BuilderContent, BuilderKind } from "./builder-types";
+export type { BuilderDocument as BuilderDocumentRecord } from "./builder-types";
 
 function randomId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export function getDefaultBuilderContent(kind: BuilderKind): BuilderContent {
-  if (kind === "onboarding_form") {
-    return {
-      coverNote: "Use this form to understand your client's body, goals, schedule, and training history before delivery starts.",
-      sections: [
-        {
-          id: randomId("section"),
-          title: "Core Intake",
-          items: ["What is your age?", "What is your current weight?", "What injuries or limitations should I know about?"]
-        },
-        {
-          id: randomId("section"),
-          title: "Lifestyle",
-          items: ["How many days per week can you train?", "How many meals do you usually eat per day?", "How much water do you drink daily?"]
-        },
-        {
-          id: randomId("section"),
-          title: "Reference Photo",
-          items: [],
-          type: "image",
-          imageUrl: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
-          imagePath: null,
-          imageCaption: "Use image blocks for posture references, progress photos, or branded visuals.",
-          span: 2,
-          height: "md"
-        }
-      ]
-    };
-  }
+  const accent = kind === "diet_plan" ? "#f59e0b" : kind === "onboarding_form" ? "#06b6d4" : "#6d5dfc";
+  const title = kind === "diet_plan" ? "Nutrition Blueprint" : kind === "onboarding_form" ? "Client Intake" : "Performance Program";
+  const subtitle = kind === "diet_plan" ? "A simple system for consistent nutrition." : kind === "onboarding_form" ? "Everything we need to build the right plan." : "Strength, intent, and progression—mapped clearly.";
+  const sectionOne = kind === "diet_plan" ? "Daily targets" : kind === "onboarding_form" ? "Body & health" : "Day 1 · Upper strength";
+  const sectionTwo = kind === "diet_plan" ? "Meal structure" : kind === "onboarding_form" ? "Lifestyle & goals" : "Coaching notes";
+  const firstItems = kind === "diet_plan"
+    ? ["Protein · 180g", "Carbohydrates · 240g", "Fats · 70g", "Water · 3.5L"]
+    : kind === "onboarding_form"
+      ? ["Age and current weight", "Injuries or limitations", "Training experience"]
+      : ["Bench press · 4 × 6", "Chest-supported row · 4 × 8", "DB shoulder press · 3 × 10", "Lat pulldown · 3 × 12"];
+  const secondItems = kind === "diet_plan"
+    ? ["Breakfast · protein + slow carbs", "Lunch · lean protein + vegetables", "Dinner · protein + flexible carbs"]
+    : kind === "onboarding_form"
+      ? ["Primary outcome", "Weekly availability", "Nutrition challenges"]
+      : ["Leave 1–2 reps in reserve", "Control every eccentric", "Add load only when form stays clean"];
 
-  if (kind === "diet_plan") {
-    return {
-      coverNote: "Build the diet flow, meals, timing, and coaching notes exactly how you want the client to follow them.",
-      sections: [
-        {
-          id: randomId("section"),
-          title: "Morning",
-          items: ["Meal 1: Protein + oats + fruit", "Hydration target: 750ml before noon", "Supplements: multivitamin + omega-3"]
-        },
-        {
-          id: randomId("section"),
-          title: "Evening",
-          items: ["Meal 4: Lean protein + potatoes + greens", "Post-dinner walk: 10-15 mins", "No sugary snacks after 9 PM"]
-        },
-        {
-          id: randomId("section"),
-          title: "Meal Inspiration",
-          items: [],
-          type: "image",
-          imageUrl: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80",
-          imagePath: null,
-          imageCaption: "Show plated meal references, grocery examples, or portion visuals.",
-          span: 2,
-          height: "md"
-        }
-      ]
-    };
-  }
+  const makeStyle = (overrides: Partial<BuilderLayerStyle> = {}): BuilderLayerStyle => ({ ...DEFAULT_LAYER_STYLE, ...overrides });
+  const layers: BuilderLayer[] = [
+    {
+      id: randomId("layer"), type: "shape", name: "Accent rail", x: 0, y: 0, width: 22, height: ARTBOARD_HEIGHT,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: "", items: [], rows: [], imageUrl: null, imagePath: null,
+      style: makeStyle({ backgroundColor: accent, borderRadius: 0, padding: 0 })
+    },
+    {
+      id: randomId("layer"), type: "text", name: "Program title", x: 64, y: 72, width: 650, height: 120,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: title, items: [], rows: [], imageUrl: null, imagePath: null,
+      style: makeStyle({ fontFamily: "Clash Display", fontSize: 58, fontWeight: 700, lineHeight: 0.98, color: "#0c1322", padding: 0 })
+    },
+    {
+      id: randomId("layer"), type: "text", name: "Program introduction", x: 68, y: 205, width: 560, height: 70,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: subtitle, items: [], rows: [], imageUrl: null, imagePath: null,
+      style: makeStyle({ fontSize: 18, fontWeight: 450, color: "#647089", padding: 0 })
+    },
+    {
+      id: randomId("layer"), type: "text", name: "Section one title", x: 68, y: 330, width: 320, height: 52,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: sectionOne, items: [], rows: [], imageUrl: null, imagePath: null,
+      style: makeStyle({ fontFamily: "Clash Display", fontSize: 28, fontWeight: 650, color: "#0c1322", padding: 0 })
+    },
+    {
+      id: randomId("layer"), type: "checklist", name: sectionOne, x: 60, y: 390, width: 700, height: 250,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: "", items: firstItems, rows: [], imageUrl: null, imagePath: null,
+      style: makeStyle({ fontSize: 18, color: "#27344d", backgroundColor: "#f3f5fa", borderColor: "#e8ebf3", borderWidth: 1, borderRadius: 24, padding: 24 })
+    },
+    {
+      id: randomId("layer"), type: "text", name: "Section two title", x: 68, y: 690, width: 320, height: 52,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: sectionTwo, items: [], rows: [], imageUrl: null, imagePath: null,
+      style: makeStyle({ fontFamily: "Clash Display", fontSize: 28, fontWeight: 650, color: "#0c1322", padding: 0 })
+    },
+    {
+      id: randomId("layer"), type: "checklist", name: sectionTwo, x: 60, y: 750, width: 700, height: 220,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: "", items: secondItems, rows: [], imageUrl: null, imagePath: null,
+      style: makeStyle({ fontSize: 18, color: "#27344d", backgroundColor: "#ffffff", borderColor: "#dde2ed", borderWidth: 1, borderRadius: 24, padding: 24 })
+    }
+  ];
 
   return {
-    coverNote: "Map out the exact weekly training structure, execution cues, and progression notes before sending to your client.",
+    version: 2,
+    coverNote: subtitle,
+    pages: [{ id: randomId("page"), name: "Page 1", width: ARTBOARD_WIDTH, height: ARTBOARD_HEIGHT, background: "#ffffff", layers }],
     sections: [
-      {
-        id: randomId("section"),
-        title: "Day 1 - Push",
-        items: ["Bench Press - 4 x 8", "Incline Dumbbell Press - 3 x 10", "Cable Lateral Raise - 3 x 15"]
-      },
-        {
-          id: randomId("section"),
-          title: "Conditioning",
-          items: ["Bike sprint: 10 rounds x 20s on / 40s off", "Cooldown walk: 8 mins", "Breathing reset: 3 mins"]
-        },
-        {
-          id: randomId("section"),
-          title: "Movement Reference",
-          items: [],
-          type: "image",
-          imageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80",
-          imagePath: null,
-          imageCaption: "Drop exercise demos, hero images, or coach branding directly into the program.",
-          span: 2,
-          height: "md"
-        }
-      ]
-    };
+      { id: randomId("section"), title: sectionOne, items: firstItems },
+      { id: randomId("section"), title: sectionTwo, items: secondItems }
+    ]
+  };
 }
 
-function normalizeContent(kind: BuilderKind, content: unknown): BuilderContent {
+function normalizeStyle(style: unknown): BuilderLayerStyle {
+  const value = style && typeof style === "object" ? style as Partial<BuilderLayerStyle> : {};
+  return {
+    ...DEFAULT_LAYER_STYLE,
+    ...value,
+    fontFamily: ["Inter", "Clash Display", "Georgia", "JetBrains Mono"].includes(String(value.fontFamily)) ? value.fontFamily as BuilderLayerStyle["fontFamily"] : "Inter",
+    textAlign: ["left", "center", "right"].includes(String(value.textAlign)) ? value.textAlign as BuilderLayerStyle["textAlign"] : "left",
+    objectFit: value.objectFit === "contain" ? "contain" : "cover"
+  };
+}
+
+function normalizeLayer(layer: unknown, index: number): BuilderLayer {
+  const value = layer && typeof layer === "object" ? layer as Partial<BuilderLayer> : {};
+  const types = ["text", "checklist", "table", "image", "shape"];
+  return {
+    id: typeof value.id === "string" && value.id ? value.id : randomId("layer"),
+    type: types.includes(String(value.type)) ? value.type as BuilderLayer["type"] : "text",
+    name: typeof value.name === "string" ? value.name.slice(0, 80) : `Layer ${index + 1}`,
+    x: Math.max(0, Math.min(ARTBOARD_WIDTH - 40, Number(value.x) || 0)),
+    y: Math.max(0, Math.min(ARTBOARD_HEIGHT - 40, Number(value.y) || 0)),
+    width: Math.max(40, Math.min(ARTBOARD_WIDTH, Number(value.width) || 240)),
+    height: Math.max(32, Math.min(ARTBOARD_HEIGHT, Number(value.height) || 100)),
+    rotation: Math.max(-180, Math.min(180, Number(value.rotation) || 0)),
+    opacity: Math.max(0.05, Math.min(1, Number(value.opacity) || 1)),
+    locked: Boolean(value.locked),
+    hidden: Boolean(value.hidden),
+    text: typeof value.text === "string" ? value.text.slice(0, 4000) : "",
+    items: Array.isArray(value.items) ? value.items.slice(0, 40).map((item) => String(item).slice(0, 500)) : [],
+    rows: Array.isArray(value.rows) ? value.rows.slice(0, 30).map((row) => Array.isArray(row) ? row.slice(0, 8).map((cell) => String(cell).slice(0, 300)) : []) : [],
+    imageUrl: typeof value.imageUrl === "string" ? value.imageUrl : null,
+    imagePath: typeof value.imagePath === "string" ? value.imagePath : null,
+    style: normalizeStyle(value.style)
+  };
+}
+
+function legacySectionsToPage(sections: LegacyBuilderSection[], kind: BuilderKind): BuilderPage {
+  const fallback = getDefaultBuilderContent(kind).pages[0];
+  if (!sections.length) return fallback;
+  const layers: BuilderLayer[] = [];
+  sections.slice(0, 8).forEach((section, index) => {
+    const column = index % 2;
+    const row = Math.floor(index / 2);
+    const x = 54 + column * 360;
+    const y = 140 + row * 220;
+    layers.push({
+      id: randomId("layer"), type: "text", name: `${section.title} title`, x, y, width: 320, height: 42,
+      rotation: 0, opacity: 1, locked: false, hidden: false, text: section.title, items: [], rows: [], imageUrl: null, imagePath: null,
+      style: { ...DEFAULT_LAYER_STYLE, fontFamily: "Clash Display", fontSize: 25, fontWeight: 650, padding: 0, color: "#101828" }
+    });
+    layers.push({
+      id: randomId("layer"), type: section.type === "image" ? "image" : "checklist", name: section.title, x, y: y + 52,
+      width: section.span === 2 ? 700 : 320, height: section.type === "image" ? 180 : 145, rotation: 0, opacity: 1, locked: false, hidden: false,
+      text: section.imageCaption || "", items: section.items || [], rows: [], imageUrl: section.imageUrl || null, imagePath: section.imagePath || null,
+      style: { ...DEFAULT_LAYER_STYLE, fontSize: 15, backgroundColor: "#f5f7fb", borderColor: "#e4e7ee", borderWidth: 1, borderRadius: 18, padding: 18 }
+    });
+  });
+  return { ...fallback, id: randomId("page"), layers };
+}
+
+function deriveLegacySections(pages: BuilderPage[]): LegacyBuilderSection[] {
+  return pages.flatMap((page) => page.layers.filter((layer) => layer.type === "checklist" || layer.type === "table" || layer.type === "image").map((layer) => ({
+    id: randomId("section"),
+    title: layer.name || "Plan section",
+    items: layer.type === "table" ? layer.rows.map((row) => row.join(" · ")) : layer.items,
+    type: layer.type === "image" ? "image" as const : "text" as const,
+    imageUrl: layer.imageUrl,
+    imagePath: layer.imagePath,
+    imageCaption: layer.text,
+    span: layer.width > ARTBOARD_WIDTH * 0.65 ? 2 as const : 1 as const,
+    height: layer.height > 300 ? "lg" as const : layer.height < 180 ? "sm" as const : "md" as const
+  })));
+}
+
+export function normalizeBuilderContent(kind: BuilderKind, content: unknown): BuilderContent {
   const fallback = getDefaultBuilderContent(kind);
 
   if (!content || typeof content !== "object") {
@@ -141,21 +171,22 @@ function normalizeContent(kind: BuilderKind, content: unknown): BuilderContent {
   }
 
   const parsed = content as Partial<BuilderContent>;
+  const legacySections = Array.isArray(parsed.sections) ? parsed.sections : fallback.sections;
+  const pages: BuilderPage[] = Array.isArray(parsed.pages) && parsed.pages.length
+    ? parsed.pages.slice(0, 12).map((page, pageIndex) => ({
+        id: typeof page?.id === "string" && page.id ? page.id : randomId("page"),
+        name: typeof page?.name === "string" ? page.name.slice(0, 80) : `Page ${pageIndex + 1}`,
+        width: ARTBOARD_WIDTH,
+        height: ARTBOARD_HEIGHT,
+        background: typeof page?.background === "string" ? page.background.slice(0, 120) : "#ffffff",
+        layers: Array.isArray(page?.layers) ? page.layers.slice(0, 80).map(normalizeLayer) : []
+      }))
+    : [legacySectionsToPage(legacySections, kind)];
   return {
+    version: 2,
     coverNote: typeof parsed.coverNote === "string" ? parsed.coverNote : fallback.coverNote,
-    sections: Array.isArray(parsed.sections)
-      ? parsed.sections.map((section) => ({
-          id: typeof section?.id === "string" ? section.id : randomId("section"),
-          title: typeof section?.title === "string" ? section.title : "Untitled Section",
-          items: Array.isArray(section?.items) ? section.items.map((item) => String(item)) : [],
-          type: section?.type === "image" ? "image" : "text",
-          imageUrl: typeof section?.imageUrl === "string" ? section.imageUrl : null,
-          imagePath: typeof section?.imagePath === "string" ? section.imagePath : null,
-          imageCaption: typeof section?.imageCaption === "string" ? section.imageCaption : "",
-          span: section?.span === 2 ? 2 : 1,
-          height: section?.height === "sm" || section?.height === "lg" ? section.height : "md"
-        }))
-      : fallback.sections
+    pages,
+    sections: deriveLegacySections(pages)
   };
 }
 
@@ -205,7 +236,7 @@ export async function getBuilderStudioData(user: User) {
     clientId: document.client_id,
     clientName: document.client_id ? profileMap.get(document.client_id) || null : null,
     updatedAt: document.updated_at,
-    content: normalizeContent(document.kind as BuilderKind, document.content)
+    content: normalizeBuilderContent(document.kind as BuilderKind, document.content)
   }));
 
   return { clients, documents };
@@ -226,7 +257,7 @@ export async function saveBuilderDocument(
   const supabase = getSupabaseAdminClient();
   await ensureCoachBootstrapped(user);
 
-  const normalizedContent = normalizeContent(payload.kind, payload.content);
+  const normalizedContent = normalizeBuilderContent(payload.kind, payload.content);
   const documentPayload = {
     coach_id: user.id,
     client_id: payload.clientId,
@@ -266,7 +297,7 @@ export async function saveBuilderDocument(
     clientId: response.data.client_id,
     clientName: null,
     updatedAt: response.data.updated_at,
-    content: normalizeContent(response.data.kind as BuilderKind, response.data.content)
+    content: normalizeBuilderContent(response.data.kind as BuilderKind, response.data.content)
   } satisfies BuilderDocumentRecord;
 }
 

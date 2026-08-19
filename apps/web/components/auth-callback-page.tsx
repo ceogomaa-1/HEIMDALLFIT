@@ -98,7 +98,7 @@ export function AuthCallbackPage() {
         <p className="text-xs uppercase tracking-[0.4em] text-white/40">
           {portal === "client" ? "Client Auth Callback" : "Coach Auth Callback"}
         </p>
-        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.05em]">
+        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.02em]">
           {status === "error" ? "Access link issue." : "Finishing sign in."}
         </h1>
         <p className="mt-4 text-sm text-white/65">{message}</p>

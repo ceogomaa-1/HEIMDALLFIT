@@ -20,8 +20,8 @@ const config: Config = {
         "hf-combat": "#EF4444"
       },
       fontFamily: {
-        display: ["'Clash Display'", "sans-serif"],
-        body: ["'Cabinet Grotesk'", "sans-serif"],
+        display: ["'Manrope'", "'Inter'", "ui-sans-serif", "sans-serif"],
+        body: ["'Inter'", "ui-sans-serif", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "sans-serif"],
         mono: ["'JetBrains Mono'", "monospace"]
       },
       boxShadow: {
