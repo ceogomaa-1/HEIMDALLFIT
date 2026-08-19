@@ -162,7 +162,7 @@ async function requestRueDocument(apiKey: string, messages: RueMessage[], compac
   const response = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(compactRetry ? 80_000 : 210_000),
     body: JSON.stringify({
       model: process.env.XAI_MODEL || "grok-build-latest",
       reasoning_effort: "low",
@@ -281,7 +281,7 @@ Rules:
       : error instanceof RueOutputError
         ? "Rue couldn’t finish this design cleanly. Your canvas is safe—please try the request once more."
         : error instanceof Error && error.name === "TimeoutError"
-          ? "Rue needs a little longer for that design. Try again with a more focused request."
+          ? "Rue’s design service took too long to answer. Your canvas is safe—please try again."
           : "Rue couldn’t update the canvas this time. Your existing work is safe—please try again.";
     return Response.json({ error: message }, { status: 502 });
   }
