@@ -2,7 +2,7 @@ import { getAuthenticatedUserFromToken, normalizeBuilderContent } from "../../..
 import type { BuilderDocument, BuilderKind } from "../../../../../lib/builder-types";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function bearerToken(request: Request) {
   const authorization = request.headers.get("authorization");
@@ -140,7 +140,8 @@ Rules:
       headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: process.env.XAI_MODEL || "grok-build-latest",
-        temperature: 0.55,
+        reasoning_effort: "low",
+        max_tokens: 12000,
         messages: [
           { role: "system", content: system },
           ...conversation,
@@ -150,7 +151,15 @@ Rules:
       })
     });
 
-    const result = await response.json() as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
+    const rawResult = await response.text();
+    let result: { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
+    try {
+      result = JSON.parse(rawResult) as typeof result;
+    } catch {
+      throw new Error(response.ok
+        ? "Grok returned an unreadable response. Please try again."
+        : `Grok request failed (${response.status}). Please try again.`);
+    }
     if (!response.ok) throw new Error(result.error?.message || "Grok could not generate the plan.");
     const content = result.choices?.[0]?.message?.content;
     if (!content) throw new Error("Grok returned an empty plan.");
