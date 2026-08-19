@@ -1,9 +1,10 @@
 "use client";
 
 import {
-  AlignHorizontalSpaceAround, Bot, CheckSquare, ChevronDown, Circle, FileHeart, ImagePlus, Layers3, ListChecks,
-  PanelRight, Plus, Redo2, Save, Send, Sparkles, Table2, Type, Undo2, ZoomIn, ZoomOut
+  AlignHorizontalSpaceAround, CheckSquare, ChevronDown, Circle, FileHeart, ImagePlus, Layers3, ListChecks,
+  PanelRight, Plus, Redo2, Save, Send, Table2, Type, Undo2, ZoomIn, ZoomOut
 } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BuilderCanvas } from "../../../components/builder/builder-canvas";
 import { BuilderCopilot, type CopilotMessage } from "../../../components/builder/builder-copilot";
@@ -246,8 +247,8 @@ export default function CoachBuilderPage() {
       const { data: { session } } = await supabase.auth.getSession(); if (!session?.access_token) throw new Error("Your coach session expired.");
       const response = await fetch("/api/coach/builder/ai", { method: "POST", headers: { authorization: `Bearer ${session.access_token}`, "content-type": "application/json" }, body: JSON.stringify({ prompt, document, conversation: conversation.slice(0, -1) }) });
       const payload = await response.json() as { document?: BuilderDocument; message?: string; error?: string };
-      if (!response.ok || !payload.document) throw new Error(payload.error || "Grok could not update the canvas.");
-      replaceDocument(payload.document); setPageId(payload.document.content.pages[0]?.id || ""); setSelectedLayerId(null); setSuccess("Grok’s design is now editable on your canvas.");
+      if (!response.ok || !payload.document) throw new Error(payload.error || "Rue could not update the canvas.");
+      replaceDocument(payload.document); setPageId(payload.document.content.pages[0]?.id || ""); setSelectedLayerId(null); setSuccess("Rue’s design is now editable on your canvas.");
       return payload.message || "I rebuilt the plan as editable layers on your canvas.";
     } finally { setGenerating(false); }
   }
@@ -268,7 +269,7 @@ export default function CoachBuilderPage() {
           <div className="flex items-center gap-1">
             <button type="button" onClick={undo} className="builder-icon-button" title="Undo" aria-label="Undo"><Undo2 /></button><button type="button" onClick={redo} className="builder-icon-button" title="Redo" aria-label="Redo"><Redo2 /></button>
             <span className="mx-1 hidden h-6 w-px bg-white/[0.07] sm:block" />
-            <button type="button" onClick={() => setCopilotOpen(true)} className="builder-ai-button" aria-label="Build with Grok"><Sparkles className="h-4 w-4" /><span className="hidden sm:inline">Build with Grok</span></button>
+            <button type="button" onClick={() => setCopilotOpen(true)} className="builder-ai-button" aria-label="Build with Rue"><Image src="/branding/rue-logo.jpg" alt="" width={18} height={18} className="h-[18px] w-[18px] rounded-md object-cover" /><span className="hidden sm:inline">Build with Rue</span></button>
             <button type="button" onClick={() => void save()} disabled={saving} className="builder-secondary-button h-10" aria-label={saving ? "Saving" : "Save document"}><Save className="h-4 w-4" /><span className="hidden md:inline">{saving ? "Saving" : "Save"}</span></button>
             <button type="button" onClick={() => void send()} disabled={sending} className="builder-primary-button h-10" aria-label={sending ? "Sending" : "Send to client"}><Send className="h-4 w-4" /><span className="hidden md:inline">{sending ? "Sending" : "Send"}</span></button>
           </div>
@@ -324,8 +325,8 @@ export default function CoachBuilderPage() {
           </aside>
         </div>
 
-        <button type="button" onClick={() => setCopilotOpen(true)} className="builder-floating-ai" aria-label="Open Grok Studio"><Bot className="h-5 w-5" /><span>Ask Grok</span></button>
-        {copilotOpen ? <button type="button" className="builder-copilot-backdrop" onClick={() => setCopilotOpen(false)} aria-label="Close Grok Studio" /> : null}
+        <button type="button" onClick={() => setCopilotOpen(true)} className="builder-floating-ai" aria-label="Open Rue"><Image src="/branding/rue-logo.jpg" alt="" width={22} height={22} className="h-[22px] w-[22px] rounded-md object-cover" /><span>Ask Rue</span></button>
+        {copilotOpen ? <button type="button" className="builder-copilot-backdrop" onClick={() => setCopilotOpen(false)} aria-label="Close Rue" /> : null}
         {copilotOpen ? <BuilderCopilot open generating={generating} onClose={() => setCopilotOpen(false)} onGenerate={generate} /> : null}
       </div>
     </CoachShell>

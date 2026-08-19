@@ -1,6 +1,7 @@
 "use client";
 
-import { Bot, Send, Sparkles, WandSparkles, X } from "lucide-react";
+import { Send, WandSparkles, X } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 export type CopilotMessage = { role: "user" | "assistant"; content: string };
@@ -35,15 +36,15 @@ export function BuilderCopilot({ open, generating, onClose, onGenerate }: { open
   return (
     <aside className={`builder-copilot ${open ? "builder-copilot-open" : ""}`} aria-hidden={!open}>
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
-        <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 text-white"><Sparkles className="h-4 w-4" /></span><div><p className="text-sm font-semibold">Grok Studio</p><p className="text-[11px] text-white/38">AI plan designer</p></div></div>
-        <button type="button" onClick={onClose} className="builder-icon-button" aria-label="Close Grok Studio"><X /></button>
+        <div className="flex items-center gap-3"><Image src="/branding/rue-logo.jpg" alt="Rue" width={36} height={36} className="h-9 w-9 rounded-xl object-cover ring-1 ring-white/10" priority /><div><p className="text-sm font-semibold">Rue</p><p className="text-[11px] text-white/38">AI plan designer</p></div></div>
+        <button type="button" onClick={onClose} className="builder-icon-button" aria-label="Close Rue"><X /></button>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <div className="rounded-2xl bg-gradient-to-br from-blue-500/12 to-violet-500/8 p-4">
           <WandSparkles className="h-5 w-5 text-blue-300" />
           <p className="mt-3 text-sm font-semibold">Build with a sentence</p>
-          <p className="mt-1 text-xs leading-5 text-white/45">Grok creates editable pages and layers. Nothing is flattened—you can still move, resize, and restyle everything.</p>
+          <p className="mt-1 text-xs leading-5 text-white/45">Rue creates editable pages and layers. Nothing is flattened—you can still move, resize, and restyle everything.</p>
         </div>
 
         {messages.length === 1 ? <div className="mt-4 space-y-2">{quickPrompts.map((item) => <button key={item} type="button" onClick={() => void submit(item)} className="w-full rounded-xl border border-white/[0.07] bg-white/[0.035] px-3 py-3 text-left text-xs leading-5 text-white/58 transition hover:bg-white/[0.07] hover:text-white">{item}</button>)}</div> : null}
@@ -51,11 +52,11 @@ export function BuilderCopilot({ open, generating, onClose, onGenerate }: { open
         <div className="mt-5 space-y-4">
           {messages.map((message, index) => (
             <div key={index} className={`flex gap-2.5 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-              {message.role === "assistant" ? <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.07] text-blue-300"><Bot className="h-3.5 w-3.5" /></span> : null}
+              {message.role === "assistant" ? <Image src="/branding/rue-logo.jpg" alt="" width={28} height={28} className="mt-0.5 h-7 w-7 shrink-0 rounded-lg object-cover ring-1 ring-white/10" /> : null}
               <p className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-5 ${message.role === "user" ? "bg-blue-600 text-white" : "bg-white/[0.055] text-white/68"}`}>{message.content}</p>
             </div>
           ))}
-          {generating ? <div className="flex items-center gap-2 text-xs text-white/42"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.07]"><Sparkles className="h-3.5 w-3.5 animate-pulse text-blue-300" /></span>Designing your editable plan…</div> : null}
+          {generating ? <div className="flex items-center gap-2 text-xs text-white/42"><span className="relative h-7 w-7 overflow-hidden rounded-lg ring-1 ring-white/10"><Image src="/branding/rue-logo.jpg" alt="" fill sizes="28px" className="animate-pulse object-cover" /></span>Rue is designing your editable plan…</div> : null}
         </div>
       </div>
 

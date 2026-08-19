@@ -28,11 +28,11 @@ const styleProperties = {
 const layerSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["id", "type", "name", "x", "y", "width", "height", "rotation", "opacity", "locked", "hidden", "text", "items", "rows", "imageUrl", "imagePath", "style"],
+  required: ["id", "type", "name", "x", "y", "width", "height"],
   properties: {
-    id: { type: "string" },
+    id: { type: "string", maxLength: 48 },
     type: { type: "string", enum: ["text", "checklist", "table", "image", "shape"] },
-    name: { type: "string" },
+    name: { type: "string", maxLength: 80 },
     x: { type: "number", minimum: 0, maximum: 780 },
     y: { type: "number", minimum: 0, maximum: 1020 },
     width: { type: "number", minimum: 40, maximum: 820 },
@@ -41,15 +41,14 @@ const layerSchema = {
     opacity: { type: "number", minimum: 0.05, maximum: 1 },
     locked: { type: "boolean" },
     hidden: { type: "boolean" },
-    text: { type: "string" },
-    items: { type: "array", items: { type: "string" }, maxItems: 40 },
-    rows: { type: "array", items: { type: "array", items: { type: "string" }, maxItems: 8 }, maxItems: 30 },
-    imageUrl: { type: "string" },
-    imagePath: { type: "string" },
+    text: { type: "string", maxLength: 1600 },
+    items: { type: "array", items: { type: "string", maxLength: 220 }, maxItems: 24 },
+    rows: { type: "array", items: { type: "array", items: { type: "string", maxLength: 180 }, maxItems: 8 }, maxItems: 20 },
+    imageUrl: { type: ["string", "null"], maxLength: 1200 },
+    imagePath: { type: ["string", "null"], maxLength: 500 },
     style: {
       type: "object",
       additionalProperties: false,
-      required: Object.keys(styleProperties),
       properties: styleProperties
     }
   }
@@ -63,33 +62,139 @@ const responseSchema = {
     additionalProperties: false,
     required: ["message", "title", "description", "kind", "theme", "coverNote", "pages"],
     properties: {
-      message: { type: "string" },
-      title: { type: "string" },
-      description: { type: "string" },
+      message: { type: "string", maxLength: 600 },
+      title: { type: "string", maxLength: 140 },
+      description: { type: "string", maxLength: 500 },
       kind: { type: "string", enum: ["onboarding_form", "diet_plan", "training_plan"] },
-      theme: { type: "string" },
-      coverNote: { type: "string" },
+      theme: { type: "string", maxLength: 80 },
+      coverNote: { type: "string", maxLength: 1200 },
       pages: {
         type: "array",
         minItems: 1,
-        maxItems: 6,
+        maxItems: 5,
         items: {
           type: "object",
           additionalProperties: false,
           required: ["id", "name", "width", "height", "background", "layers"],
           properties: {
-            id: { type: "string" },
-            name: { type: "string" },
+            id: { type: "string", maxLength: 48 },
+            name: { type: "string", maxLength: 80 },
             width: { type: "number", enum: [820] },
             height: { type: "number", enum: [1060] },
-            background: { type: "string" },
-            layers: { type: "array", minItems: 1, maxItems: 30, items: layerSchema }
+            background: { type: "string", maxLength: 120 },
+            layers: { type: "array", minItems: 1, maxItems: 18, items: layerSchema }
           }
         }
       }
     }
   }
 };
+
+type GeneratedDocument = {
+  message: string;
+  title: string;
+  description: string;
+  kind: BuilderKind;
+  theme: string;
+  coverNote: string;
+  pages: unknown[];
+};
+
+type XaiResult = {
+  choices?: Array<{
+    finish_reason?: string;
+    message?: { content?: string };
+  }>;
+  error?: { message?: string };
+};
+
+class RueOutputError extends Error {}
+
+class RueServiceError extends Error {
+  constructor(readonly status: number) {
+    super(`Rue provider request failed with status ${status}.`);
+  }
+}
+
+function parseGeneratedDocument(content: string): GeneratedDocument {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw new RueOutputError("Rue returned malformed structured output.");
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    throw new RueOutputError("Rue returned an invalid document.");
+  }
+
+  const candidate = parsed as Partial<GeneratedDocument>;
+  if (
+    typeof candidate.message !== "string" ||
+    typeof candidate.title !== "string" ||
+    typeof candidate.description !== "string" ||
+    !["onboarding_form", "diet_plan", "training_plan"].includes(String(candidate.kind)) ||
+    typeof candidate.theme !== "string" ||
+    typeof candidate.coverNote !== "string" ||
+    !Array.isArray(candidate.pages) ||
+    candidate.pages.length === 0
+  ) {
+    throw new RueOutputError("Rue returned an incomplete document.");
+  }
+
+  return candidate as GeneratedDocument;
+}
+
+function friendlyServiceMessage(status: number) {
+  if (status === 429) return "Rue is handling a lot of requests right now. Give it a moment, then try again.";
+  if (status === 401 || status === 403) return "Rue is temporarily unavailable while its connection is being refreshed.";
+  return "Rue couldn’t reach the design service right now. Your canvas is safe—please try again shortly.";
+}
+
+type RueMessage = { role: "system" | "user" | "assistant"; content: string };
+
+async function requestRueDocument(apiKey: string, messages: RueMessage[], compactRetry: boolean) {
+  const retryInstruction: RueMessage[] = compactRetry ? [{
+    role: "user",
+    content: "Retry the same request as a compact canvas document. Preserve the useful coaching detail, but consolidate it into tables and checklists, use no more than 14 layers per page, and omit optional/default/empty layer properties. The response must finish as complete valid JSON."
+  }] : [];
+
+  const response = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
+    signal: AbortSignal.timeout(120_000),
+    body: JSON.stringify({
+      model: process.env.XAI_MODEL || "grok-build-latest",
+      reasoning_effort: "low",
+      max_tokens: 24000,
+      messages: [...messages, ...retryInstruction],
+      response_format: { type: "json_schema", json_schema: responseSchema }
+    })
+  });
+
+  const rawResult = await response.text();
+  let result: XaiResult;
+  try {
+    result = JSON.parse(rawResult) as XaiResult;
+  } catch {
+    if (response.ok) throw new RueOutputError("Rue returned an unreadable provider response.");
+    throw new RueServiceError(response.status);
+  }
+
+  if (!response.ok) {
+    console.error("[Rue Builder] Provider rejected generation", { status: response.status, providerMessage: result.error?.message });
+    throw new RueServiceError(response.status);
+  }
+
+  const choice = result.choices?.[0];
+  if (choice?.finish_reason === "length") {
+    throw new RueOutputError("Rue reached the output limit before completing the document.");
+  }
+
+  const content = choice?.message?.content;
+  if (!content) throw new RueOutputError("Rue returned an empty document.");
+  return parseGeneratedDocument(content);
+}
 
 export async function POST(request: Request) {
   try {
@@ -99,16 +204,16 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.XAI_API_KEY;
     if (!apiKey) {
-      return Response.json({ error: "Grok is ready in the Builder, but XAI_API_KEY has not been added to this environment yet." }, { status: 503 });
+      return Response.json({ error: "Rue isn’t connected to the design service in this environment yet." }, { status: 503 });
     }
 
     const body = await request.json() as { prompt?: string; document?: BuilderDocument; conversation?: Array<{ role: "user" | "assistant"; content: string }> };
     const prompt = body.prompt?.trim().slice(0, 5000);
-    if (!prompt) return Response.json({ error: "Tell Grok what you want to build or change." }, { status: 400 });
+    if (!prompt) return Response.json({ error: "Tell Rue what you want to build or change." }, { status: 400 });
 
     const current = body.document;
     const conversation = Array.isArray(body.conversation) ? body.conversation.slice(-8).map((message) => ({ role: message.role, content: message.content.slice(0, 2000) })) : [];
-    const system = `You are HEIMDALLFIT Studio Copilot, an elite fitness-program designer and editorial art director embedded in a visual canvas editor.
+    const system = `You are Rue, HEIMDALLFIT's elite fitness-program designer and editorial art director embedded in a visual canvas editor.
 
 Return a complete, editable document—not prose. Create exceptionally clear, premium layouts that feel like a top fitness publication, with strong hierarchy and generous whitespace. Every visual object must be an independent layer placed inside an 820 × 1060 artboard.
 
@@ -124,6 +229,7 @@ Rules:
 - Fitness and nutrition content is educational coaching material, not diagnosis or medical treatment. Flag contraindications and professional-referral needs in the plan when relevant.
 - Colors must be valid CSS hex values. Page background may be a hex color or a CSS linear-gradient.
 - Every required field must be returned. IDs must be short unique strings.
+- Keep the response compact. Prefer a table or checklist over many separate text layers, and omit optional properties when they are empty or equal to their normal defaults.
 - In message, briefly explain what you created or changed in a warm, direct tone.`;
 
     const currentContext = current ? JSON.stringify({
@@ -135,36 +241,21 @@ Rules:
       content: current.content
     }) : "No document exists yet.";
 
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: process.env.XAI_MODEL || "grok-build-latest",
-        reasoning_effort: "low",
-        max_tokens: 12000,
-        messages: [
-          { role: "system", content: system },
-          ...conversation,
-          { role: "user", content: `Current editable document:\n${currentContext}\n\nCoach request:\n${prompt}` }
-        ],
-        response_format: { type: "json_schema", json_schema: responseSchema }
-      })
-    });
+    const messages: RueMessage[] = [
+      { role: "system", content: system },
+      ...conversation,
+      { role: "user", content: `Current editable document:\n${currentContext}\n\nCoach request:\n${prompt}` }
+    ];
 
-    const rawResult = await response.text();
-    let result: { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
+    let generated: GeneratedDocument;
     try {
-      result = JSON.parse(rawResult) as typeof result;
-    } catch {
-      throw new Error(response.ok
-        ? "Grok returned an unreadable response. Please try again."
-        : `Grok request failed (${response.status}). Please try again.`);
+      generated = await requestRueDocument(apiKey, messages, false);
+    } catch (error) {
+      if (!(error instanceof RueOutputError)) throw error;
+      console.warn("[Rue Builder] Retrying compact generation", { reason: error.message });
+      generated = await requestRueDocument(apiKey, messages, true);
     }
-    if (!response.ok) throw new Error(result.error?.message || "Grok could not generate the plan.");
-    const content = result.choices?.[0]?.message?.content;
-    if (!content) throw new Error("Grok returned an empty plan.");
 
-    const generated = JSON.parse(content) as { message: string; title: string; description: string; kind: BuilderKind; theme: string; coverNote: string; pages: unknown[] };
     const normalized = normalizeBuilderContent(generated.kind, { version: 2, coverNote: generated.coverNote, pages: generated.pages, sections: [] });
     const document: BuilderDocument = {
       id: current?.id || "",
@@ -181,7 +272,17 @@ Rules:
 
     return Response.json({ message: generated.message, document });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Grok could not update the canvas.";
-    return Response.json({ error: message }, { status: 500 });
+    console.error("[Rue Builder] Generation failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : "Unknown failure"
+    });
+    const message = error instanceof RueServiceError
+      ? friendlyServiceMessage(error.status)
+      : error instanceof RueOutputError
+        ? "Rue couldn’t finish this design cleanly. Your canvas is safe—please try the request once more."
+        : error instanceof Error && error.name === "TimeoutError"
+          ? "Rue needs a little longer for that design. Try again with a more focused request."
+          : "Rue couldn’t update the canvas this time. Your existing work is safe—please try again.";
+    return Response.json({ error: message }, { status: 502 });
   }
 }
