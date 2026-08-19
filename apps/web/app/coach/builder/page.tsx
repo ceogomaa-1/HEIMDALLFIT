@@ -245,8 +245,18 @@ export default function CoachBuilderPage() {
     if (!supabase) throw new Error("Supabase is unavailable."); setGenerating(true); setError(null);
     try {
       const { data: { session } } = await supabase.auth.getSession(); if (!session?.access_token) throw new Error("Your coach session expired.");
-      const response = await fetch("/api/coach/builder/ai", { method: "POST", headers: { authorization: `Bearer ${session.access_token}`, "content-type": "application/json" }, body: JSON.stringify({ prompt, document, conversation: conversation.slice(0, -1) }) });
-      const payload = await response.json() as { document?: BuilderDocument; message?: string; error?: string };
+      let response: Response;
+      try {
+        response = await fetch("/api/coach/builder/ai", { method: "POST", headers: { authorization: `Bearer ${session.access_token}`, "content-type": "application/json" }, body: JSON.stringify({ prompt, document, conversation: conversation.slice(0, -1) }) });
+      } catch {
+        throw new Error("Rue lost the connection before the plan arrived. Your canvas is safe—tap send to try again.");
+      }
+      let payload: { document?: BuilderDocument; message?: string; error?: string };
+      try {
+        payload = await response.json() as typeof payload;
+      } catch {
+        throw new Error("Rue’s response was interrupted before it reached your phone. Your canvas is safe—tap send to try again.");
+      }
       if (!response.ok || !payload.document) throw new Error(payload.error || "Rue could not update the canvas.");
       replaceDocument(payload.document); setPageId(payload.document.content.pages[0]?.id || ""); setSelectedLayerId(null); setSuccess("Rue’s design is now editable on your canvas.");
       return payload.message || "I rebuilt the plan as editable layers on your canvas.";

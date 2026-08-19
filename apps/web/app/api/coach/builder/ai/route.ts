@@ -1,174 +1,68 @@
 import { getAuthenticatedUserFromToken, normalizeBuilderContent } from "../../../../../lib/builder-studio";
-import type { BuilderDocument, BuilderKind } from "../../../../../lib/builder-types";
+import { composeRuePages, parseRuePlan, RUE_RESPONSE_SCHEMA, type RuePlan } from "../../../../../lib/rue-builder";
+import type { BuilderDocument } from "../../../../../lib/builder-types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-function bearerToken(request: Request) {
-  const authorization = request.headers.get("authorization");
-  return authorization?.startsWith("Bearer ") ? authorization.slice(7).trim() : null;
-}
-
-const styleProperties = {
-  fontFamily: { type: "string", enum: ["Inter", "Clash Display", "Georgia", "JetBrains Mono"] },
-  fontSize: { type: "number", minimum: 8, maximum: 120 },
-  fontWeight: { type: "number", minimum: 300, maximum: 800 },
-  lineHeight: { type: "number", minimum: 0.8, maximum: 2.5 },
-  letterSpacing: { type: "number", minimum: -4, maximum: 20 },
-  textAlign: { type: "string", enum: ["left", "center", "right"] },
-  color: { type: "string" },
-  backgroundColor: { type: "string" },
-  borderColor: { type: "string" },
-  borderWidth: { type: "number", minimum: 0, maximum: 12 },
-  borderRadius: { type: "number", minimum: 0, maximum: 100 },
-  padding: { type: "number", minimum: 0, maximum: 80 },
-  objectFit: { type: "string", enum: ["cover", "contain"] }
-};
-
-const layerSchema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["id", "type", "name", "x", "y", "width", "height"],
-  properties: {
-    id: { type: "string", maxLength: 48 },
-    type: { type: "string", enum: ["text", "checklist", "table", "image", "shape"] },
-    name: { type: "string", maxLength: 80 },
-    x: { type: "number", minimum: 0, maximum: 780 },
-    y: { type: "number", minimum: 0, maximum: 1020 },
-    width: { type: "number", minimum: 40, maximum: 820 },
-    height: { type: "number", minimum: 32, maximum: 1060 },
-    rotation: { type: "number", minimum: -180, maximum: 180 },
-    opacity: { type: "number", minimum: 0.05, maximum: 1 },
-    locked: { type: "boolean" },
-    hidden: { type: "boolean" },
-    text: { type: "string", maxLength: 1600 },
-    items: { type: "array", items: { type: "string", maxLength: 220 }, maxItems: 24 },
-    rows: { type: "array", items: { type: "array", items: { type: "string", maxLength: 180 }, maxItems: 8 }, maxItems: 20 },
-    imageUrl: { type: ["string", "null"], maxLength: 1200 },
-    imagePath: { type: ["string", "null"], maxLength: 500 },
-    style: {
-      type: "object",
-      additionalProperties: false,
-      properties: styleProperties
-    }
-  }
-};
-
-const responseSchema = {
-  name: "heimdallfit_builder_document",
-  strict: true,
-  schema: {
-    type: "object",
-    additionalProperties: false,
-    required: ["message", "title", "description", "kind", "theme", "coverNote", "pages"],
-    properties: {
-      message: { type: "string", maxLength: 600 },
-      title: { type: "string", maxLength: 140 },
-      description: { type: "string", maxLength: 500 },
-      kind: { type: "string", enum: ["onboarding_form", "diet_plan", "training_plan"] },
-      theme: { type: "string", maxLength: 80 },
-      coverNote: { type: "string", maxLength: 1200 },
-      pages: {
-        type: "array",
-        minItems: 1,
-        maxItems: 5,
-        items: {
-          type: "object",
-          additionalProperties: false,
-          required: ["id", "name", "width", "height", "background", "layers"],
-          properties: {
-            id: { type: "string", maxLength: 48 },
-            name: { type: "string", maxLength: 80 },
-            width: { type: "number", enum: [820] },
-            height: { type: "number", enum: [1060] },
-            background: { type: "string", maxLength: 120 },
-            layers: { type: "array", minItems: 1, maxItems: 18, items: layerSchema }
-          }
-        }
-      }
-    }
-  }
-};
-
-type GeneratedDocument = {
-  message: string;
-  title: string;
-  description: string;
-  kind: BuilderKind;
-  theme: string;
-  coverNote: string;
-  pages: unknown[];
-};
-
+type RueMessage = { role: "system" | "user" | "assistant"; content: string };
 type XaiResult = {
-  choices?: Array<{
-    finish_reason?: string;
-    message?: { content?: string };
-  }>;
+  choices?: Array<{ finish_reason?: string; message?: { content?: string } }>;
   error?: { message?: string };
 };
 
 class RueOutputError extends Error {}
-
 class RueServiceError extends Error {
   constructor(readonly status: number) {
     super(`Rue provider request failed with status ${status}.`);
   }
 }
 
-function parseGeneratedDocument(content: string): GeneratedDocument {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(content);
-  } catch {
-    throw new RueOutputError("Rue returned malformed structured output.");
-  }
-
-  if (!parsed || typeof parsed !== "object") {
-    throw new RueOutputError("Rue returned an invalid document.");
-  }
-
-  const candidate = parsed as Partial<GeneratedDocument>;
-  if (
-    typeof candidate.message !== "string" ||
-    typeof candidate.title !== "string" ||
-    typeof candidate.description !== "string" ||
-    !["onboarding_form", "diet_plan", "training_plan"].includes(String(candidate.kind)) ||
-    typeof candidate.theme !== "string" ||
-    typeof candidate.coverNote !== "string" ||
-    !Array.isArray(candidate.pages) ||
-    candidate.pages.length === 0
-  ) {
-    throw new RueOutputError("Rue returned an incomplete document.");
-  }
-
-  return candidate as GeneratedDocument;
+function bearerToken(request: Request) {
+  const authorization = request.headers.get("authorization");
+  return authorization?.startsWith("Bearer ") ? authorization.slice(7).trim() : null;
 }
 
-function friendlyServiceMessage(status: number) {
-  if (status === 429) return "Rue is handling a lot of requests right now. Give it a moment, then try again.";
-  if (status === 401 || status === 403) return "Rue is temporarily unavailable while its connection is being refreshed.";
-  return "Rue couldn’t reach the design service right now. Your canvas is safe—please try again shortly.";
+function compactCurrentDocument(current?: BuilderDocument) {
+  if (!current) return "No document exists yet.";
+  return JSON.stringify({
+    title: current.title,
+    description: current.description,
+    kind: current.kind,
+    theme: current.theme,
+    hasAssignedClient: Boolean(current.clientId),
+    pages: current.content.pages.slice(0, 5).map((page) => ({
+      name: page.name,
+      content: page.layers
+        .filter((layer) => layer.type !== "shape")
+        .slice(0, 16)
+        .map((layer) => ({
+          type: layer.type,
+          name: layer.name,
+          text: layer.text.slice(0, 500),
+          items: layer.items.slice(0, 8),
+          rows: layer.rows.slice(0, 8)
+        }))
+    }))
+  });
 }
 
-type RueMessage = { role: "system" | "user" | "assistant"; content: string };
-
-async function requestRueDocument(apiKey: string, messages: RueMessage[], compactRetry: boolean) {
+async function requestRuePlan(apiKey: string, messages: RueMessage[], compactRetry: boolean) {
   const retryInstruction: RueMessage[] = compactRetry ? [{
     role: "user",
-    content: "Retry the same request as a compact canvas document. Preserve the useful coaching detail, but consolidate it into tables and checklists, use no more than 14 layers per page, and omit optional/default/empty layer properties. The response must finish as complete valid JSON."
+    content: "Retry the same plan in the most concise valid form. Keep every requested day and the essential coaching detail, use tables for repeated exercise data, and return complete JSON."
   }] : [];
 
   const response = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-    signal: AbortSignal.timeout(compactRetry ? 80_000 : 210_000),
+    signal: AbortSignal.timeout(compactRetry ? 55_000 : 85_000),
     body: JSON.stringify({
-      model: process.env.XAI_MODEL || "grok-build-latest",
+      model: process.env.XAI_MODEL || "grok-4.3-latest",
       reasoning_effort: "low",
-      max_tokens: 24000,
+      max_tokens: 8000,
       messages: [...messages, ...retryInstruction],
-      response_format: { type: "json_schema", json_schema: responseSchema }
+      response_format: { type: "json_schema", json_schema: RUE_RESPONSE_SCHEMA }
     })
   });
 
@@ -187,82 +81,151 @@ async function requestRueDocument(apiKey: string, messages: RueMessage[], compac
   }
 
   const choice = result.choices?.[0];
-  if (choice?.finish_reason === "length") {
-    throw new RueOutputError("Rue reached the output limit before completing the document.");
-  }
-
+  if (choice?.finish_reason === "length") throw new RueOutputError("Rue reached the output limit.");
   const content = choice?.message?.content;
-  if (!content) throw new RueOutputError("Rue returned an empty document.");
-  return parseGeneratedDocument(content);
+  if (!content) throw new RueOutputError("Rue returned an empty plan.");
+
+  try {
+    return parseRuePlan(content);
+  } catch {
+    throw new RueOutputError("Rue returned malformed plan data.");
+  }
+}
+
+function friendlyServiceMessage(status: number) {
+  if (status === 429) return "Rue is handling a lot of requests right now. Give it a moment, then try again.";
+  if (status === 401 || status === 403) return "Rue is temporarily unavailable while its connection is being refreshed.";
+  return "Rue couldn’t reach the design service right now. Your canvas is safe—please try again shortly.";
+}
+
+function friendlyGenerationError(error: unknown) {
+  console.error("[Rue Builder] Generation failed", {
+    name: error instanceof Error ? error.name : "UnknownError",
+    message: error instanceof Error ? error.message : "Unknown failure"
+  });
+  if (error instanceof RueServiceError) return friendlyServiceMessage(error.status);
+  if (error instanceof RueOutputError) return "Rue couldn’t finish this design cleanly. Your canvas is safe—please try once more.";
+  if (error instanceof Error && error.name === "TimeoutError") return "Rue’s design service took too long to answer. Your canvas is safe—please try again.";
+  return "Rue couldn’t update the canvas this time. Your existing work is safe—please try again.";
+}
+
+function heartbeatJson(work: () => Promise<unknown>) {
+  const encoder = new TextEncoder();
+  let heartbeat: ReturnType<typeof setInterval> | null = null;
+  let closed = false;
+
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      const enqueue = (value: string) => {
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(value));
+        } catch {
+          closed = true;
+        }
+      };
+
+      enqueue(" ".repeat(2048));
+      heartbeat = setInterval(() => enqueue(" ".repeat(2048)), 5000);
+
+      void work()
+        .then((payload) => enqueue(JSON.stringify(payload)))
+        .catch((error) => enqueue(JSON.stringify({ error: friendlyGenerationError(error) })))
+        .finally(() => {
+          if (heartbeat) clearInterval(heartbeat);
+          if (!closed) {
+            closed = true;
+            controller.close();
+          }
+        });
+    },
+    cancel() {
+      closed = true;
+      if (heartbeat) clearInterval(heartbeat);
+    }
+  });
+
+  return new Response(stream, {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-cache, no-store, no-transform",
+      "x-accel-buffering": "no"
+    }
+  });
 }
 
 export async function POST(request: Request) {
+  const token = bearerToken(request);
+  if (!token) return Response.json({ error: "Missing authorization token." }, { status: 401 });
+
   try {
-    const token = bearerToken(request);
-    if (!token) return Response.json({ error: "Missing authorization token." }, { status: 401 });
     await getAuthenticatedUserFromToken(token);
+  } catch {
+    return Response.json({ error: "Your coach session expired. Please sign in again." }, { status: 401 });
+  }
 
-    const apiKey = process.env.XAI_API_KEY;
-    if (!apiKey) {
-      return Response.json({ error: "Rue isn’t connected to the design service in this environment yet." }, { status: 503 });
-    }
+  const apiKey = process.env.XAI_API_KEY;
+  if (!apiKey) return Response.json({ error: "Rue isn’t connected to the design service in this environment yet." }, { status: 503 });
 
-    const body = await request.json() as { prompt?: string; document?: BuilderDocument; conversation?: Array<{ role: "user" | "assistant"; content: string }> };
-    const prompt = body.prompt?.trim().slice(0, 5000);
-    if (!prompt) return Response.json({ error: "Tell Rue what you want to build or change." }, { status: 400 });
+  let body: { prompt?: string; document?: BuilderDocument; conversation?: Array<{ role: "user" | "assistant"; content: string }> };
+  try {
+    body = await request.json() as typeof body;
+  } catch {
+    return Response.json({ error: "Rue couldn’t read that request. Please send it again." }, { status: 400 });
+  }
 
-    const current = body.document;
-    const conversation = Array.isArray(body.conversation) ? body.conversation.slice(-8).map((message) => ({ role: message.role, content: message.content.slice(0, 2000) })) : [];
-    const system = `You are Rue, HEIMDALLFIT's elite fitness-program designer and editorial art director embedded in a visual canvas editor.
+  const prompt = body.prompt?.trim().slice(0, 5000);
+  if (!prompt) return Response.json({ error: "Tell Rue what you want to build or change." }, { status: 400 });
 
-Return a complete, editable document—not prose. Create exceptionally clear, premium layouts that feel like a top fitness publication, with strong hierarchy and generous whitespace. Every visual object must be an independent layer placed inside an 820 × 1060 artboard.
+  const current = body.document;
+  const conversation = Array.isArray(body.conversation)
+    ? body.conversation.slice(-6).map((message) => ({ role: message.role, content: message.content.slice(0, 1200) }))
+    : [];
+  const system = `You are Rue, HEIMDALLFIT's elite fitness-program designer and editorial art director.
+
+Create the semantic content for a premium editable fitness, nutrition, or onboarding document. HEIMDALLFIT—not you—will turn your semantic pages and blocks into polished positioned canvas layers. Do not return coordinates, layer styles, colors, image URLs, or rendering instructions.
 
 Rules:
-- Use text layers for headings, subheadings, paragraphs, labels and callouts.
-- Use checklist layers for exercises, habits, ingredients, questions, or steps.
-- Use table layers when rows and columns improve scanning (sets/reps/rest, meals/macros, schedules).
-- Use shape layers behind content for color fields, dividers, pills, and cards. Put background shapes before foreground layers in the array.
-- Image layers may preserve image URLs already in the current document, but never invent an image URL. Use an empty string when no image is available.
-- Keep all layers inside the artboard without overlaps that obscure content. Use 44px minimum touch-readable content sizing where appropriate and at least 32px page margins.
-- Use no more than 24 layers per page. Add pages when needed instead of cramming.
-- Write concrete coaching content customized to the prompt. Avoid filler language.
-- Fitness and nutrition content is educational coaching material, not diagnosis or medical treatment. Flag contraindications and professional-referral needs in the plan when relevant.
-- Colors must be valid CSS hex values. Page background may be a hex color or a CSS linear-gradient.
-- Every required field must be returned. IDs must be short unique strings.
-- Keep the response compact. Prefer a table or checklist over many separate text layers, and omit optional properties when they are empty or equal to their normal defaults.
-- In message, briefly explain what you created or changed in a warm, direct tone.`;
+- Make the content concrete, useful, and customized to the coach's request.
+- For multi-day programs, use one overview page plus one page per day when space permits.
+- Use table blocks for exercises, sets, reps, rest, tempo, meals, macros, or schedules.
+- Use list blocks for habits, questions, cues, ingredients, or steps.
+- Use text sparingly and callouts for progression, safety, substitutions, or coaching priorities.
+- Each page may contain at most three blocks. Keep table rows to eight and list items to eight.
+- Put content only in the matching field: rows for tables, items for lists, body for text/callouts. Keep the other fields empty.
+- Fitness and nutrition content is educational coaching material, not diagnosis or medical treatment. Include relevant contraindications or referral guidance.
+- Choose a visual theme that fits the request.
+- In message, briefly explain what you built in a warm, direct tone.`;
 
-    const currentContext = current ? JSON.stringify({
-      title: current.title,
-      description: current.description,
-      kind: current.kind,
-      theme: current.theme,
-      hasAssignedClient: Boolean(current.clientId),
-      content: current.content
-    }) : "No document exists yet.";
+  const messages: RueMessage[] = [
+    { role: "system", content: system },
+    ...conversation,
+    { role: "user", content: `Current document summary:\n${compactCurrentDocument(current)}\n\nCoach request:\n${prompt}` }
+  ];
 
-    const messages: RueMessage[] = [
-      { role: "system", content: system },
-      ...conversation,
-      { role: "user", content: `Current editable document:\n${currentContext}\n\nCoach request:\n${prompt}` }
-    ];
-
-    let generated: GeneratedDocument;
+  return heartbeatJson(async () => {
+    let generated: RuePlan;
     try {
-      generated = await requestRueDocument(apiKey, messages, false);
+      generated = await requestRuePlan(apiKey, messages, false);
     } catch (error) {
       if (!(error instanceof RueOutputError)) throw error;
-      console.warn("[Rue Builder] Retrying compact generation", { reason: error.message });
-      generated = await requestRueDocument(apiKey, messages, true);
+      console.warn("[Rue Builder] Retrying compact semantic generation", { reason: error.message });
+      generated = await requestRuePlan(apiKey, messages, true);
     }
 
-    const normalized = normalizeBuilderContent(generated.kind, { version: 2, coverNote: generated.coverNote, pages: generated.pages, sections: [] });
+    const pages = composeRuePages(generated);
+    const normalized = normalizeBuilderContent(generated.kind, {
+      version: 2,
+      coverNote: generated.coverNote,
+      pages,
+      sections: []
+    });
     const document: BuilderDocument = {
       id: current?.id || "",
       title: generated.title.slice(0, 140),
       description: generated.description.slice(0, 500),
       kind: generated.kind,
-      theme: generated.theme.slice(0, 80),
+      theme: generated.theme,
       status: current?.status || "draft",
       clientId: current?.clientId || null,
       clientName: current?.clientName || null,
@@ -270,19 +233,6 @@ Rules:
       content: normalized
     };
 
-    return Response.json({ message: generated.message, document });
-  } catch (error) {
-    console.error("[Rue Builder] Generation failed", {
-      name: error instanceof Error ? error.name : "UnknownError",
-      message: error instanceof Error ? error.message : "Unknown failure"
-    });
-    const message = error instanceof RueServiceError
-      ? friendlyServiceMessage(error.status)
-      : error instanceof RueOutputError
-        ? "Rue couldn’t finish this design cleanly. Your canvas is safe—please try the request once more."
-        : error instanceof Error && error.name === "TimeoutError"
-          ? "Rue’s design service took too long to answer. Your canvas is safe—please try again."
-          : "Rue couldn’t update the canvas this time. Your existing work is safe—please try again.";
-    return Response.json({ error: message }, { status: 502 });
-  }
+    return { message: generated.message, document };
+  });
 }
