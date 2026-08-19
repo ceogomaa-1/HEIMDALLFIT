@@ -15,7 +15,7 @@ export default function ClientProgramsPage() {
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-[calc(7.5rem+env(safe-area-inset-bottom))] xl:pb-4">
         <section className="pb-5">
           <p className="text-[13px] text-white/45">Your training</p>
-          <h1 className="mt-1 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.1rem]">Programs</h1>
+          <h1 className="mt-1 font-display text-[1.8rem] font-semibold tracking-[-0.02em] text-white sm:text-[2.1rem]">Programs</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-white/48">Everything your coach has assigned, ready when you are.</p>
         </section>
 
@@ -37,7 +37,7 @@ export default function ClientProgramsPage() {
                     </span>
                     <span className="rounded-full border border-white/[0.07] bg-white/[0.035] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-white/42">{program.sport}</span>
                   </div>
-                  <h2 className="mt-6 font-display text-xl font-semibold tracking-[-0.04em] text-white">{program.title}</h2>
+                  <h2 className="mt-6 font-display text-xl font-semibold tracking-[-0.015em] text-white">{program.title}</h2>
                   <div className="mt-3 flex items-center gap-2 text-xs text-white/38"><CalendarDays className="h-3.5 w-3.5" /> Added {program.createdAt}</div>
                   <button type="button" className="mt-6 flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(37,99,235,0.28)] transition hover:bg-blue-500">
                     Open program <ArrowUpRight className="h-4 w-4" />

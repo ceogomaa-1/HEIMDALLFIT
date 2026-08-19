@@ -24,7 +24,7 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
   return (
     <div className="rounded-2xl bg-white/[0.045] p-5 sm:p-6">
       <p className="text-sm text-white/50">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-white">{value}</p>
+      <p className="mt-3 text-3xl font-semibold tracking-[-0.015em] text-white">{value}</p>
       <p className="mt-2 text-xs text-white/35">{detail}</p>
     </div>
   );
@@ -123,7 +123,7 @@ export default function CoachPortalPage() {
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
                 <p className="text-sm font-medium text-blue-400">{greeting()}, {profile.name.split(" ")[0]}.</p>
-                <h1 className="mt-3 font-display text-[clamp(2.3rem,6vw,4.5rem)] font-bold leading-[0.96] tracking-[-0.065em]">Your coaching work,<br />in one place.</h1>
+                <h1 className="mt-3 font-display text-[clamp(2.3rem,6vw,4.5rem)] font-bold leading-[0.96] tracking-[-0.025em]">Your coaching work,<br />in one place.</h1>
                 <p className="mt-4 max-w-lg text-sm leading-6 text-white/50">See who needs you, build their next plan, and keep every conversation moving.</p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -148,7 +148,7 @@ export default function CoachPortalPage() {
 
           <section className="rounded-[28px] bg-white/[0.035] p-5 sm:p-7" id="clients">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div><p className="text-xs font-medium text-blue-400">Clients</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Your roster</h2><p className="mt-2 text-sm text-white/40">The people currently connected to your coaching room.</p></div>
+              <div><p className="text-xs font-medium text-blue-400">Clients</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.015em]">Your roster</h2><p className="mt-2 text-sm text-white/40">The people currently connected to your coaching room.</p></div>
               <label className="flex h-11 w-full items-center gap-3 rounded-xl bg-white/[0.055] px-4 sm:max-w-[280px]"><Search className="h-4 w-4 text-white/35" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search clients" className="w-full bg-transparent text-sm outline-none placeholder:text-white/30" /></label>
             </div>
             <div className="mt-6">
@@ -159,7 +159,7 @@ export default function CoachPortalPage() {
           </section>
 
           <section className="rounded-[28px] bg-white/[0.035] p-5 sm:p-7">
-            <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-medium text-blue-400">Store</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Live offers</h2></div><Link href="/coach/store" className="text-sm font-semibold text-white/55 transition hover:text-white">Manage store</Link></div>
+            <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-medium text-blue-400">Store</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.015em]">Live offers</h2></div><Link href="/coach/store" className="text-sm font-semibold text-white/55 transition hover:text-white">Manage store</Link></div>
             {dashboard?.store.length ? <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{dashboard.store.slice(0, 3).map((item) => <Link key={item.id} href="/coach/store" className="group overflow-hidden rounded-2xl bg-white/[0.045] transition hover:bg-white/[0.07]">{item.image ? <img src={item.image} alt="" className="h-36 w-full object-cover" /> : <div className="flex h-24 items-end bg-[linear-gradient(135deg,#1b1e27,#111216)] p-4 text-3xl font-bold text-white/10">{item.title[0]}</div>}<div className="p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold">{item.title}</p><p className="mt-1 line-clamp-1 text-xs text-white/40">{item.subtitle}</p></div><span className="text-sm font-semibold text-emerald-400">{item.priceLabel}</span></div></div></Link>)}</div> : <p className="mt-6 rounded-2xl bg-white/[0.025] px-5 py-10 text-center text-sm text-white/40">No offers are live yet.</p>}
           </section>
         </div>

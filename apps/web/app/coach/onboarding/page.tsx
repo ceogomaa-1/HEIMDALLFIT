@@ -174,7 +174,7 @@ export default function CoachOnboardingPage() {
         <section className="flex flex-col gap-4 pb-2 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-medium text-blue-400">Invite a client</p>
-            <h1 className="mt-2 font-display text-[clamp(2.1rem,5vw,3.4rem)] font-bold tracking-[-0.055em] text-white">Bring someone into your room.</h1>
+            <h1 className="mt-2 font-display text-[clamp(2.1rem,5vw,3.4rem)] font-bold tracking-[-0.02em] text-white">Bring someone into your room.</h1>
             <p className="mt-3 max-w-[620px] text-[14px] leading-7 text-[var(--text-secondary)]">
               Send a personal invitation. Their account will connect to your coaching room automatically.
             </p>
@@ -203,7 +203,7 @@ export default function CoachOnboardingPage() {
                   <UserRoundPlus className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-white">Client details</h2>
+                  <h2 className="font-display text-[1.8rem] font-semibold tracking-[-0.015em] text-white">Client details</h2>
                   <p className="text-[13px] text-[var(--text-secondary)]">Add their name, email, and a personal note.</p>
                 </div>
               </div>
@@ -296,7 +296,7 @@ export default function CoachOnboardingPage() {
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.04em] text-white">What happens next</h2>
+                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.015em] text-white">What happens next</h2>
                     <p className="text-[13px] text-[var(--text-secondary)]">The client receives the invite, signs up, and gets connected to your room.</p>
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function CoachOnboardingPage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.04em] text-white">Recent Invites</h2>
+                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.015em] text-white">Recent Invites</h2>
                     <p className="text-[13px] text-[var(--text-secondary)]">Track which clients have already been invited into your room.</p>
                   </div>
                 </div>
@@ -359,7 +359,7 @@ export default function CoachOnboardingPage() {
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.04em] text-white">Client Entry Promise</h2>
+                    <h2 className="font-display text-[1.6rem] font-semibold tracking-[-0.015em] text-white">Client Entry Promise</h2>
                     <p className="text-[13px] text-[var(--text-secondary)]">No switching apps. No WhatsApp dependency. Everything starts here.</p>
                   </div>
                 </div>

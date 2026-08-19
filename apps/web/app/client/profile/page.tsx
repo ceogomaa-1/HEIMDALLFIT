@@ -25,7 +25,7 @@ export default function ClientProfilePage() {
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pb-[calc(7.5rem+env(safe-area-inset-bottom))] xl:pb-4">
         <section>
           <p className="text-[13px] text-white/45">Your account</p>
-          <h1 className="mt-1 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.1rem]">Profile</h1>
+          <h1 className="mt-1 font-display text-[1.8rem] font-semibold tracking-[-0.02em] text-white sm:text-[2.1rem]">Profile</h1>
         </section>
 
         {loading ? (
@@ -39,7 +39,7 @@ export default function ClientProfilePage() {
                 <div className="flex items-center gap-4">
                   <ProfileAvatar name={data.profile.name} avatar={data.profile.avatar} />
                   <div className="min-w-0">
-                    <p className="truncate font-display text-2xl font-semibold tracking-[-0.04em] text-white">{data.profile.name}</p>
+                    <p className="truncate font-display text-2xl font-semibold tracking-[-0.015em] text-white">{data.profile.name}</p>
                     <p className="mt-1 truncate text-sm text-white/45">{data.profile.handle}</p>
                     <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium text-emerald-300"><ShieldCheck className="h-3.5 w-3.5" /> Client account</span>
                   </div>

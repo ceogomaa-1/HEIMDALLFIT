@@ -99,7 +99,7 @@ export default function FindCoachPage() {
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-4 xl:pr-1">
         <section className="flex flex-col gap-5 pt-1 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="font-display text-[2rem] font-semibold tracking-[-0.055em] text-white sm:text-[2.4rem]">Find your fit.</h1>
+            <h1 className="font-display text-[2rem] font-semibold tracking-[-0.02em] text-white sm:text-[2.4rem]">Find your fit.</h1>
             <p className="mt-2 max-w-[620px] text-[14px] leading-6 text-white/52">
               Discover coaches by specialty, style, and the people already training with them.
             </p>
@@ -214,7 +214,7 @@ export default function FindCoachPage() {
                     <Compass className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white">No coaches matched</h2>
+                    <h2 className="text-[1.2rem] font-semibold tracking-[-0.015em] text-white">No coaches matched</h2>
                     <p className="text-[13px] text-white/45">Try a different name, specialty, or room keyword.</p>
                   </div>
                 </div>

@@ -663,7 +663,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                 <p className="font-mono text-xs uppercase tracking-[0.45em] text-[var(--accent)]">
                   {portalType === "client" ? "Client Authentication" : "Coach Authentication"}
                 </p>
-                <h1 className="mt-5 font-display text-6xl font-bold leading-[0.95] tracking-[-0.06em] text-white">
+                <h1 className="mt-5 font-display text-6xl font-bold leading-[0.95] tracking-[-0.025em] text-white">
                   Access
                   <br />
                   Your Portal.
@@ -718,7 +718,7 @@ export function SignInPage({ className, portalType = "coach" }: SignInPageProps)
                   </div>
 
                   <div className="mt-8 space-y-2 text-center">
-                    <h2 className="font-display text-[2.4rem] font-bold leading-none tracking-[-0.05em] text-white">
+                    <h2 className="font-display text-[2.4rem] font-bold leading-none tracking-[-0.02em] text-white">
                       {mode === "login"
                         ? portalType === "client"
                           ? "Welcome to your room."

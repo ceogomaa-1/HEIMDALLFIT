@@ -107,7 +107,7 @@ function ClientDashboardContent() {
           <div className="mx-auto w-full max-w-[1120px] space-y-9">
             <section className="pt-1 sm:pt-3">
               <p className="text-[14px] font-medium text-white/48">Welcome back</p>
-              <h1 className="mt-1 max-w-[13ch] font-display text-[2.45rem] font-semibold leading-[0.98] tracking-[-0.065em] text-white sm:text-[3.5rem]">{firstName}.</h1>
+              <h1 className="mt-1 max-w-[13ch] font-display text-[2.45rem] font-semibold leading-[0.98] tracking-[-0.025em] text-white sm:text-[3.5rem]">{firstName}.</h1>
               <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-white/46">
                 <span className="capitalize text-emerald-400">{data.stats.membershipStatus}</span><span className="text-white/18">•</span>
                 <span>{data.stats.currentWeight}</span><span className="text-white/18">•</span>
@@ -120,7 +120,7 @@ function ClientDashboardContent() {
                 <div className="absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/12 blur-3xl" />
                 <div className="relative max-w-xl">
                   <p className="text-[13px] font-semibold text-white/72">{featuredProgram ? "Up next" : "Your next step"}</p>
-                  <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.055em] text-white sm:text-[2.6rem]">
+                  <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-[2.6rem]">
                     {featuredProgram ? featuredProgram.title : data.linkedCoach ? "Your coach is building your plan." : "Find the right coach for your goals."}
                   </h2>
                   <p className="mt-3 max-w-md text-sm leading-6 text-white/68">

@@ -332,7 +332,7 @@ export default function CoachProfilePage() {
         <section className="flex flex-col gap-4 pb-2 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-medium text-blue-400">Public profile</p>
-            <h1 className="mt-2 font-display text-[clamp(2.1rem,5vw,3.4rem)] font-bold tracking-[-0.055em] text-white">Make a strong first impression.</h1>
+            <h1 className="mt-2 font-display text-[clamp(2.1rem,5vw,3.4rem)] font-bold tracking-[-0.02em] text-white">Make a strong first impression.</h1>
             <p className="mt-2 text-[14px] text-[var(--text-secondary)]">
               Keep your coaching identity, proof, and room details up to date.
             </p>
@@ -471,7 +471,7 @@ export default function CoachProfilePage() {
                     <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-4 md:flex-row md:items-center md:justify-between">
                       <div>
                         <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--text-ghost)]">Marketplace Gallery</p>
-                        <h3 className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white">Profile highlights</h3>
+                        <h3 className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.015em] text-white">Profile highlights</h3>
                         <p className="mt-1 text-sm text-[var(--text-secondary)]">Add photos that preview your coaching style inside the coach marketplace.</p>
                       </div>
                       <button
@@ -524,7 +524,7 @@ export default function CoachProfilePage() {
                     <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-4 md:flex-row md:items-center md:justify-between">
                       <div>
                         <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--text-ghost)]">Authority Stack</p>
-                        <h3 className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white">Certifications, awards, medals, titles, trophies</h3>
+                        <h3 className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.015em] text-white">Certifications, awards, medals, titles, trophies</h3>
                         <p className="mt-1 text-sm text-[var(--text-secondary)]">Show clients the receipts behind your coaching reputation.</p>
                       </div>
                       <button
@@ -648,7 +648,7 @@ export default function CoachProfilePage() {
                         )}
                       </div>
                       <div className="pb-2">
-                        <h3 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "20px", fontWeight: 700, color: "var(--text-primary)" }}>
+                        <h3 style={{ fontFamily: "'Manrope', 'Inter', sans-serif", fontSize: "20px", fontWeight: 700, color: "var(--text-primary)" }}>
                           {form.fullName}
                         </h3>
                         <p className="text-sm text-[var(--text-secondary)]">{profile?.handle}</p>
@@ -726,11 +726,11 @@ export default function CoachProfilePage() {
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   <div className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-4">
                     <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-ghost)]">Gallery Posts</p>
-                    <p className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white">{form.gallery.length}</p>
+                    <p className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.02em] text-white">{form.gallery.length}</p>
                   </div>
                   <div className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-4 py-4">
                     <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-ghost)]">Achievements</p>
-                    <p className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white">{form.achievements.length}</p>
+                    <p className="mt-2 font-display text-[1.8rem] font-semibold tracking-[-0.02em] text-white">{form.achievements.length}</p>
                   </div>
                 </div>
               </GlassPanel>
