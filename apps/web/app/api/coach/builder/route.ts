@@ -1,4 +1,5 @@
 import { getAuthenticatedUserFromToken, getBuilderStudioData, saveBuilderDocument } from "../../../../lib/builder-studio";
+import type { BuilderContent, BuilderKind } from "../../../../lib/builder-types";
 
 function getBearerToken(request: Request) {
   const authorization = request.headers.get("authorization");
@@ -45,23 +46,10 @@ export async function POST(request: Request) {
       id?: string;
       title?: string;
       description?: string;
-      kind?: "onboarding_form" | "diet_plan" | "training_plan";
+      kind?: BuilderKind;
       theme?: string;
       clientId?: string | null;
-      content?: {
-        coverNote?: string;
-        sections?: Array<{
-          id?: string;
-          title?: string;
-          items?: string[];
-          type?: "text" | "image";
-          imageUrl?: string | null;
-          imagePath?: string | null;
-          imageCaption?: string;
-          span?: 1 | 2;
-          height?: "sm" | "md" | "lg";
-        }>;
-      };
+      content?: BuilderContent;
     };
 
     const user = await getAuthenticatedUserFromToken(token);
@@ -72,20 +60,7 @@ export async function POST(request: Request) {
       kind: payload.kind || "training_plan",
       theme: payload.theme || "obsidian",
       clientId: payload.clientId || null,
-      content: {
-        coverNote: payload.content?.coverNote || "",
-        sections: payload.content?.sections?.map((section) => ({
-          id: section.id || "",
-          title: section.title || "",
-          items: Array.isArray(section.items) ? section.items : [],
-          type: section.type === "image" ? "image" : "text",
-          imageUrl: typeof section.imageUrl === "string" ? section.imageUrl : null,
-          imagePath: typeof section.imagePath === "string" ? section.imagePath : null,
-          imageCaption: typeof section.imageCaption === "string" ? section.imageCaption : "",
-          span: section.span === 2 ? 2 : 1,
-          height: section.height === "sm" || section.height === "lg" ? section.height : "md"
-        })) || []
-      }
+      content: payload.content || ({ coverNote: "", pages: [], sections: [], version: 2 } satisfies BuilderContent)
     });
 
     return Response.json({ document });

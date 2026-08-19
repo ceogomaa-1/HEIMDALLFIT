@@ -180,17 +180,17 @@ export function CoachShell({ profile, children }: PropsWithChildren<{ profile: {
           </div>
         </header>
 
-        <main className={cn("mx-auto flex min-h-[calc(100dvh-72px)] w-full max-w-[1440px] flex-col px-4 py-6 sm:px-6 lg:px-8 lg:py-8", pathname.includes("/messages") && "max-w-none px-0 py-0 sm:px-0 lg:px-0 lg:py-0")}>
+        <main className={cn("mx-auto flex min-h-[calc(100dvh-72px)] w-full max-w-[1440px] flex-col px-4 py-6 sm:px-6 lg:px-8 lg:py-8", (pathname.includes("/messages") || pathname.includes("/builder")) && "max-w-none px-0 py-0 sm:px-0 lg:px-0 lg:py-0")}>
           {children}
         </main>
       </div>
 
-      <nav className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 grid grid-cols-5 rounded-[22px] border border-white/[0.09] bg-[#111216]/95 p-1.5 shadow-[0_18px_55px_rgba(0,0,0,0.55)] backdrop-blur-2xl lg:hidden">
+      {!pathname.includes("/builder") ? <nav className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 grid grid-cols-5 rounded-[22px] border border-white/[0.09] bg-[#111216]/95 p-1.5 shadow-[0_18px_55px_rgba(0,0,0,0.55)] backdrop-blur-2xl lg:hidden">
         {mobileNav.map(({ href, label, icon: Icon, match }) => {
           const active = match(pathname);
           return <Link key={href} href={href} className={cn("flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-[17px] text-[10px] font-medium transition active:scale-95", active ? "bg-white/[0.08] text-white" : "text-white/45")}><Icon className={cn("h-5 w-5", active && "text-blue-400")} /><span>{label}</span></Link>;
         })}
-      </nav>
+      </nav> : null}
     </div>
   );
 }
