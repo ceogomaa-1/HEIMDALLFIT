@@ -68,6 +68,8 @@ function NavLink({ href, label, icon: Icon, active }: { href: Route; label: stri
 export function CoachShell({ profile, children }: PropsWithChildren<{ profile: { name: string; handle?: string; role: string; avatar: string | null } }>) {
   const pathname = usePathname();
   const activeNav = useMemo(() => coachNav.find((item) => item.match(pathname)) || coachNav[0], [pathname]);
+  const isMessages = pathname.includes("/messages");
+  const isBuilder = pathname.includes("/builder");
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadThreads, setUnreadThreads] = useState<ThreadSummary[]>([]);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -109,7 +111,7 @@ export function CoachShell({ profile, children }: PropsWithChildren<{ profile: {
   const mobileNav = coachNav.filter((item) => !("desktopOnly" in item && item.desktopOnly));
 
   return (
-    <div className="coach-portal min-h-dvh bg-[#08090b] text-white">
+    <div className={cn("coach-portal bg-[#08090b] text-white", isMessages ? "h-[100dvh] overflow-hidden" : "min-h-dvh")}>
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[420px] bg-[radial-gradient(circle_at_72%_0%,rgba(37,99,235,0.12),transparent_55%)]" />
 
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[232px] flex-col border-r border-white/[0.06] bg-[#0b0c0f]/95 px-4 py-5 lg:flex">
@@ -140,7 +142,7 @@ export function CoachShell({ profile, children }: PropsWithChildren<{ profile: {
         </Link>
       </aside>
 
-      <div className="relative min-h-dvh lg:pl-[232px]">
+      <div className={cn("relative lg:pl-[232px]", isMessages ? "h-full min-h-0" : "min-h-dvh")}>
         <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-white/[0.06] bg-[#08090b]/88 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <Link href="/coach" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white font-display font-bold text-black lg:hidden">H</Link>
@@ -180,12 +182,18 @@ export function CoachShell({ profile, children }: PropsWithChildren<{ profile: {
           </div>
         </header>
 
-        <main className={cn("mx-auto flex min-h-[calc(100dvh-72px)] w-full max-w-[1440px] flex-col px-4 py-6 sm:px-6 lg:px-8 lg:py-8", (pathname.includes("/messages") || pathname.includes("/builder")) && "max-w-none px-0 py-0 sm:px-0 lg:px-0 lg:py-0")}>
+        <main className={cn(
+          "mx-auto flex w-full flex-col",
+          isMessages
+            ? "h-[calc(100dvh-72px)] min-h-0 max-w-none px-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-0 lg:pb-0"
+            : "min-h-[calc(100dvh-72px)] max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8",
+          isBuilder && "max-w-none px-0 py-0 sm:px-0 lg:px-0 lg:py-0"
+        )}>
           {children}
         </main>
       </div>
 
-      {!pathname.includes("/builder") ? <nav className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 grid grid-cols-5 rounded-[22px] border border-white/[0.09] bg-[#111216]/95 p-1.5 shadow-[0_18px_55px_rgba(0,0,0,0.55)] backdrop-blur-2xl lg:hidden">
+      {!isBuilder ? <nav className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 grid grid-cols-5 rounded-[22px] border border-white/[0.09] bg-[#111216]/95 p-1.5 shadow-[0_18px_55px_rgba(0,0,0,0.55)] backdrop-blur-2xl lg:hidden">
         {mobileNav.map(({ href, label, icon: Icon, match }) => {
           const active = match(pathname);
           return <Link key={href} href={href} className={cn("flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-[17px] text-[10px] font-medium transition active:scale-95", active ? "bg-white/[0.08] text-white" : "text-white/45")}><Icon className={cn("h-5 w-5", active && "text-blue-400")} /><span>{label}</span></Link>;
